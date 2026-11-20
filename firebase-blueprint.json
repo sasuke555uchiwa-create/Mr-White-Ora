@@ -1,0 +1,226 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "Private authenticated user profile, account links, and server-managed progression.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "displayName": { "type": "string", "minLength": 1, "maxLength": 50 },
+        "photoURL": { "type": "string", "maxLength": 2097152 },
+        "xp": { "type": "number" },
+        "level": { "type": "number" },
+        "stats": {
+          "type": "object",
+          "properties": {
+            "wins": { "type": "number" },
+            "hosted": { "type": "number" },
+            "played": { "type": "number" },
+            "longestStreak": { "type": "number" },
+            "currentStreak": { "type": "number" },
+            "roleStats": { "type": "object" }
+          }
+        },
+        "connectedAccounts": { "type": "object" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "displayName", "photoURL", "xp", "level", "stats", "connectedAccounts", "createdAt", "updatedAt"]
+    },
+    "PublicProfile": {
+      "title": "PublicProfile",
+      "description": "Publicly visible non-PII player summary for leaderboard, friends, and room opponent stats.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "displayName": { "type": "string", "minLength": 1, "maxLength": 50 },
+        "photoURL": { "type": "string", "maxLength": 2097152 },
+        "xp": { "type": "number" },
+        "level": { "type": "number" },
+        "stats": {
+          "type": "object",
+          "properties": {
+            "wins": { "type": "number" },
+            "hosted": { "type": "number" },
+            "played": { "type": "number" },
+            "longestStreak": { "type": "number" },
+            "currentStreak": { "type": "number" },
+            "roleStats": { "type": "object" }
+          }
+        },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "displayName", "photoURL", "xp", "level", "stats", "updatedAt"]
+    },
+    "AdminRecord": {
+      "title": "AdminRecord",
+      "description": "Server-provisioned administrator capability document.",
+      "type": "object",
+      "properties": {
+        "active": { "type": "boolean" },
+        "email": { "type": "string", "maxLength": 254 }
+      },
+      "required": ["active"]
+    },
+    "Room": {
+      "title": "Room",
+      "description": "Publicly visible multiplayer room lobby and redacted match state (no secrets or hidden roles).",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "hostId": { "type": "string", "maxLength": 128 },
+        "hostName": { "type": "string", "maxLength": 50 },
+        "hostAvatar": { "type": "string", "maxLength": 2097152 },
+        "status": { "type": "string", "enum": ["waiting", "playing", "finished"] },
+        "isPrivate": { "type": "boolean" },
+        "hasSecretCode": { "type": "boolean" },
+        "maxPlayers": { "type": "number" },
+        "language": { "type": "string", "maxLength": 10 },
+        "category": { "type": "string", "maxLength": 32 },
+        "difficulty": { "type": "string", "enum": ["easy", "hard"] },
+        "turnDurationSeconds": { "type": "number" },
+        "playerIds": { "type": "array" },
+        "players": { "type": "array" },
+        "kickedPlayers": { "type": "array" },
+        "messages": { "type": "array" },
+        "gameState": { "type": "object" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "hostId", "status", "isPrivate", "maxPlayers", "playerIds", "players"]
+    },
+    "PrivatePlayerSecret": {
+      "title": "PrivatePlayerSecret",
+      "description": "Isolated per-player role and secret word document readable solely by its owner.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "maxLength": 128 },
+        "matchId": { "type": "string", "maxLength": 128 },
+        "round": { "type": "number" },
+        "role": { "type": "string", "enum": ["citizen", "undercover", "mrwhite", "hidden"] },
+        "secretWord": { "type": "string", "maxLength": 120 },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "matchId", "round", "role"]
+    },
+    "RoomInviteMeta": {
+      "title": "RoomInviteMeta",
+      "description": "Room secret join code accessible only to joined room members.",
+      "type": "object",
+      "properties": {
+        "secretCode": { "type": "string", "maxLength": 12 },
+        "roomId": { "type": "string", "maxLength": 128 },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["secretCode", "roomId"]
+    },
+    "RoomPrivateState": {
+      "title": "RoomPrivateState",
+      "description": "Server-only authoritative match words, role assignments, secret ballot votes, and settlement idempotency log.",
+      "type": "object",
+      "properties": {
+        "matchId": { "type": "string", "maxLength": 128 },
+        "round": { "type": "number" },
+        "civilianWord": { "type": "string", "maxLength": 120 },
+        "undercoverWord": { "type": "string", "maxLength": 120 },
+        "rolesByUid": { "type": "object" },
+        "votesByUid": { "type": "object" },
+        "settledMatches": { "type": "array" }
+      },
+      "required": ["matchId", "round", "civilianWord", "undercoverWord", "rolesByUid", "votesByUid"]
+    },
+    "RoomCodeLookup": {
+      "title": "RoomCodeLookup",
+      "description": "Server-only lookup mapping 6-digit invite codes to roomIds.",
+      "type": "object",
+      "properties": {
+        "roomId": { "type": "string", "maxLength": 128 },
+        "hostId": { "type": "string", "maxLength": 128 }
+      },
+      "required": ["roomId", "hostId"]
+    },
+    "FriendRequest": {
+      "title": "FriendRequest",
+      "description": "Deterministic friend request created and resolved via Cloud Functions.",
+      "type": "object",
+      "properties": {
+        "fromId": { "type": "string", "maxLength": 128 },
+        "toId": { "type": "string", "maxLength": 128 },
+        "status": { "type": "string", "enum": ["pending", "accepted", "rejected"] },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["fromId", "toId", "status"]
+    },
+    "Friendship": {
+      "title": "Friendship",
+      "description": "Deterministic bidirectional friendship record managed by Cloud Functions.",
+      "type": "object",
+      "properties": {
+        "user1": { "type": "string", "maxLength": 128 },
+        "user2": { "type": "string", "maxLength": 128 },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["user1", "user2"]
+    },
+    "RateLimitBucket": {
+      "title": "RateLimitBucket",
+      "description": "Server-only transactional sliding-window rate limit counter for callable endpoints.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "maxLength": 128 },
+        "action": { "type": "string", "maxLength": 64 },
+        "windowStart": { "type": "number" },
+        "count": { "type": "number" },
+        "expiresAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "action", "windowStart", "count", "expiresAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/User" },
+      "description": "Private user profile and progression stats (owner/admin read only)."
+    },
+    "/publicProfiles/{userId}": {
+      "schema": { "$ref": "#/entities/PublicProfile" },
+      "description": "Publicly readable non-PII player stats for leaderboard and social features."
+    },
+    "/admins/{userId}": {
+      "schema": { "$ref": "#/entities/AdminRecord" },
+      "description": "Server-managed administrator membership records."
+    },
+    "/roomCodes/{code}": {
+      "schema": { "$ref": "#/entities/RoomCodeLookup" },
+      "description": "Server-only mapping from invite codes to room IDs."
+    },
+    "/rooms/{roomId}": {
+      "schema": { "$ref": "#/entities/Room" },
+      "description": "Public waiting rooms and active match state without hidden secrets."
+    },
+    "/rooms/{roomId}/privatePlayers/{playerUid}": {
+      "schema": { "$ref": "#/entities/PrivatePlayerSecret" },
+      "description": "Private secret word and role visible exclusively to playerUid."
+    },
+    "/rooms/{roomId}/privateMeta/{docId}": {
+      "schema": { "$ref": "#/entities/RoomInviteMeta" },
+      "description": "Invite secret code visible only to members of the parent room."
+    },
+    "/rooms/{roomId}/privateState/{docId}": {
+      "schema": { "$ref": "#/entities/RoomPrivateState" },
+      "description": "Server-only match secrets, role map, live votes, and settlement guard."
+    },
+    "/friendRequests/{requestId}": {
+      "schema": { "$ref": "#/entities/FriendRequest" },
+      "description": "Incoming and outgoing friend requests."
+    },
+    "/friendships/{friendshipId}": {
+      "schema": { "$ref": "#/entities/Friendship" },
+      "description": "Active friendships between users."
+    },
+    "/rateLimits/{limitId}": {
+      "schema": { "$ref": "#/entities/RateLimitBucket" },
+      "description": "Server-only Cloud Functions abuse prevention rate limit buckets."
+    }
+  }
+}
