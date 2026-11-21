@@ -8,6 +8,7 @@ import { UserCheck, UserX, Users, UserPlus } from 'lucide-react';
 import { getUITranslation } from '../translations';
 import { getSettings } from '../services/storageService';
 import { Avatar } from './Avatar';
+import { IconButton, IntelligencePanel, PlayerIntelligenceCard } from './ui/BlacksiteUI';
 
 export const FriendsSection: React.FC = () => {
   const { user } = useAuth();
@@ -29,7 +30,6 @@ export const FriendsSection: React.FC = () => {
     let isMounted = true;
     setLoading(true);
 
-    // Listen for incoming friend requests
     const qReq = query(
       collection(db, 'friendRequests'),
       where('toId', '==', user.uid),
@@ -59,7 +59,6 @@ export const FriendsSection: React.FC = () => {
       (error) => handleFirestoreError(error, OperationType.LIST, 'friendRequests')
     );
 
-    // Listen for friendships
     const qFriends1 = query(collection(db, 'friendships'), where('user1', '==', user.uid));
     const qFriends2 = query(collection(db, 'friendships'), where('user2', '==', user.uid));
 
@@ -140,55 +139,85 @@ export const FriendsSection: React.FC = () => {
 
   return (
     <div className="mt-8 mb-8" dir={isRTL ? 'rtl' : 'ltr'}>
-      <h3 className={`text-lg font-black mb-4 flex items-center gap-2 drop-shadow-sm ${isRTL ? 'text-right justify-start' : 'text-left justify-start'}`}>
-        <Users className="w-5 h-5 text-primary" /> {getUITranslation(lang, 'friends')}
+      <h3
+        className={`text-base font-bold text-text-main mb-4 flex items-center gap-2 ${
+          isRTL ? 'text-right justify-start' : 'text-left justify-start'
+        }`}
+      >
+        <Users className="w-5 h-5 text-cyan-text" /> {getUITranslation(lang, 'friends')}
       </h3>
-      
+
       {requests.length > 0 && (
         <div className="mb-6">
-          <h4 className={`text-sm font-bold text-text-muted mb-3 ${isRTL ? 'text-right' : 'text-left'}`}>{getUITranslation(lang, 'friendRequests')} ({requests.length})</h4>
-          <div className="space-y-3">
-            {requests.map(req => (
-              <div key={req.id} className="card-modern p-3 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <Avatar avatar={req.user.photoURL || ''} name={req.user.displayName} size={48} />
-                  <div className={isRTL ? 'text-right' : 'text-left'}>
-                    <p className="font-black text-sm text-white drop-shadow-sm">{req.user.displayName}</p>
-                    <p className="text-xs font-bold text-text-muted">{getUITranslation(lang, 'level')} {req.user.level}</p>
+          <h4 className={`text-xs font-semibold text-text-muted mb-2.5 ${isRTL ? 'text-right' : 'text-left'}`}>
+            {getUITranslation(lang, 'friendRequests')} ({requests.length})
+          </h4>
+          <div className="space-y-2.5">
+            {requests.map((req) => (
+              <PlayerIntelligenceCard key={req.id} className="p-3 flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3 min-w-0">
+                  <Avatar avatar={req.user.photoURL || ''} name={req.user.displayName} size={44} />
+                  <div className={`min-w-0 ${isRTL ? 'text-right' : 'text-left'}`}>
+                    <p className="font-bold text-sm text-text-main truncate">{req.user.displayName}</p>
+                    <p className="text-xs font-medium text-text-muted tabular-nums">
+                      {getUITranslation(lang, 'level')} {req.user.level}
+                    </p>
                   </div>
                 </div>
-                <div className="flex gap-2">
-                  <button onClick={() => acceptFriendRequest(req.id, req.fromId, req.toId)} className="p-2.5 bg-green-500/20 text-green-400 rounded-full hover:bg-green-500 hover:text-white transition-colors border border-green-500/30">
+                <div className="flex gap-2 shrink-0">
+                  <IconButton
+                    onClick={() => acceptFriendRequest(req.id, req.fromId, req.toId)}
+                    variant="primary"
+                    size="sm"
+                    aria-label="Accept"
+                    className="bg-[#3E7B67]/20 border-[#3E7B67]/40 text-emerald-text hover:bg-[#3E7B67]/30"
+                  >
                     <UserCheck className="w-4 h-4" />
-                  </button>
-                  <button onClick={() => rejectFriendRequest(req.id)} className="p-2.5 bg-danger/20 text-danger rounded-full hover:bg-danger hover:text-white transition-colors border border-danger/30">
+                  </IconButton>
+                  <IconButton
+                    onClick={() => rejectFriendRequest(req.id)}
+                    variant="danger"
+                    size="sm"
+                    aria-label="Reject"
+                  >
                     <UserX className="w-4 h-4" />
-                  </button>
+                  </IconButton>
                 </div>
-              </div>
+              </PlayerIntelligenceCard>
             ))}
           </div>
         </div>
       )}
 
       <div>
-        <h4 className={`text-sm font-bold text-text-muted mb-3 ${isRTL ? 'text-right' : 'text-left'}`}>{getUITranslation(lang, 'friendsList')} ({friends.length})</h4>
+        <h4 className={`text-xs font-semibold text-text-muted mb-2.5 ${isRTL ? 'text-right' : 'text-left'}`}>
+          {getUITranslation(lang, 'friendsList')} ({friends.length})
+        </h4>
         {loading ? (
-          <div className="text-center py-4 font-bold text-text-muted">{getUITranslation(lang, 'loading')}</div>
-        ) : friends.length === 0 ? (
-          <div className="text-center py-8 card-modern border-dashed opacity-70">
-            <UserPlus className="w-10 h-10 text-text-muted mx-auto mb-3 opacity-50" />
-            <p className="text-text-main font-bold text-sm">{getUITranslation(lang, 'noFriendsYet')}</p>
-            <p className="text-xs font-bold text-text-muted mt-1">{getUITranslation(lang, 'addFriendsFromRooms')}</p>
+          <div className="text-center py-4 font-semibold text-sm text-text-muted">
+            {getUITranslation(lang, 'loading')}
           </div>
+        ) : friends.length === 0 ? (
+          <IntelligencePanel className="text-center py-8 border-dashed opacity-80">
+            <UserPlus className="w-9 h-9 text-text-muted mx-auto mb-2.5 opacity-55" />
+            <p className="text-text-main font-bold text-sm">{getUITranslation(lang, 'noFriendsYet')}</p>
+            <p className="text-xs font-medium text-text-muted mt-1">
+              {getUITranslation(lang, 'addFriendsFromRooms')}
+            </p>
+          </IntelligencePanel>
         ) : (
           <div className="grid grid-cols-2 gap-3">
-            {friends.map(friend => (
-              <div key={friend.id} className="card-modern p-4 flex flex-col items-center text-center gap-2">
-                <Avatar avatar={friend.photoURL || ''} name={friend.displayName} size={56} />
-                <p className="font-black text-sm text-white truncate w-full drop-shadow-sm">{friend.displayName}</p>
-                <p className="text-xs font-bold text-text-muted">{getUITranslation(lang, 'level')} {friend.level}</p>
-              </div>
+            {friends.map((friend) => (
+              <PlayerIntelligenceCard
+                key={friend.id}
+                className="p-4 flex flex-col items-center text-center gap-2"
+              >
+                <Avatar avatar={friend.photoURL || ''} name={friend.displayName} size={54} />
+                <p className="font-bold text-sm text-text-main truncate w-full">{friend.displayName}</p>
+                <p className="text-xs font-medium text-text-muted tabular-nums">
+                  {getUITranslation(lang, 'level')} {friend.level}
+                </p>
+              </PlayerIntelligenceCard>
             ))}
           </div>
         )}

@@ -6,6 +6,12 @@ import { getSettings } from '../services/storageService';
 import { playSound } from '../services/soundService';
 import { Player } from '../types';
 import { Avatar } from './Avatar';
+import {
+  ClassifiedStamp,
+  IntelligencePanel,
+  PlayerIntelligenceCard,
+  TacticalButton,
+} from './ui/BlacksiteUI';
 
 interface DiscussionPhaseProps {
   players: Player[];
@@ -38,82 +44,110 @@ export const DiscussionPhase: React.FC<DiscussionPhaseProps> = ({ players, onSki
   return (
     <div className="flex flex-col min-h-full items-center p-4 sm:p-6 max-w-3xl mx-auto w-full">
       <motion.div
-        initial={{ scale: 0.9, opacity: 0 }}
+        initial={{ scale: 0.96, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
-        className="bg-bg-surface/90 rounded-3xl p-6 border border-border-strong shadow-2xl flex flex-col items-center max-w-md w-full text-center relative mb-6"
+        className="w-full max-w-md mb-6"
       >
-        <div className="w-16 h-16 bg-accent/20 rounded-full flex items-center justify-center mb-4">
-          <MessageCircle size={32} className="text-accent animate-pulse" />
-        </div>
-
-        <h2 className="text-2xl font-black text-text-main mb-2">{t('discussionTime')}</h2>
-        <p className="text-text-muted mb-4 text-sm font-bold">{t('discussAndAsk')}</p>
-
-        {/* Status Bar */}
-        <div className="flex gap-3 w-full justify-center">
-          <div className="bg-bg-card border border-border rounded-xl p-2.5 flex-1 flex flex-col items-center shadow-sm">
-            <span className="text-xs font-black text-text-muted mb-1">
-              {t('remainingIntruders')}
+        <IntelligencePanel className="p-6 flex flex-col items-center text-center">
+          <div className="flex items-center justify-between w-full mb-4">
+            <ClassifiedStamp tone="cyan">BRIEFING</ClassifiedStamp>
+            <span className="text-xs font-mono-code font-bold text-text-muted tabular-nums">
+              {alivePlayers.length} ACTIVE
             </span>
-            <div className="flex items-center gap-1.5">
-              <span className="text-base font-black text-text-main tabular-nums">
-                {mrWhiteCount + undercoverCount}
+          </div>
+
+          <div className="w-14 h-14 bg-[#668F9A]/15 border border-[#668F9A]/35 rounded-[12px] flex items-center justify-center mb-3">
+            <MessageCircle size={26} className="text-cyan-text" />
+          </div>
+
+          <h2 className="text-xl sm:text-2xl font-bold text-text-main mb-1.5">
+            {t('discussionTime')}
+          </h2>
+          <p className="text-text-muted mb-5 text-xs sm:text-sm font-medium">
+            {t('discussAndAsk')}
+          </p>
+
+          {/* Status Bar */}
+          <div className="grid grid-cols-2 gap-3 w-full">
+            <div className="bg-bg-card border border-border rounded-[10px] p-2.5 flex flex-col items-center">
+              <span className="text-[11px] font-semibold text-text-muted mb-1">
+                {t('remainingIntruders')}
               </span>
-              <VenetianMask size={15} className="text-danger" />
+              <div className="flex items-center gap-1.5">
+                <span className="text-base font-bold text-text-main font-mono-code tabular-nums">
+                  {mrWhiteCount + undercoverCount}
+                </span>
+                <VenetianMask size={15} className="text-danger-text" />
+              </div>
+            </div>
+            <div className="bg-bg-card border border-border rounded-[10px] p-2.5 flex flex-col items-center">
+              <span className="text-[11px] font-semibold text-text-muted mb-1">
+                {t('specialRoles')}
+              </span>
+              <div className="flex items-center gap-1.5">
+                <span className="text-base font-bold text-text-main font-mono-code tabular-nums">
+                  {specialRolesCount > 0 ? specialRolesCount : t('none')}
+                </span>
+                <ShieldAlert size={15} className="text-cyan-text" />
+              </div>
             </div>
           </div>
-          <div className="bg-bg-card border border-border rounded-xl p-2.5 flex-1 flex flex-col items-center shadow-sm">
-            <span className="text-xs font-black text-text-muted mb-1">{t('specialRoles')}</span>
-            <div className="flex items-center gap-1.5">
-              <span className="text-base font-black text-text-main tabular-nums">
-                {specialRolesCount > 0 ? specialRolesCount : t('none')}
-              </span>
-              <ShieldAlert size={15} className="text-accent" />
-            </div>
-          </div>
-        </div>
+        </IntelligencePanel>
       </motion.div>
 
       <div className="w-full max-w-lg mb-6">
-        <div className="flex flex-wrap justify-center gap-5">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
           {speakingOrder.map((player, index) => {
-            const badgeColor = index === 0 ? 'bg-pink-500' : 'bg-emerald-500';
+            const isFirstSpeaker = index === 0;
 
             return (
               <motion.div
                 key={player.id}
-                initial={{ opacity: 0, scale: 0.85 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: index * 0.08, type: 'spring' }}
-                className="flex flex-col items-center relative"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.05 }}
               >
-                <div
-                  className={`absolute -top-1 -left-1 w-7 h-7 rounded-full ${badgeColor} flex items-center justify-center font-black text-white text-xs z-10 shadow-md border-2 border-white/40 tabular-nums`}
+                <PlayerIntelligenceCard
+                  className={`p-3 flex flex-col items-center relative ${
+                    isFirstSpeaker ? 'border-[#B49A62]/55 bg-[#B49A62]/10' : ''
+                  }`}
                 >
-                  {index + 1}
-                </div>
+                  <div
+                    className={`absolute top-2 left-2 min-w-[24px] h-6 px-1.5 rounded-[6px] flex items-center justify-center font-mono-code font-bold text-[11px] tabular-nums border ${
+                      isFirstSpeaker
+                        ? 'bg-[#B49A62] text-[#080B10] border-[#D4BE8A]/60'
+                        : 'bg-bg-surface text-text-muted border-border'
+                    }`}
+                  >
+                    {index + 1}
+                  </div>
 
-                <Avatar avatar={player.avatar} name={player.name} size={86} />
+                  <Avatar avatar={player.avatar} name={player.name} size={64} />
 
-                <div className="mt-2.5 bg-bg-surface/85 backdrop-blur-sm px-3.5 py-1 rounded-xl text-xs font-black text-text-main shadow-sm min-w-[80px] text-center border border-border-strong truncate max-w-[110px]">
-                  {player.name}
-                </div>
+                  <div className="mt-2.5 px-2.5 py-1 rounded-[8px] bg-bg-surface border border-border text-xs font-bold text-text-main text-center truncate max-w-full w-full">
+                    {player.name}
+                  </div>
+                </PlayerIntelligenceCard>
               </motion.div>
             );
           })}
         </div>
       </div>
 
-      <button
-        onClick={() => {
-          playSound('click');
-          onSkip();
-        }}
-        className="btn-chunky w-full max-w-md py-4 bg-primary text-white rounded-2xl font-black flex items-center justify-center gap-2 mt-auto"
-      >
-        <span>{t('voteNow')}</span>
-        <FastForward size={20} />
-      </button>
+      <div className="w-full max-w-md mt-auto pt-2">
+        <TacticalButton
+          onClick={() => {
+            playSound('click');
+            onSkip();
+          }}
+          variant="primary"
+          size="lg"
+          fullWidth
+          trailingIcon={<FastForward size={18} />}
+        >
+          {t('voteNow')}
+        </TacticalButton>
+      </div>
     </div>
   );
 };

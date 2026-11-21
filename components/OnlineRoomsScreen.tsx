@@ -13,6 +13,14 @@ import { ArrowRight, Search, Plus, Globe, Lock, EyeOff, Eye, Zap, Clock, Minus }
 import { Avatar } from './Avatar';
 import { getUITranslation } from '../translations';
 import { showToast } from '../utils/toast';
+import {
+  ClassifiedStamp,
+  IconButton,
+  IntelligencePanel,
+  ModalShell,
+  SegmentedControl,
+  TacticalButton,
+} from './ui/BlacksiteUI';
 
 interface Room {
   id: string;
@@ -131,15 +139,14 @@ export const OnlineRoomsScreen: React.FC<OnlineRoomsScreenProps> = ({
 
   if (!user) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center p-6 text-center bg-bg-dark text-text-main">
-        <h2 className="text-2xl font-bold mb-4">{t('loginRequired')}</h2>
-        <p className="text-text-muted mb-8">{t('mustLoginToPlayOnline')}</p>
-        <button
-          onClick={onBack}
-          className="w-full max-w-xs py-4 bg-primary text-white rounded-2xl font-bold shadow-lg flex items-center justify-center gap-3 hover:bg-primary-dark transition-colors"
-        >
-          {t('backToHome')}
-        </button>
+      <div className="min-h-full flex flex-col items-center justify-center p-6 text-center text-text-main">
+        <IntelligencePanel className="max-w-sm w-full p-6 space-y-4">
+          <h2 className="text-xl font-extrabold">{t('loginRequired')}</h2>
+          <p className="text-sm text-text-muted leading-relaxed">{t('mustLoginToPlayOnline')}</p>
+          <TacticalButton variant="primary" fullWidth onClick={onBack}>
+            {t('backToHome')}
+          </TacticalButton>
+        </IntelligencePanel>
       </div>
     );
   }
@@ -176,7 +183,12 @@ export const OnlineRoomsScreen: React.FC<OnlineRoomsScreenProps> = ({
       if (res.success && res.roomId) {
         onJoinRoom(res.roomId);
       } else {
-        const msgKey = res.reason === 'roomFull' ? 'roomFull' : res.reason === 'kickedFromRoom' ? 'kickedFromRoom' : 'roomNotFound';
+        const msgKey =
+          res.reason === 'roomFull'
+            ? 'roomFull'
+            : res.reason === 'kickedFromRoom'
+            ? 'kickedFromRoom'
+            : 'roomNotFound';
         const msg = t(msgKey);
         setJoinError(msg);
         showToast(msg, 'warning');
@@ -192,41 +204,44 @@ export const OnlineRoomsScreen: React.FC<OnlineRoomsScreenProps> = ({
     }
   };
 
-  const filterTabs: { id: RoomFilter; label: string }[] = [
-    { id: 'all', label: isRTL ? 'الكل' : 'All' },
-    { id: 'open', label: isRTL ? 'أماكن متاحة' : 'Open Slots' },
-    { id: 'large', label: t('extended') },
+  const filterTabs: { value: RoomFilter; label: string }[] = [
+    { value: 'all', label: isRTL ? 'الكل' : 'All' },
+    { value: 'open', label: isRTL ? 'أماكن متاحة' : 'Open Slots' },
+    { value: 'large', label: t('extended') },
   ];
 
   return (
     <motion.div
-      initial={{ opacity: 0, x: 20 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: -20 }}
-      className="flex flex-col bg-bg-dark p-4 max-w-3xl mx-auto w-full pb-24"
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -6 }}
+      className="flex flex-col p-4 max-w-3xl mx-auto w-full pb-24 min-h-full"
     >
       {/* Header */}
-      <div className="flex items-center justify-between gap-3 mb-5">
-        <button
-          onClick={onBack}
-          className="min-h-[44px] min-w-[44px] flex items-center justify-center card-modern"
-          aria-label={t('back')}
-        >
-          <ArrowRight className={`w-6 h-6 ${isRTL ? '' : 'rotate-180'}`} />
-        </button>
-        <h2 className="text-xl font-black truncate">{t('publicRooms')}</h2>
-        <button
+      <div className="flex items-center justify-between gap-3 mb-4">
+        <IconButton onClick={onBack} aria-label={t('back')} variant="secondary">
+          <ArrowRight className={`w-5 h-5 ${isRTL ? '' : 'rotate-180'}`} />
+        </IconButton>
+        <h2 className="text-lg sm:text-xl font-extrabold text-text-main truncate">
+          {t('publicRooms')}
+        </h2>
+        <TacticalButton
+          variant="cyan"
+          size="sm"
           onClick={handleQuickJoin}
           disabled={loading}
-          className="min-h-[44px] px-3.5 rounded-2xl bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-400/40 text-emerald-300 font-black text-xs flex items-center gap-1.5 transition-colors disabled:opacity-40 shrink-0"
+          loading={joining}
+          icon={<Zap size={15} />}
         >
-          <Zap className="w-4 h-4" />
-          <span>{t('quickJoin')}</span>
-        </button>
+          {t('quickJoin')}
+        </TacticalButton>
       </div>
 
       {/* Join by 6-digit Code */}
-      <form onSubmit={handleJoinWithCode} className="card-modern p-2 flex items-center gap-2 mb-3">
+      <form
+        onSubmit={handleJoinWithCode}
+        className="rounded-[12px] bg-bg-surface border border-border-strong p-1.5 flex items-center gap-2 mb-3"
+      >
         <input
           type="text"
           inputMode="numeric"
@@ -237,50 +252,41 @@ export const OnlineRoomsScreen: React.FC<OnlineRoomsScreenProps> = ({
             setJoinCode(e.target.value.replace(/\D/g, ''));
             if (joinError) setJoinError(null);
           }}
-          className="flex-1 bg-transparent text-text-main px-4 py-2 font-black tracking-widest tabular-nums placeholder:tracking-normal placeholder:font-bold placeholder:text-text-muted/60 outline-none text-start"
+          className="flex-1 bg-transparent text-text-main px-3 py-2 font-mono-code font-bold tracking-widest tabular-nums placeholder:tracking-normal placeholder:font-sans placeholder:font-medium placeholder:text-text-muted/70 outline-none text-start"
         />
-        <button
+        <IconButton
           type="submit"
+          variant="primary"
           disabled={joining || joinCode.trim().length < 4}
-          className="min-h-[44px] min-w-[44px] px-3.5 bg-primary/20 text-primary hover:bg-primary hover:text-white rounded-xl transition-colors disabled:opacity-40 flex items-center justify-center"
           aria-label={t('joinByCodePlaceholder')}
         >
-          <Search className="w-5 h-5" />
-        </button>
+          <Search className="w-4 h-4" />
+        </IconButton>
       </form>
       {joinError && (
-        <p className="text-xs font-black text-rose-400 text-center mb-3">{joinError}</p>
+        <p className="text-xs font-bold text-danger-text text-center mb-3">{joinError}</p>
       )}
 
       {/* Filter Tabs */}
-      <div className="flex card-modern p-1 mb-5 text-xs sm:text-sm font-black gap-1">
-        {filterTabs.map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveFilter(tab.id)}
-            className={`flex-1 min-h-[44px] rounded-full transition-all ${
-              activeFilter === tab.id
-                ? 'text-white bg-primary shadow-md'
-                : 'text-text-muted hover:text-white'
-            }`}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </div>
+      <SegmentedControl<RoomFilter>
+        options={filterTabs}
+        value={activeFilter}
+        onChange={setActiveFilter}
+        className="w-full mb-5"
+      />
 
       {/* Rooms List */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
         {loading ? (
           <div className="sm:col-span-2 flex justify-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary"></div>
+            <div className="animate-spin rounded-full h-8 w-8 border-2 border-[#B49A62] border-t-transparent" />
           </div>
         ) : filteredRooms.length === 0 ? (
-          <div className="sm:col-span-2 text-center py-12 text-text-muted card-modern p-6">
-            <Globe className="w-12 h-12 mx-auto mb-3 opacity-50" />
-            <p className="font-bold">{t('noRoomsAvailable')}</p>
-            <p className="text-sm mt-1">{t('beFirstToCreate')}</p>
-          </div>
+          <IntelligencePanel className="sm:col-span-2 text-center py-12 p-6 border-dashed">
+            <Globe className="w-10 h-10 mx-auto mb-3 text-text-muted opacity-55" />
+            <p className="font-bold text-text-main text-sm">{t('noRoomsAvailable')}</p>
+            <p className="text-xs text-text-muted mt-1">{t('beFirstToCreate')}</p>
+          </IntelligencePanel>
         ) : (
           filteredRooms.map((room) => {
             const catTitle = categoryLabels[room.category || 'standard'] || categoryLabels.standard;
@@ -295,55 +301,56 @@ export const OnlineRoomsScreen: React.FC<OnlineRoomsScreenProps> = ({
                 key={room.id}
                 onClick={() => onJoinRoom(room.id)}
                 disabled={isFull}
-                className={`w-full card-modern text-text-main p-4 flex flex-col justify-between gap-3 transition-all group text-start ${
-                  isFull ? 'opacity-60 cursor-not-allowed' : 'hover:bg-white/10 active:scale-[0.99]'
+                className={`w-full rounded-[12px] bg-bg-surface border border-border-strong text-text-main p-4 flex flex-col justify-between gap-3 transition-colors text-start ${
+                  isFull
+                    ? 'opacity-55 cursor-not-allowed'
+                    : 'hover:border-[#668F9A]/60 hover:bg-bg-card/60 active:scale-[0.99]'
                 }`}
               >
                 <div className="flex items-center justify-between gap-3 w-full">
                   <div className="flex items-center gap-3 min-w-0">
-                    <Avatar avatar={room.hostAvatar || ''} name={room.hostName} size={46} />
+                    <Avatar avatar={room.hostAvatar || ''} name={room.hostName} size={44} />
                     <div className="min-w-0">
-                      <div className="font-black text-base flex items-center gap-1.5 drop-shadow-sm truncate">
+                      <div className="font-bold text-sm sm:text-base flex items-center gap-1.5 truncate">
                         <span className="truncate">{room.hostName}</span>
-                        {(room.hasSecretCode || room.isPrivate) && <Lock className="w-3 h-3 text-accent shrink-0" />}
+                        {(room.hasSecretCode || room.isPrivate) && (
+                          <Lock className="w-3.5 h-3.5 text-primary-text shrink-0" />
+                        )}
                       </div>
-                      <div className="text-xs text-text-muted font-bold flex items-center gap-1.5 flex-wrap mt-0.5">
+                      <div className="text-xs text-text-muted font-medium flex items-center gap-1.5 flex-wrap mt-0.5">
                         <span>{catTitle}</span>
-                        <span>·</span>
-                        <span className={isHard ? 'text-rose-400' : 'text-emerald-400'}>
+                        <span aria-hidden="true">·</span>
+                        <span className={isHard ? 'text-danger-text font-bold' : 'text-cyan-text font-bold'}>
                           {isHard ? t('difficultyHard') : t('difficultyEasy')}
                         </span>
                       </div>
                     </div>
                   </div>
-                  <div className="w-9 h-9 rounded-full bg-bg-dark flex items-center justify-center text-xs font-black border border-white/10 shadow-inner shrink-0">
+                  <ClassifiedStamp tone="neutral">
                     {(room.language || 'ar').toUpperCase()}
-                  </div>
+                  </ClassifiedStamp>
                 </div>
 
-                <div className="flex items-center justify-between w-full pt-2 border-t border-white/10">
-                  <div className="flex items-center gap-1.5">
+                <div className="flex items-center justify-between w-full pt-2.5 border-t border-border">
+                  <div className="flex items-center gap-2">
                     <div className="flex -space-x-2 rtl:space-x-reverse">
                       {(room.players || []).slice(0, 4).map((p: any, idx: number) => (
-                        <div
-                          key={p.uid || idx}
-                          className="rounded-full ring-2 ring-bg-dark"
-                        >
+                        <div key={p.uid || idx} className="rounded-full ring-2 ring-bg-surface">
                           <Avatar avatar={p.avatar} name={p.name} size={24} />
                         </div>
                       ))}
                     </div>
-                    <span className="text-[11px] font-bold text-text-muted flex items-center gap-1">
+                    <span className="text-[11px] font-medium text-text-muted flex items-center gap-1">
                       <Clock size={12} />
-                      <span className="tabular-nums">
+                      <span className="font-mono-code tabular-nums">
                         {turnDuration}
                         {t('secondsShort')}
                       </span>
                     </span>
                   </div>
                   <div
-                    className={`font-black text-sm tabular-nums ${
-                      isFull ? 'text-rose-400' : 'text-emerald-400'
+                    className={`font-mono-code font-bold text-xs tabular-nums ${
+                      isFull ? 'text-danger-text' : 'text-emerald-text'
                     }`}
                     dir="ltr"
                   >
@@ -357,229 +364,238 @@ export const OnlineRoomsScreen: React.FC<OnlineRoomsScreenProps> = ({
       </div>
 
       {/* Create Room Button */}
-      <button
-        onClick={() => setShowCreateModal(true)}
-        className="btn-modern btn-modern-accent w-full py-4 rounded-[2rem] font-black flex items-center justify-center gap-2 mt-auto"
-      >
-        <Plus className="w-6 h-6" />
-        {t('createNewRoom')}
-      </button>
+      <div className="mt-auto">
+        <TacticalButton
+          variant="primary"
+          size="lg"
+          fullWidth
+          onClick={() => setShowCreateModal(true)}
+          icon={<Plus className="w-5 h-5" />}
+        >
+          {t('createNewRoom')}
+        </TacticalButton>
+      </div>
 
       {/* Create Room Modal */}
       {showCreateModal && (
-        <div className="fixed inset-0 bg-bg-dark/90 backdrop-blur-md flex items-center justify-center p-4 z-50 overflow-y-auto">
+        <div className="fixed inset-0 bg-black/75 backdrop-blur-xs flex items-center justify-center p-4 z-50 overflow-y-auto">
           <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
+            initial={{ opacity: 0, scale: 0.96 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="card-modern p-6 sm:p-7 w-full max-w-md my-auto max-h-[90vh] overflow-y-auto"
+            className="w-full max-w-md my-auto"
           >
-            <h3 className="text-2xl font-black mb-5 text-center drop-shadow-sm">
-              {t('roomSettings')}
-            </h3>
+            <ModalShell maxWidthClass="max-w-md" className="p-5 sm:p-6 max-h-[90vh] overflow-y-auto">
+              <h3 className="text-lg font-extrabold mb-4 text-center text-text-main">
+                {t('roomSettings')}
+              </h3>
 
-            <div className="space-y-5 mb-6">
-              {/* Touch-Friendly Player Stepper */}
-              <div>
-                <label className="block text-sm font-bold text-text-muted mb-2">
-                  {t('numberOfPlayers')}
-                </label>
-                <div className="flex items-center justify-between bg-bg-dark border border-white/10 rounded-2xl p-2">
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setNewRoomSettings((prev) => ({
-                        ...prev,
-                        maxPlayers: Math.max(3, prev.maxPlayers - 1),
-                      }))
-                    }
-                    className="min-h-[44px] min-w-[44px] rounded-xl bg-white/5 hover:bg-white/10 flex items-center justify-center text-text-main"
-                    aria-label="Decrease players"
-                  >
-                    <Minus size={18} />
-                  </button>
-                  <span className="text-2xl font-black tabular-nums text-white">
-                    {newRoomSettings.maxPlayers}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setNewRoomSettings((prev) => ({
-                        ...prev,
-                        maxPlayers: Math.min(10, prev.maxPlayers + 1),
-                      }))
-                    }
-                    className="min-h-[44px] min-w-[44px] rounded-xl bg-white/5 hover:bg-white/10 flex items-center justify-center text-text-main"
-                    aria-label="Increase players"
-                  >
-                    <Plus size={18} />
-                  </button>
-                </div>
-              </div>
-
-              {/* Language */}
-              <div>
-                <label className="block text-sm font-bold text-text-muted mb-2">
-                  {t('gameLanguage')}
-                </label>
-                <div className="grid grid-cols-2 gap-2.5">
-                  {[
-                    { code: 'ar', label: t('standardArabic') },
-                    { code: 'en', label: t('english') },
-                    { code: 'fr', label: t('french') },
-                    { code: 'es', label: t('spanish') },
-                  ].map((item) => (
+              <div className="space-y-4 mb-6">
+                {/* Player Stepper */}
+                <div>
+                  <label className="block text-xs font-bold text-text-muted mb-2">
+                    {t('numberOfPlayers')}
+                  </label>
+                  <div className="flex items-center justify-between bg-bg-card border border-border rounded-[10px] p-1.5">
                     <button
-                      key={item.code}
-                      type="button"
-                      onClick={() => setNewRoomSettings({ ...newRoomSettings, language: item.code })}
-                      className={`min-h-[44px] py-2 rounded-xl font-black text-sm transition-colors border ${
-                        newRoomSettings.language === item.code
-                          ? 'bg-primary text-white border-primary/50 shadow-[0_0_15px_rgba(var(--primary-rgb),0.3)]'
-                          : 'bg-bg-dark text-text-muted border-white/5 hover:bg-white/5'
-                      }`}
-                    >
-                      {item.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Word Category */}
-              <div>
-                <label className="block text-sm font-bold text-text-muted mb-2">
-                  {t('wordCategory')}
-                </label>
-                <div className="grid grid-cols-2 gap-2">
-                  {(['standard', 'animals', 'food', 'places', 'objects'] as const).map((cat) => (
-                    <button
-                      key={cat}
-                      type="button"
-                      onClick={() => setNewRoomSettings({ ...newRoomSettings, category: cat })}
-                      className={`min-h-[44px] py-2 px-3 rounded-xl font-black text-xs transition-colors border truncate ${
-                        newRoomSettings.category === cat
-                          ? 'bg-emerald-500/20 text-emerald-300 border-emerald-400/60'
-                          : 'bg-bg-dark text-text-muted border-white/5 hover:bg-white/5'
-                      } ${cat === 'standard' ? 'col-span-2' : ''}`}
-                    >
-                      {categoryLabels[cat]}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Difficulty */}
-              <div>
-                <label className="block text-sm font-bold text-text-muted mb-2">
-                  {t('difficulty')}
-                </label>
-                <div className="flex gap-2.5">
-                  <button
-                    type="button"
-                    onClick={() => setNewRoomSettings({ ...newRoomSettings, difficulty: 'easy' })}
-                    className={`flex-1 min-h-[44px] py-2 rounded-xl font-black text-xs transition-colors flex items-center justify-center gap-1.5 border ${
-                      newRoomSettings.difficulty === 'easy'
-                        ? 'bg-sky-500/20 text-sky-300 border-sky-400/60'
-                        : 'bg-bg-dark text-text-muted border-white/5 hover:bg-white/5'
-                    }`}
-                  >
-                    <Eye size={15} />
-                    <span>{t('difficultyEasy')}</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setNewRoomSettings({ ...newRoomSettings, difficulty: 'hard' })}
-                    className={`flex-1 min-h-[44px] py-2 rounded-xl font-black text-xs transition-colors flex items-center justify-center gap-1.5 border ${
-                      newRoomSettings.difficulty === 'hard'
-                        ? 'bg-rose-500/20 text-rose-300 border-rose-400/60'
-                        : 'bg-bg-dark text-text-muted border-white/5 hover:bg-white/5'
-                    }`}
-                  >
-                    <EyeOff size={15} />
-                    <span>{t('difficultyHard')}</span>
-                  </button>
-                </div>
-              </div>
-
-              {/* Turn Timer */}
-              <div>
-                <label className="block text-sm font-bold text-text-muted mb-2">
-                  {t('turnDuration')}
-                </label>
-                <div className="grid grid-cols-4 gap-2">
-                  {[30, 45, 60, 90].map((sec) => (
-                    <button
-                      key={sec}
                       type="button"
                       onClick={() =>
-                        setNewRoomSettings({ ...newRoomSettings, turnDurationSeconds: sec })
+                        setNewRoomSettings((prev) => ({
+                          ...prev,
+                          maxPlayers: Math.max(3, prev.maxPlayers - 1),
+                        }))
                       }
-                      className={`min-h-[44px] rounded-xl font-black text-xs tabular-nums border transition-colors ${
-                        newRoomSettings.turnDurationSeconds === sec
-                          ? 'bg-amber-500/20 text-amber-300 border-amber-400/60'
-                          : 'bg-bg-dark text-text-muted border-white/5 hover:bg-white/5'
+                      className="min-h-[44px] min-w-[44px] rounded-[8px] bg-bg-surface hover:bg-bg-main flex items-center justify-center text-text-main border border-border"
+                      aria-label="Decrease players"
+                    >
+                      <Minus size={16} />
+                    </button>
+                    <span className="text-xl font-extrabold font-mono-code tabular-nums text-text-main">
+                      {newRoomSettings.maxPlayers}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setNewRoomSettings((prev) => ({
+                          ...prev,
+                          maxPlayers: Math.min(10, prev.maxPlayers + 1),
+                        }))
+                      }
+                      className="min-h-[44px] min-w-[44px] rounded-[8px] bg-bg-surface hover:bg-bg-main flex items-center justify-center text-text-main border border-border"
+                      aria-label="Increase players"
+                    >
+                      <Plus size={16} />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Language */}
+                <div>
+                  <label className="block text-xs font-bold text-text-muted mb-2">
+                    {t('gameLanguage')}
+                  </label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {[
+                      { code: 'ar', label: t('standardArabic') },
+                      { code: 'en', label: t('english') },
+                      { code: 'fr', label: t('french') },
+                      { code: 'es', label: t('spanish') },
+                    ].map((item) => (
+                      <button
+                        key={item.code}
+                        type="button"
+                        onClick={() => setNewRoomSettings({ ...newRoomSettings, language: item.code })}
+                        className={`min-h-[44px] py-2 rounded-[10px] font-bold text-xs sm:text-sm transition-colors border ${
+                          newRoomSettings.language === item.code
+                            ? 'bg-[#B49A62]/15 text-primary-text border-[#B49A62]'
+                            : 'bg-bg-card text-text-muted border-border hover:text-text-main'
+                        }`}
+                      >
+                        {item.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Word Category */}
+                <div>
+                  <label className="block text-xs font-bold text-text-muted mb-2">
+                    {t('wordCategory')}
+                  </label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {(['standard', 'animals', 'food', 'places', 'objects'] as const).map((cat) => (
+                      <button
+                        key={cat}
+                        type="button"
+                        onClick={() => setNewRoomSettings({ ...newRoomSettings, category: cat })}
+                        className={`min-h-[44px] py-2 px-3 rounded-[10px] font-bold text-xs transition-colors border truncate ${
+                          newRoomSettings.category === cat
+                            ? 'bg-[#668F9A]/15 text-cyan-text border-[#668F9A]'
+                            : 'bg-bg-card text-text-muted border-border hover:text-text-main'
+                        } ${cat === 'standard' ? 'col-span-2' : ''}`}
+                      >
+                        {categoryLabels[cat]}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Difficulty */}
+                <div>
+                  <label className="block text-xs font-bold text-text-muted mb-2">
+                    {t('difficulty')}
+                  </label>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setNewRoomSettings({ ...newRoomSettings, difficulty: 'easy' })}
+                      className={`flex-1 min-h-[44px] py-2 rounded-[10px] font-bold text-xs transition-colors flex items-center justify-center gap-1.5 border ${
+                        newRoomSettings.difficulty === 'easy'
+                          ? 'bg-[#668F9A]/15 text-cyan-text border-[#668F9A]'
+                          : 'bg-bg-card text-text-muted border-border hover:text-text-main'
                       }`}
                     >
-                      {sec}
-                      {t('secondsShort')}
+                      <Eye size={14} />
+                      <span>{t('difficultyEasy')}</span>
                     </button>
-                  ))}
+                    <button
+                      type="button"
+                      onClick={() => setNewRoomSettings({ ...newRoomSettings, difficulty: 'hard' })}
+                      className={`flex-1 min-h-[44px] py-2 rounded-[10px] font-bold text-xs transition-colors flex items-center justify-center gap-1.5 border ${
+                        newRoomSettings.difficulty === 'hard'
+                          ? 'bg-[#963F46]/18 text-danger-text border-[#963F46]'
+                          : 'bg-bg-card text-text-muted border-border hover:text-text-main'
+                      }`}
+                    >
+                      <EyeOff size={14} />
+                      <span>{t('difficultyHard')}</span>
+                    </button>
+                  </div>
                 </div>
+
+                {/* Turn Timer */}
+                <div>
+                  <label className="block text-xs font-bold text-text-muted mb-2">
+                    {t('turnDuration')}
+                  </label>
+                  <div className="grid grid-cols-4 gap-2">
+                    {[30, 45, 60, 90].map((sec) => (
+                      <button
+                        key={sec}
+                        type="button"
+                        onClick={() =>
+                          setNewRoomSettings({ ...newRoomSettings, turnDurationSeconds: sec })
+                        }
+                        className={`min-h-[44px] rounded-[10px] font-mono-code font-bold text-xs tabular-nums border transition-colors ${
+                          newRoomSettings.turnDurationSeconds === sec
+                            ? 'bg-[#B49A62]/15 text-primary-text border-[#B49A62]'
+                            : 'bg-bg-card text-text-muted border-border hover:text-text-main'
+                        }`}
+                      >
+                        {sec}
+                        {t('secondsShort')}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Privacy */}
+                <div>
+                  <label className="block text-xs font-bold text-text-muted mb-2">
+                    {t('roomType')}
+                  </label>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setNewRoomSettings({ ...newRoomSettings, isPrivate: false })}
+                      className={`flex-1 min-h-[44px] py-2 rounded-[10px] font-bold transition-colors flex items-center justify-center gap-2 border text-xs sm:text-sm ${
+                        !newRoomSettings.isPrivate
+                          ? 'bg-[#3E7B67]/18 text-emerald-text border-[#3E7B67]'
+                          : 'bg-bg-card text-text-muted border-border hover:text-text-main'
+                      }`}
+                    >
+                      <Globe size={15} />
+                      {t('public')}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setNewRoomSettings({ ...newRoomSettings, isPrivate: true })}
+                      className={`flex-1 min-h-[44px] py-2 rounded-[10px] font-bold transition-colors flex items-center justify-center gap-2 border text-xs sm:text-sm ${
+                        newRoomSettings.isPrivate
+                          ? 'bg-[#B49A62]/15 text-primary-text border-[#B49A62]'
+                          : 'bg-bg-card text-text-muted border-border hover:text-text-main'
+                      }`}
+                    >
+                      <Lock size={15} />
+                      {t('private')}
+                    </button>
+                  </div>
+                </div>
+
+                <p className="text-xs text-text-muted bg-bg-card border border-border rounded-[10px] px-3.5 py-2.5 leading-relaxed">
+                  {t('onlineClassicRolesNote')}
+                </p>
               </div>
 
-              {/* Privacy */}
-              <div>
-                <label className="block text-sm font-bold text-text-muted mb-2">
-                  {t('roomType')}
-                </label>
-                <div className="flex gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setNewRoomSettings({ ...newRoomSettings, isPrivate: false })}
-                    className={`flex-1 min-h-[44px] py-2 rounded-xl font-black transition-colors flex items-center justify-center gap-2 border text-sm ${
-                      !newRoomSettings.isPrivate
-                        ? 'bg-green-500 text-white border-green-500/50 shadow-[0_0_15px_rgba(34,197,94,0.3)]'
-                        : 'bg-bg-dark text-text-muted border-white/5 hover:bg-white/5'
-                    }`}
-                  >
-                    <Globe size={16} />
-                    {t('public')}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setNewRoomSettings({ ...newRoomSettings, isPrivate: true })}
-                    className={`flex-1 min-h-[44px] py-2 rounded-xl font-black transition-colors flex items-center justify-center gap-2 border text-sm ${
-                      newRoomSettings.isPrivate
-                        ? 'bg-accent text-white border-accent/50 shadow-[0_0_15px_rgba(var(--accent-rgb),0.3)]'
-                        : 'bg-bg-dark text-text-muted border-white/5 hover:bg-white/5'
-                    }`}
-                  >
-                    <Lock size={16} />
-                    {t('private')}
-                  </button>
-                </div>
+              <div className="flex gap-3">
+                <TacticalButton
+                  variant="secondary"
+                  onClick={() => setShowCreateModal(false)}
+                  className="flex-1"
+                >
+                  {t('cancel')}
+                </TacticalButton>
+                <TacticalButton
+                  variant="primary"
+                  onClick={() => {
+                    setShowCreateModal(false);
+                    onCreateRoom(newRoomSettings);
+                  }}
+                  className="flex-1"
+                >
+                  {t('create')}
+                </TacticalButton>
               </div>
-              <p className="text-xs font-bold text-text-muted bg-bg-dark/70 border border-white/10 rounded-xl px-3.5 py-2.5 leading-relaxed">
-                {t('onlineClassicRolesNote')}
-              </p>
-            </div>
-
-            <div className="flex gap-3">
-              <button
-                onClick={() => setShowCreateModal(false)}
-                className="btn-modern btn-modern-outline flex-1 min-h-[48px] rounded-2xl"
-              >
-                {t('cancel')}
-              </button>
-              <button
-                onClick={() => {
-                  setShowCreateModal(false);
-                  onCreateRoom(newRoomSettings);
-                }}
-                className="btn-modern flex-1 min-h-[48px] rounded-2xl"
-              >
-                {t('create')}
-              </button>
-            </div>
+            </ModalShell>
           </motion.div>
         </div>
       )}

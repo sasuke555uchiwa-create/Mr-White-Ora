@@ -46,6 +46,15 @@ import { getUITranslation } from '../translations';
 import { getSettings, recordOnlineSessionMatch } from '../services/storageService';
 import { showToast } from '../utils/toast';
 import { getPlayerRoundPoints } from '../src/game/winEngine';
+import {
+  ClassifiedStamp,
+  IconButton,
+  IntelligencePanel,
+  ModalShell,
+  PlayerIntelligenceCard,
+  StatusIndicator,
+  TacticalButton,
+} from './ui/BlacksiteUI';
 
 interface OnlineClue {
   id: string;
@@ -194,7 +203,11 @@ export const OnlineGameScreen: React.FC<OnlineGameScreenProps> = ({
 
       if (phase === 'RESULT' && revealedMap?.[p.uid]) {
         resolvedRole = revealedMap[p.uid];
-      } else if (phase === 'REVEAL_VOTE_RESULT' && p.uid === gameState.mostVotedId && gameState.mostVotedRevealedRole) {
+      } else if (
+        phase === 'REVEAL_VOTE_RESULT' &&
+        p.uid === gameState.mostVotedId &&
+        gameState.mostVotedRevealedRole
+      ) {
         resolvedRole = gameState.mostVotedRevealedRole as PlayerRole;
       } else if (p.revealedRole) {
         resolvedRole = p.revealedRole as PlayerRole;
@@ -297,8 +310,8 @@ export const OnlineGameScreen: React.FC<OnlineGameScreenProps> = ({
 
   if (!room || !user) {
     return (
-      <div className="min-h-[60vh] flex items-center justify-center bg-bg-dark">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+      <div className="min-h-[60vh] flex items-center justify-center">
+        <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-[#B49A62]" />
       </div>
     );
   }
@@ -471,36 +484,36 @@ export const OnlineGameScreen: React.FC<OnlineGameScreenProps> = ({
     if (!privatePlayer) {
       return (
         <div className="py-6 flex flex-col items-center justify-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary mb-2"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#B49A62] mb-2" />
         </div>
       );
     }
 
     if (privatePlayer.role === 'mrwhite') {
       return (
-        <div className="text-danger flex flex-col items-center">
+        <div className="text-primary-text flex flex-col items-center">
           <img
             src={getRoleAsset('mrwhite')}
             alt="Mr. White"
             referrerPolicy="no-referrer"
-            className="w-24 h-24 rounded-3xl object-cover border border-amber-400/45 shadow-lg mb-3 bg-[#0B1120]"
+            className="w-24 h-24 rounded-[12px] object-cover border border-[#B49A62]/45 shadow-lg mb-3 bg-[#080B10]"
           />
-          <span className="text-3xl sm:text-4xl font-black block mb-2">{t('mrWhiteRole')}</span>
-          <p className="text-sm font-bold text-text-muted">{t('tryToGuessWord')}</p>
+          <span className="text-2xl sm:text-3xl font-bold block mb-2">{t('mrWhiteRole')}</span>
+          <p className="text-xs sm:text-sm font-medium text-text-muted">{t('tryToGuessWord')}</p>
         </div>
       );
     }
 
     if (privatePlayer.role === 'hidden' || difficulty === 'hard') {
       return (
-        <div className="text-sky-400 flex flex-col items-center">
-          <div className="flex items-center justify-center gap-2 text-base font-black mb-3">
-            <EyeOff size={20} />
+        <div className="text-cyan-text flex flex-col items-center">
+          <div className="flex items-center justify-center gap-2 text-sm font-bold mb-3">
+            <EyeOff size={18} />
             <span>{isRTL ? 'دورك مخفي (وضع صعب)' : 'Role Hidden (Hard Mode)'}</span>
           </div>
-          <p className="text-sm font-bold mb-2 text-text-muted">{t('secretWordIs')}</p>
-          <div className="bg-bg-dark py-3 px-6 rounded-xl border border-sky-400/30 inline-block">
-            <span className="text-3xl font-black text-text-main">
+          <p className="text-xs font-semibold mb-2 text-text-muted">{t('secretWordIs')}</p>
+          <div className="bg-bg-card py-3 px-6 rounded-[10px] border border-[#668F9A]/40 inline-block">
+            <span className="text-2xl sm:text-3xl font-bold text-text-main">
               {privatePlayer.secretWord || '••••'}
             </span>
           </div>
@@ -510,34 +523,38 @@ export const OnlineGameScreen: React.FC<OnlineGameScreenProps> = ({
 
     if (privatePlayer.role === 'undercover') {
       return (
-        <div className="text-orange-400 flex flex-col items-center">
+        <div className="text-[#C88D5E] flex flex-col items-center">
           <img
             src={getRoleAsset('undercover')}
             alt="Undercover"
             referrerPolicy="no-referrer"
-            className="w-24 h-24 rounded-3xl object-cover border border-orange-400/45 shadow-lg mb-3 bg-[#0B1120]"
+            className="w-24 h-24 rounded-[12px] object-cover border border-[#A46F44]/50 shadow-lg mb-3 bg-[#080B10]"
           />
-          <span className="text-3xl sm:text-4xl font-black block mb-3">{t('undercoverRole')}</span>
-          <p className="text-sm font-bold mb-2 text-text-muted">{t('secretWordIs')}</p>
-          <div className="bg-bg-dark py-3 px-6 rounded-xl border border-orange-500/30 inline-block">
-            <span className="text-3xl font-black text-white">{privatePlayer.secretWord}</span>
+          <span className="text-2xl sm:text-3xl font-bold block mb-3">{t('undercoverRole')}</span>
+          <p className="text-xs font-semibold mb-2 text-text-muted">{t('secretWordIs')}</p>
+          <div className="bg-bg-card py-3 px-6 rounded-[10px] border border-[#A46F44]/40 inline-block">
+            <span className="text-2xl sm:text-3xl font-bold text-text-main">
+              {privatePlayer.secretWord}
+            </span>
           </div>
         </div>
       );
     }
 
     return (
-      <div className="text-primary flex flex-col items-center">
+      <div className="text-cyan-text flex flex-col items-center">
         <img
           src={getRoleAsset('citizen')}
           alt="Citizen"
           referrerPolicy="no-referrer"
-          className="w-24 h-24 rounded-3xl object-cover border border-sky-400/45 shadow-lg mb-3 bg-[#0B1120]"
+          className="w-24 h-24 rounded-[12px] object-cover border border-[#668F9A]/45 shadow-lg mb-3 bg-[#080B10]"
         />
-        <span className="text-3xl sm:text-4xl font-black block mb-3">{t('citizenRole')}</span>
-        <p className="text-sm font-bold mb-2 text-text-muted">{t('secretWordIs')}</p>
-        <div className="bg-bg-dark py-3 px-6 rounded-xl border border-primary/30 inline-block">
-          <span className="text-3xl font-black text-white">{privatePlayer.secretWord}</span>
+        <span className="text-2xl sm:text-3xl font-bold block mb-3">{t('citizenRole')}</span>
+        <p className="text-xs font-semibold mb-2 text-text-muted">{t('secretWordIs')}</p>
+        <div className="bg-bg-card py-3 px-6 rounded-[10px] border border-[#668F9A]/40 inline-block">
+          <span className="text-2xl sm:text-3xl font-bold text-text-main">
+            {privatePlayer.secretWord}
+          </span>
         </div>
       </div>
     );
@@ -551,59 +568,65 @@ export const OnlineGameScreen: React.FC<OnlineGameScreenProps> = ({
       if (isHost) {
         return (
           <div className="flex flex-col items-center justify-center flex-1 text-center p-6 max-w-md mx-auto w-full">
-            <div className="w-20 h-20 rounded-full bg-primary/15 border border-primary/30 flex items-center justify-center mb-4">
-              <Play className="w-9 h-9 text-primary" />
+            <div className="w-16 h-16 rounded-[12px] bg-[#B49A62]/15 border border-[#B49A62]/35 flex items-center justify-center mb-4">
+              <Play className="w-7 h-7 text-primary-text" />
             </div>
-            <h2 className="text-2xl sm:text-3xl font-black mb-3 text-primary">
+            <h2 className="text-xl sm:text-2xl font-bold mb-4 text-text-main">
               {t('readyToStartRound')}
             </h2>
 
-            <div className="card-modern p-4 w-full mb-6 text-xs font-bold text-text-muted space-y-2">
+            <IntelligencePanel className="p-4 w-full mb-6 text-xs font-semibold text-text-muted space-y-2.5">
               <div className="flex items-center justify-between">
                 <span>{t('playersLabel')}</span>
-                <span className="text-text-main font-black tabular-nums">{players.length}</span>
+                <span className="text-text-main font-mono-code font-bold tabular-nums">
+                  {players.length}
+                </span>
               </div>
               <div className="flex items-center justify-between">
                 <span>{t('difficulty')}</span>
-                <span className={difficulty === 'hard' ? 'text-rose-400 font-black' : 'text-sky-400 font-black'}>
+                <span
+                  className={
+                    difficulty === 'hard'
+                      ? 'text-danger-text font-bold'
+                      : 'text-cyan-text font-bold'
+                  }
+                >
                   {difficulty === 'hard' ? t('difficultyHard') : t('difficultyEasy')}
                 </span>
               </div>
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between gap-2">
                 <span>{t('roleDistribution')}</span>
-                <span className="text-text-main font-black tabular-nums">
-                  {scaledCitizens} {t('citizen')} · {scaledUndercover} {t('undercover')} · 1 {t('mrWhite')}
+                <span className="text-text-main font-bold tabular-nums">
+                  {scaledCitizens} {t('citizen')} · {scaledUndercover} {t('undercover')} · 1{' '}
+                  {t('mrWhite')}
                 </span>
               </div>
-              <p className="text-[11px] font-bold text-text-muted/85 pt-2 border-t border-white/10 text-start leading-relaxed">
+              <p className="text-[11px] font-medium text-text-muted pt-2.5 border-t border-border text-start leading-relaxed">
                 {t('onlineClassicRolesNote')}
               </p>
-            </div>
+            </IntelligencePanel>
 
-            <button
+            <TacticalButton
               onClick={handleStartRound}
               disabled={isLoading || players.length < 3}
-              className="btn-modern w-full min-h-[54px] py-4 rounded-2xl font-black text-lg flex items-center justify-center gap-2 disabled:opacity-50"
+              loading={isLoading}
+              variant="primary"
+              size="lg"
+              fullWidth
+              icon={<Play size={18} />}
             >
-              {isLoading ? (
-                <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-white"></div>
-              ) : (
-                <>
-                  <Play size={22} />
-                  <span>{t('startRound')}</span>
-                </>
-              )}
-            </button>
-            {error && <p className="text-danger mt-4 text-sm font-bold">{error}</p>}
+              {t('startRound')}
+            </TacticalButton>
+            {error && <p className="text-danger-text mt-4 text-sm font-semibold">{error}</p>}
           </div>
         );
       }
 
       return (
         <div className="flex flex-col items-center justify-center flex-1 text-center p-6">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mb-4"></div>
-          <h2 className="text-2xl font-black text-primary">{t('waitingForHost')}</h2>
-          <p className="text-text-muted mt-2 font-bold">{t('hostPreparingRound')}</p>
+          <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-[#B49A62] mb-4" />
+          <h2 className="text-xl font-bold text-text-main">{t('waitingForHost')}</h2>
+          <p className="text-text-muted mt-2 text-sm font-medium">{t('hostPreparingRound')}</p>
         </div>
       );
     }
@@ -614,24 +637,32 @@ export const OnlineGameScreen: React.FC<OnlineGameScreenProps> = ({
 
       return (
         <div className="flex flex-col items-center justify-center flex-1 text-center p-5 max-w-md mx-auto w-full">
-          <h2 className="text-2xl sm:text-3xl font-black mb-5 text-primary">{t('yourTurn')}</h2>
-          <div className="card-modern p-7 w-full">
-            <h3 className="text-lg font-bold text-text-muted mb-4">{t('youAreLabel')}</h3>
-            {renderWordCardInner()}
+          <div className="mb-3">
+            <ClassifiedStamp tone="gold">CLASSIFIED BRIEFING</ClassifiedStamp>
           </div>
+          <h2 className="text-xl sm:text-2xl font-bold mb-4 text-text-main">{t('yourTurn')}</h2>
+          <IntelligencePanel className="p-6 w-full border-[#B49A62]/35">
+            <h3 className="text-sm font-semibold text-text-muted mb-4">{t('youAreLabel')}</h3>
+            {renderWordCardInner()}
+          </IntelligencePanel>
 
           {!isReady ? (
-            <button
-              onClick={handleRevealComplete}
-              disabled={busyAction || !privatePlayer}
-              className="btn-modern mt-6 w-full min-h-[54px] py-4 rounded-2xl font-black text-lg disabled:opacity-50"
-            >
-              {t('iUnderstandReady')}
-            </button>
+            <div className="mt-5 w-full">
+              <TacticalButton
+                onClick={handleRevealComplete}
+                disabled={busyAction || !privatePlayer}
+                loading={busyAction}
+                variant="primary"
+                size="lg"
+                fullWidth
+              >
+                {t('iUnderstandReady')}
+              </TacticalButton>
+            </div>
           ) : (
-            <div className="mt-6 flex flex-col items-center gap-1">
-              <p className="text-emerald-400 font-black text-sm">{t('waitingForOtherPlayers')}</p>
-              <span className="text-xs font-black text-text-muted tabular-nums">
+            <div className="mt-5 flex flex-col items-center gap-1.5">
+              <StatusIndicator tone="emerald">{t('waitingForOtherPlayers')}</StatusIndicator>
+              <span className="text-xs font-mono-code font-bold text-text-muted tabular-nums">
                 {readyCount} / {players.length}
               </span>
             </div>
@@ -642,14 +673,15 @@ export const OnlineGameScreen: React.FC<OnlineGameScreenProps> = ({
 
     if (phase === 'PLAYING') {
       const activeSpeaker = players.find((p) => p.uid === activeSpeakerUid);
-      const isMyTurn = activeSpeakerUid === user.uid && !currentPlayer?.isEliminated && !turnsCompleted;
+      const isMyTurn =
+        activeSpeakerUid === user.uid && !currentPlayer?.isEliminated && !turnsCompleted;
       const roundClues = clues.filter((c) => c.round === currentRound);
       const spokenThisRoundUids = new Set(roundClues.map((c) => c.uid));
 
       return (
         <div className="flex flex-col flex-1 w-full max-w-3xl mx-auto px-4 pb-24 pt-2 gap-4">
           {currentPlayer?.isEliminated && (
-            <div className="px-4 py-2.5 rounded-2xl bg-rose-500/15 border border-rose-400/35 text-rose-200 text-xs font-black flex items-center gap-2">
+            <div className="px-4 py-2.5 rounded-[10px] bg-[#963F46]/15 border border-[#963F46]/35 text-danger-text text-xs font-semibold flex items-center gap-2">
               <ShieldAlert size={16} className="shrink-0" />
               <span>{t('spectatorModeNote')}</span>
             </div>
@@ -657,21 +689,25 @@ export const OnlineGameScreen: React.FC<OnlineGameScreenProps> = ({
 
           {/* Active Turn Spotlight */}
           {!turnsCompleted && activeSpeaker ? (
-            <div
-              className={`card-modern p-4 border ${
+            <IntelligencePanel
+              className={`p-4 ${
                 isMyTurn
-                  ? 'border-emerald-400/60 bg-emerald-500/10'
-                  : 'border-primary/40 bg-primary/5'
+                  ? 'border-[#3E7B67]/55 bg-[#3E7B67]/10'
+                  : 'border-[#668F9A]/45'
               }`}
             >
               <div className="flex items-center justify-between gap-3">
                 <div className="flex items-center gap-3 min-w-0">
-                  <Avatar avatar={activeSpeaker.avatar} name={activeSpeaker.name} size={48} />
+                  <Avatar avatar={activeSpeaker.avatar} name={activeSpeaker.name} size={46} />
                   <div className="min-w-0 text-start">
-                    <p className="text-[11px] font-black text-text-muted uppercase tracking-wider">
+                    <p
+                      className={`text-[11px] font-semibold text-text-muted ${
+                        !isRTL ? 'uppercase tracking-wider' : ''
+                      }`}
+                    >
                       {t('currentSpeaker')}
                     </p>
-                    <p className="text-lg font-black text-text-main truncate">
+                    <p className="text-base sm:text-lg font-bold text-text-main truncate">
                       {activeSpeaker.name}
                     </p>
                   </div>
@@ -679,10 +715,10 @@ export const OnlineGameScreen: React.FC<OnlineGameScreenProps> = ({
 
                 <div className="flex items-center gap-2 shrink-0">
                   <div
-                    className={`px-3 py-1.5 rounded-xl font-black text-sm tabular-nums flex items-center gap-1.5 border ${
+                    className={`px-3 py-1.5 rounded-[8px] font-mono-code font-bold text-sm tabular-nums flex items-center gap-1.5 border ${
                       timeLeftSeconds <= 10
-                        ? 'bg-rose-500/20 text-rose-300 border-rose-400/50'
-                        : 'bg-bg-dark text-amber-300 border-white/10'
+                        ? 'bg-[#963F46]/15 text-danger-text border-[#963F46]/45'
+                        : 'bg-bg-card text-primary-text border-border-strong'
                     }`}
                   >
                     <Clock size={14} />
@@ -692,22 +728,23 @@ export const OnlineGameScreen: React.FC<OnlineGameScreenProps> = ({
                     </span>
                   </div>
                   {(isHost || isMyTurn) && (
-                    <button
+                    <IconButton
                       onClick={handleManualSkipTurn}
                       disabled={busyAction}
-                      className="min-h-[40px] min-w-[40px] px-2.5 rounded-xl bg-white/5 hover:bg-white/15 text-text-muted hover:text-white border border-white/10 flex items-center justify-center gap-1 text-xs font-black disabled:opacity-40"
+                      variant="secondary"
+                      size="sm"
                       title={t('skipTurn')}
                       aria-label={t('skipTurn')}
                     >
                       <SkipForward size={15} />
-                    </button>
+                    </IconButton>
                   )}
                 </div>
               </div>
 
               {isMyTurn && (
-                <form onSubmit={handleSubmitClue} className="mt-3 pt-3 border-t border-white/10">
-                  <p className="text-xs font-black text-emerald-300 mb-2 text-start">
+                <form onSubmit={handleSubmitClue} className="mt-3 pt-3 border-t border-border">
+                  <p className="text-xs font-bold text-emerald-text mb-2 text-start">
                     {t('yourTurnWriteClue')}
                   </p>
                   <div className="flex gap-2">
@@ -717,35 +754,41 @@ export const OnlineGameScreen: React.FC<OnlineGameScreenProps> = ({
                       maxLength={80}
                       onChange={(e) => setClueInput(e.target.value)}
                       placeholder={t('cluePlaceholder')}
-                      className="flex-1 bg-bg-dark border border-emerald-400/40 rounded-xl px-4 py-3 text-sm font-bold text-white outline-none focus:border-emerald-400"
+                      className="flex-1 bg-bg-card border border-[#3E7B67]/50 rounded-[10px] px-3.5 py-2.5 text-sm font-medium text-text-main outline-none focus:border-[#3E7B67] min-h-[44px]"
                       autoFocus
                     />
-                    <button
+                    <TacticalButton
                       type="submit"
                       disabled={!clueInput.trim() || submittingClue}
-                      className="min-h-[44px] px-4 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-sm flex items-center gap-1.5 disabled:opacity-40 shrink-0"
+                      loading={submittingClue}
+                      variant="primary"
+                      size="md"
+                      icon={<Send size={15} />}
                     >
-                      <Send size={16} />
-                      <span>{t('sendClue')}</span>
-                    </button>
+                      {t('sendClue')}
+                    </TacticalButton>
                   </div>
                 </form>
               )}
-            </div>
+            </IntelligencePanel>
           ) : (
-            <div className="card-modern p-4 border border-amber-400/40 bg-amber-500/10 text-center">
-              <p className="text-sm font-black text-amber-200">{t('allTurnsFinished')}</p>
-            </div>
+            <IntelligencePanel className="p-4 border-[#B49A62]/40 bg-[#B49A62]/10 text-center">
+              <p className="text-sm font-bold text-primary-text">{t('allTurnsFinished')}</p>
+            </IntelligencePanel>
           )}
 
           {/* Clues Feed & Players Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
-            <div className="card-modern p-4 flex flex-col max-h-64 overflow-y-auto custom-scrollbar">
-              <h3 className="text-xs font-black text-text-muted uppercase tracking-wider mb-3 text-start">
+            <IntelligencePanel className="p-4 flex flex-col max-h-64 overflow-y-auto custom-scrollbar">
+              <h3
+                className={`text-xs font-semibold text-text-muted mb-3 text-start ${
+                  !isRTL ? 'uppercase tracking-wider' : ''
+                }`}
+              >
                 {t('cluesFeedTitle')}
               </h3>
               {clues.length === 0 ? (
-                <p className="text-xs font-bold text-text-muted/70 py-4 text-center">
+                <p className="text-xs font-medium text-text-muted py-4 text-center">
                   {t('noCluesYet')}
                 </p>
               ) : (
@@ -753,16 +796,16 @@ export const OnlineGameScreen: React.FC<OnlineGameScreenProps> = ({
                   {clues.map((clue) => (
                     <div
                       key={clue.id}
-                      className="flex items-center justify-between gap-2.5 px-3 py-2 rounded-xl bg-bg-dark/70 border border-white/5"
+                      className="flex items-center justify-between gap-2.5 px-3 py-2 rounded-[10px] bg-bg-card border border-border"
                     >
                       <div className="flex items-center gap-2.5 min-w-0">
                         <Avatar avatar={clue.avatar} name={clue.name} size={28} />
                         <div className="min-w-0 text-start">
-                          <span className="text-[11px] font-black text-text-muted block truncate">
+                          <span className="text-[11px] font-bold text-text-muted block truncate">
                             {clue.name}
                           </span>
                           <span
-                            className={`text-sm font-bold break-words ${
+                            className={`text-sm font-medium break-words ${
                               clue.skipped ? 'text-text-muted italic' : 'text-text-main'
                             }`}
                           >
@@ -770,15 +813,13 @@ export const OnlineGameScreen: React.FC<OnlineGameScreenProps> = ({
                           </span>
                         </div>
                       </div>
-                      <span className="text-[10px] font-black text-primary/80 px-2 py-0.5 rounded-md bg-primary/10 shrink-0 tabular-nums">
-                        R{clue.round}
-                      </span>
+                      <ClassifiedStamp tone="neutral">R{clue.round}</ClassifiedStamp>
                     </div>
                   ))}
                   <div ref={cluesEndRef} />
                 </div>
               )}
-            </div>
+            </IntelligencePanel>
 
             <div className="grid grid-cols-2 gap-2.5">
               {players.map((p) => {
@@ -788,37 +829,41 @@ export const OnlineGameScreen: React.FC<OnlineGameScreenProps> = ({
                   <button
                     key={p.uid || p.id}
                     onClick={() => setSelectedPlayerForStats(p)}
-                    className={`card-modern p-3 flex flex-col items-center transition-all relative ${
-                      p.isEliminated
-                        ? 'opacity-45 border-danger/40'
-                        : isSpeaking
-                        ? 'border-amber-400 bg-amber-500/10 ring-2 ring-amber-400/30'
-                        : 'hover:bg-primary/10 hover:border-primary'
-                    }`}
+                    className="text-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#668F9A]/70 rounded-[12px]"
                   >
-                    {p.uid === room.hostId && (
-                      <Crown size={13} className="absolute top-2 right-2 text-amber-400" />
-                    )}
-                    {!p.isEliminated && hasSpoken && (
-                      <span className="absolute top-2 left-2 w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
-                        <Check size={12} />
-                      </span>
-                    )}
-                    <div className="relative">
-                      <Avatar avatar={p.avatar} name={p.name} size={50} className="mb-1.5" />
-                      {p.isEliminated && (
-                        <div className="absolute inset-0 flex items-center justify-center bg-black/55 rounded-full">
-                          <XCircle size={22} className="text-danger" />
-                        </div>
-                      )}
-                    </div>
-                    <span
-                      className={`font-black text-xs sm:text-sm truncate max-w-full ${
-                        p.isEliminated ? 'line-through text-danger' : ''
+                    <PlayerIntelligenceCard
+                      className={`p-3 flex flex-col items-center relative ${
+                        p.isEliminated
+                          ? 'opacity-45 border-[#963F46]/40'
+                          : isSpeaking
+                          ? 'border-[#B49A62] bg-[#B49A62]/10'
+                          : 'hover:border-[#668F9A]/50'
                       }`}
                     >
-                      {p.name}
-                    </span>
+                      {p.uid === room.hostId && (
+                        <Crown size={13} className="absolute top-2 right-2 text-primary-text" />
+                      )}
+                      {!p.isEliminated && hasSpoken && (
+                        <span className="absolute top-2 left-2 w-5 h-5 rounded-[6px] bg-[#3E7B67]/20 text-emerald-text flex items-center justify-center">
+                          <Check size={12} />
+                        </span>
+                      )}
+                      <div className="relative">
+                        <Avatar avatar={p.avatar} name={p.name} size={48} className="mb-1.5" />
+                        {p.isEliminated && (
+                          <div className="absolute inset-0 flex items-center justify-center bg-[#080B10]/65 rounded-[10px]">
+                            <XCircle size={20} className="text-danger-text" />
+                          </div>
+                        )}
+                      </div>
+                      <span
+                        className={`font-bold text-xs sm:text-sm truncate max-w-full ${
+                          p.isEliminated ? 'line-through text-danger-text' : 'text-text-main'
+                        }`}
+                      >
+                        {p.name}
+                      </span>
+                    </PlayerIntelligenceCard>
                   </button>
                 );
               })}
@@ -827,20 +872,23 @@ export const OnlineGameScreen: React.FC<OnlineGameScreenProps> = ({
 
           <div className="mt-auto pt-2">
             {isHost ? (
-              <button
+              <TacticalButton
                 onClick={handleTimeUp}
                 disabled={busyAction || !turnsCompleted}
-                className="btn-modern w-full min-h-[52px] py-3.5 rounded-[2rem] font-black text-base flex items-center justify-center gap-2 disabled:opacity-45 disabled:cursor-not-allowed"
+                loading={busyAction}
+                variant="danger"
+                size="lg"
+                fullWidth
+                icon={<Vote size={18} />}
               >
-                <Vote size={20} />
-                <span>{t('endAndVote')}</span>
-              </button>
+                {t('endAndVote')}
+              </TacticalButton>
             ) : (
-              <div className="card-modern p-3.5 bg-primary/5 border-primary/20 text-center">
-                <p className="text-primary font-black text-xs sm:text-sm">
+              <IntelligencePanel className="p-3.5 text-center">
+                <p className="text-cyan-text font-semibold text-xs sm:text-sm">
                   {t('waitingForHostToStartVote')}
                 </p>
-              </div>
+              </IntelligencePanel>
             )}
           </div>
         </div>
@@ -855,8 +903,8 @@ export const OnlineGameScreen: React.FC<OnlineGameScreenProps> = ({
       return (
         <div className="flex flex-col items-center flex-1 text-center p-4 pb-24 w-full max-w-2xl mx-auto gap-4">
           <div>
-            <h2 className="text-2xl font-black text-danger">{t('votingTime')}</h2>
-            <p className="text-xs font-black text-text-muted mt-1 tabular-nums">
+            <h2 className="text-xl sm:text-2xl font-bold text-danger-text">{t('votingTime')}</h2>
+            <p className="text-xs font-mono-code font-bold text-text-muted mt-1 tabular-nums">
               {t('votedCount', { count: validVoteCount, total: alivePlayers.length })}
             </p>
           </div>
@@ -865,29 +913,23 @@ export const OnlineGameScreen: React.FC<OnlineGameScreenProps> = ({
             {alivePlayers.map((p) => {
               const voted = Boolean(p.uid && votedUids.includes(p.uid));
               return (
-                <div
-                  key={p.uid}
-                  className={`px-2.5 py-1 rounded-full text-[11px] font-black border flex items-center gap-1.5 ${
-                    voted
-                      ? 'bg-emerald-500/15 border-emerald-400/40 text-emerald-300'
-                      : 'bg-white/5 border-white/10 text-text-muted'
-                  }`}
-                >
-                  <span>{p.name}</span>
-                  <span>{voted ? `✓ ${t('votedStatus')}` : t('decidingStatus')}</span>
-                </div>
+                <StatusIndicator key={p.uid} tone={voted ? 'emerald' : 'neutral'}>
+                  {p.name} · {voted ? `✓ ${t('votedStatus')}` : t('decidingStatus')}
+                </StatusIndicator>
               );
             })}
           </div>
 
           {isEliminated ? (
-            <div className="card-modern p-6 w-full max-w-md my-auto">
-              <h3 className="text-xl font-black text-danger mb-2">{t('youAreEliminated')}</h3>
-              <p className="text-sm text-text-muted font-bold">{t('spectatorModeNote')}</p>
-            </div>
+            <IntelligencePanel className="p-6 w-full max-w-md my-auto">
+              <h3 className="text-lg font-bold text-danger-text mb-2">
+                {t('youAreEliminated')}
+              </h3>
+              <p className="text-sm text-text-muted font-medium">{t('spectatorModeNote')}</p>
+            </IntelligencePanel>
           ) : !hasMyVote ? (
             <>
-              <p className="text-sm font-bold text-text-muted">{t('whoIsImpostor')}</p>
+              <p className="text-sm font-medium text-text-muted">{t('whoIsImpostor')}</p>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 w-full">
                 {alivePlayers
                   .filter((p) => p.uid !== user.uid)
@@ -896,29 +938,36 @@ export const OnlineGameScreen: React.FC<OnlineGameScreenProps> = ({
                       key={p.uid}
                       disabled={submittingVote}
                       onClick={() => p.uid && handleVote(p.uid)}
-                      className="card-modern min-h-[116px] p-3 flex flex-col items-center justify-center hover:bg-danger/15 hover:border-danger active:scale-95 transition-all disabled:opacity-50"
+                      className="text-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#963F46]/70 rounded-[12px] disabled:opacity-50"
                     >
-                      <Avatar avatar={p.avatar} name={p.name} size={56} className="mb-1.5" />
-                      <span className="font-black text-sm truncate max-w-full">{p.name}</span>
+                      <PlayerIntelligenceCard className="min-h-[116px] p-3 flex flex-col items-center justify-center hover:bg-[#963F46]/10 hover:border-[#963F46]/55">
+                        <Avatar avatar={p.avatar} name={p.name} size={54} className="mb-2" />
+                        <span className="font-bold text-sm text-text-main truncate max-w-full">
+                          {p.name}
+                        </span>
+                      </PlayerIntelligenceCard>
                     </button>
                   ))}
               </div>
             </>
           ) : (
-            <div className="flex flex-col items-center my-auto card-modern p-6 w-full max-w-sm">
-              <div className="w-16 h-16 bg-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center mb-4">
-                <Check className="w-8 h-8" strokeWidth={3} />
+            <IntelligencePanel className="flex flex-col items-center my-auto p-6 w-full max-w-sm">
+              <div className="w-14 h-14 bg-[#3E7B67]/20 border border-[#3E7B67]/40 text-emerald-text rounded-[12px] flex items-center justify-center mb-4">
+                <Check className="w-7 h-7" strokeWidth={2.5} />
               </div>
-              <h3 className="text-xl font-black mb-1">{t('yourVoteRecorded')}</h3>
-              <p className="text-text-muted text-sm font-bold">{t('waitingForOtherPlayers')}</p>
-            </div>
+              <h3 className="text-lg font-bold text-text-main mb-1">{t('yourVoteRecorded')}</h3>
+              <p className="text-text-muted text-sm font-medium">{t('waitingForOtherPlayers')}</p>
+            </IntelligencePanel>
           )}
 
           {isHost && validVoteCount > 0 && validVoteCount < alivePlayers.length && (() => {
             const requiredMajority =
               alivePlayers.length <= 1
                 ? Math.max(0, alivePlayers.length)
-                : Math.min(alivePlayers.length, Math.max(2, Math.floor(alivePlayers.length / 2) + 1));
+                : Math.min(
+                    alivePlayers.length,
+                    Math.max(2, Math.floor(alivePlayers.length / 2) + 1)
+                  );
             const votingStartedAt = Number(gameState.votingStartedAt || 0);
             const elapsedMs = votingStartedAt > 0 ? Math.max(0, votingNowMs - votingStartedAt) : 0;
             const remainingSeconds = Math.max(0, Math.ceil((15000 - elapsedMs) / 1000));
@@ -926,15 +975,16 @@ export const OnlineGameScreen: React.FC<OnlineGameScreenProps> = ({
 
             return (
               <div className="mt-auto flex flex-col items-center gap-1.5">
-                <button
+                <TacticalButton
                   onClick={handleForceResolveVotes}
                   disabled={busyAction || !canForceResolve}
-                  className="px-5 py-3 rounded-2xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-400/50 text-amber-200 font-black text-xs transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                  variant="primary"
+                  size="sm"
                 >
                   {t('forceEndVote')}
-                </button>
+                </TacticalButton>
                 {!canForceResolve && (
-                  <p className="text-[11px] font-bold text-text-muted tabular-nums">
+                  <p className="text-[11px] font-mono-code font-bold text-text-muted tabular-nums">
                     {validVoteCount}/{requiredMajority} {t('votedStatus')} · {remainingSeconds}s
                   </p>
                 )}
@@ -975,14 +1025,15 @@ export const OnlineGameScreen: React.FC<OnlineGameScreenProps> = ({
       if (!impostorPlayer) {
         return (
           <div className="flex flex-col items-center justify-center flex-1 text-center p-6">
-            <h2 className="text-xl font-black text-amber-300 mb-4">{t('mrWhiteIsGuessing')}</h2>
+            <h2 className="text-xl font-bold text-primary-text mb-4">{t('mrWhiteIsGuessing')}</h2>
             {isHost && (
-              <button
+              <TacticalButton
                 onClick={() => void submitOnlineMrWhiteGuess(roomId, '', true)}
-                className="btn-modern px-6 py-3 rounded-2xl font-black"
+                variant="primary"
+                size="md"
               >
                 {t('ok')}
-              </button>
+              </TacticalButton>
             )}
           </div>
         );
@@ -1000,9 +1051,9 @@ export const OnlineGameScreen: React.FC<OnlineGameScreenProps> = ({
 
       return (
         <div className="flex flex-col items-center justify-center flex-1 text-center p-6">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-danger mb-4"></div>
-          <h2 className="text-2xl font-black text-danger">{t('mrWhiteIsGuessing')}</h2>
-          <p className="text-text-muted mt-2 font-bold">
+          <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-[#B49A62] mb-4" />
+          <h2 className="text-xl font-bold text-primary-text">{t('mrWhiteIsGuessing')}</h2>
+          <p className="text-text-muted mt-2 text-sm font-medium">
             {t('waitingForMrWhiteToChoose', { name: impostorPlayer.name })}
           </p>
         </div>
@@ -1058,15 +1109,12 @@ export const OnlineGameScreen: React.FC<OnlineGameScreenProps> = ({
 
     return (
       <div className="flex flex-col items-center justify-center flex-1 text-center p-6">
-        <h2 className="text-2xl font-bold text-primary mb-4">
+        <h2 className="text-xl font-bold text-text-main mb-4">
           {t('phaseLabel')} {phase}
         </h2>
-        <button
-          onClick={() => setShowLeaveConfirm(true)}
-          className="btn-modern btn-modern-outline mt-6 px-6 py-3 rounded-xl"
-        >
+        <TacticalButton onClick={() => setShowLeaveConfirm(true)} variant="secondary" size="md">
           {t('leaveRoom')}
-        </button>
+        </TacticalButton>
       </div>
     );
   };
@@ -1076,62 +1124,57 @@ export const OnlineGameScreen: React.FC<OnlineGameScreenProps> = ({
       {showMatchHud && (
         <div className="w-full max-w-3xl mx-auto px-4 pt-3 pb-1 flex items-center justify-between gap-2 z-20">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="px-3 py-1.5 rounded-xl bg-white/10 border border-white/15 text-xs font-black text-text-main tabular-nums">
+            <StatusIndicator tone="gold">
               {t('roundNumberLabel', { round: currentRound })}
-            </span>
-            <span className="px-3 py-1.5 rounded-xl bg-bg-surface/80 border border-white/10 text-xs font-bold text-text-muted tabular-nums">
+            </StatusIndicator>
+            <StatusIndicator tone="neutral">
               {t('aliveCountLabel', { count: alivePlayers.length })}
-            </span>
-            <span className="px-3 py-1.5 rounded-xl bg-rose-500/15 border border-rose-400/30 text-xs font-black text-rose-200 tabular-nums flex items-center gap-1.5">
-              {difficulty === 'hard' ? (
-                <>
-                  <HelpCircle size={15} className="text-rose-300 shrink-0" />
-                  <span>
-                    {t('remainingIntruders')}: {totalAliveInfiltrators}
-                  </span>
-                </>
-              ) : (
-                <span>
-                  {t('remainingIntruders')}: {totalAliveInfiltrators}
-                </span>
-              )}
-            </span>
+            </StatusIndicator>
+            <StatusIndicator
+              tone="crimson"
+              icon={difficulty === 'hard' ? <HelpCircle size={12} /> : undefined}
+            >
+              {t('remainingIntruders')}: {totalAliveInfiltrators}
+            </StatusIndicator>
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
             {currentPlayer && !currentPlayer.isEliminated && (
-              <button
+              <TacticalButton
                 onClick={() => {
                   setPeekRevealed(false);
                   setShowWordPeek(true);
                 }}
-                className="min-h-[40px] px-3 rounded-xl bg-primary/20 hover:bg-primary/30 border border-primary/40 text-primary text-xs font-black flex items-center gap-1.5"
+                variant="secondary"
+                size="sm"
+                icon={<Eye size={15} className="text-cyan-text" />}
               >
-                <Eye size={15} />
-                <span>{t('myWordPeek')}</span>
-              </button>
+                {t('myWordPeek')}
+              </TacticalButton>
             )}
-            <button
+            <IconButton
               onClick={() => setShowLeaveConfirm(true)}
-              className="min-h-[40px] min-w-[40px] px-2.5 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 border border-rose-400/30 text-rose-300 flex items-center justify-center"
+              variant="danger"
+              size="sm"
               aria-label={t('leaveRoom')}
               title={t('leaveRoom')}
             >
               <LogOut size={16} />
-            </button>
+            </IconButton>
           </div>
         </div>
       )}
 
       {!showMatchHud && phase !== 'RESULT' && (
         <div className="w-full max-w-3xl mx-auto px-4 pt-3 flex justify-end z-20">
-          <button
+          <TacticalButton
             onClick={() => setShowLeaveConfirm(true)}
-            className="min-h-[40px] px-3 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 border border-rose-400/30 text-rose-300 text-xs font-black flex items-center gap-1.5"
+            variant="danger"
+            size="sm"
+            icon={<LogOut size={14} />}
           >
-            <LogOut size={15} />
-            <span>{t('leaveRoom')}</span>
-          </button>
+            {t('leaveRoom')}
+          </TacticalButton>
         </div>
       )}
 
@@ -1139,69 +1182,80 @@ export const OnlineGameScreen: React.FC<OnlineGameScreenProps> = ({
 
       <button
         onClick={() => setShowChat(true)}
-        className="fixed bottom-5 left-5 min-h-[54px] min-w-[54px] flex items-center justify-center bg-primary text-white rounded-full shadow-lg hover:bg-primary-dark transition-all z-40"
+        className="fixed bottom-5 left-5 min-h-[50px] min-w-[50px] flex items-center justify-center bg-[#668F9A] text-[#080B10] border border-[#8CB3BE]/50 rounded-[12px] shadow-lg hover:bg-[#77A0AB] transition-colors z-40"
         aria-label={t('chat')}
       >
-        <MessageCircle className="w-6 h-6" />
+        <MessageCircle className="w-5 h-5" />
         {room.messages?.length > 0 && (
-          <span className="absolute top-1 right-1 w-3 h-3 bg-danger rounded-full border-2 border-bg-dark"></span>
+          <span className="absolute -top-1 -right-1 w-3 h-3 bg-[#963F46] rounded-[4px] border border-[#080B10]" />
         )}
       </button>
 
       {showWordPeek && currentPlayer && (
         <div
           onClick={() => setShowWordPeek(false)}
-          className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-5"
+          className="fixed inset-0 z-50 bg-[#080B10]/85 backdrop-blur-md flex items-center justify-center p-5"
         >
-          <div
-            onClick={(e) => e.stopPropagation()}
-            className="card-modern p-6 w-full max-w-sm text-center"
-          >
-            {!peekRevealed ? (
-              <div className="py-6 flex flex-col items-center gap-4">
-                <EyeOff size={40} className="text-primary" />
-                <p className="text-sm font-bold text-text-muted">{t('tapToRevealWord')}</p>
-                <button
-                  onClick={() => setPeekRevealed(true)}
-                  className="btn-modern w-full min-h-[48px] rounded-2xl font-black"
-                >
-                  {t('myWordPeek')}
-                </button>
-              </div>
-            ) : (
-              <div className="space-y-5">
-                {renderWordCardInner()}
-                <button
-                  onClick={() => setShowWordPeek(false)}
-                  className="btn-modern btn-modern-outline w-full min-h-[48px] rounded-2xl font-black"
-                >
-                  {t('hideWord')}
-                </button>
-              </div>
-            )}
+          <div onClick={(e) => e.stopPropagation()} className="w-full max-w-sm">
+            <ModalShell className="p-6 text-center">
+              {!peekRevealed ? (
+                <div className="py-4 flex flex-col items-center gap-4">
+                  <div className="w-14 h-14 rounded-[12px] bg-[#668F9A]/15 border border-[#668F9A]/35 flex items-center justify-center">
+                    <EyeOff size={28} className="text-cyan-text" />
+                  </div>
+                  <p className="text-sm font-medium text-text-muted">{t('tapToRevealWord')}</p>
+                  <TacticalButton
+                    onClick={() => setPeekRevealed(true)}
+                    variant="cyan"
+                    size="lg"
+                    fullWidth
+                  >
+                    {t('myWordPeek')}
+                  </TacticalButton>
+                </div>
+              ) : (
+                <div className="space-y-5">
+                  {renderWordCardInner()}
+                  <TacticalButton
+                    onClick={() => setShowWordPeek(false)}
+                    variant="secondary"
+                    size="lg"
+                    fullWidth
+                  >
+                    {t('hideWord')}
+                  </TacticalButton>
+                </div>
+              )}
+            </ModalShell>
           </div>
         </div>
       )}
 
       {showLeaveConfirm && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-5">
-          <div className="card-modern p-6 w-full max-w-sm text-center">
-            <h3 className="text-lg font-black mb-2">{t('leaveRoom')}</h3>
-            <p className="text-sm font-bold text-text-muted mb-6">{t('leaveRoomConfirm')}</p>
-            <div className="flex gap-3">
-              <button
-                onClick={() => setShowLeaveConfirm(false)}
-                className="btn-modern btn-modern-outline flex-1 min-h-[48px] rounded-2xl font-black"
-              >
-                {t('stay')}
-              </button>
-              <button
-                onClick={handleLeaveConfirmed}
-                className="flex-1 min-h-[48px] rounded-2xl bg-rose-500 hover:bg-rose-400 text-white font-black transition-colors"
-              >
-                {t('leave')}
-              </button>
-            </div>
+        <div className="fixed inset-0 z-50 bg-[#080B10]/85 backdrop-blur-sm flex items-center justify-center p-5">
+          <div className="w-full max-w-sm">
+            <ModalShell className="p-6 text-center">
+              <h3 className="text-lg font-bold text-text-main mb-2">{t('leaveRoom')}</h3>
+              <p className="text-sm font-medium text-text-muted mb-6">{t('leaveRoomConfirm')}</p>
+              <div className="flex gap-3">
+                <TacticalButton
+                  onClick={() => setShowLeaveConfirm(false)}
+                  variant="secondary"
+                  size="md"
+                  className="flex-1"
+                >
+                  {t('stay')}
+                </TacticalButton>
+                <TacticalButton
+                  onClick={handleLeaveConfirmed}
+                  variant="danger"
+                  size="md"
+                  className="flex-1"
+                >
+                  {t('leave')}
+                </TacticalButton>
+              </div>
+            </ModalShell>
           </div>
         </div>
       )}

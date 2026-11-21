@@ -17,6 +17,11 @@ import {
   StatisticsFilter,
 } from '../src/game/statsEngine';
 import { PlayerRole } from '../types';
+import {
+  IntelligencePanel,
+  PlayerIntelligenceCard,
+  SegmentedControl,
+} from './ui/BlacksiteUI';
 
 interface GameStatisticsProps {
   profile: UserProfile;
@@ -40,10 +45,10 @@ const RoleArtwork: React.FC<RoleImageWithFallbackProps> = ({
   if (failed) {
     return (
       <div
-        className={`${sizeClass} rounded-2xl bg-primary/15 border border-primary/30 flex items-center justify-center text-primary shrink-0`}
+        className={`${sizeClass} rounded-[10px] bg-[#668F9A]/15 border border-[#668F9A]/35 flex items-center justify-center text-cyan-text shrink-0`}
         aria-label={alt}
       >
-        <Shield className="w-6 h-6" />
+        <Shield className="w-5 h-5" />
       </div>
     );
   }
@@ -55,7 +60,7 @@ const RoleArtwork: React.FC<RoleImageWithFallbackProps> = ({
       loading="lazy"
       referrerPolicy="no-referrer"
       onError={() => setFailed(true)}
-      className={`${sizeClass} rounded-2xl object-cover bg-[#0B1120] border border-white/15 shrink-0`}
+      className={`${sizeClass} rounded-[10px] object-cover bg-[#080B10] border border-border-strong shrink-0`}
     />
   );
 };
@@ -337,45 +342,25 @@ export const GameStatistics: React.FC<GameStatisticsProps> = ({
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
         <div>
           <div className="flex items-center gap-2">
-            <BarChart3 className="w-5 h-5 text-primary shrink-0" />
-            <h3 className="text-lg font-black text-text-main">{copy.sectionTitle}</h3>
+            <BarChart3 className="w-5 h-5 text-cyan-text shrink-0" />
+            <h3 className="text-base font-bold text-text-main">{copy.sectionTitle}</h3>
           </div>
-          <p className="text-[11px] font-bold text-text-muted mt-1 text-start">
+          <p className="text-[11px] font-medium text-text-muted mt-1 text-start">
             {copy.syncScopeNote}
           </p>
         </div>
 
-        <div
-          className="inline-flex items-center gap-1 p-1 rounded-xl bg-bg-surface border border-border self-start sm:self-auto"
-          role="tablist"
-          aria-label={copy.sectionTitle}
-        >
-          {(['all', 'online', 'local'] as StatisticsFilter[]).map((tab) => {
-            const label =
-              tab === 'all'
-                ? copy.filterAll
-                : tab === 'online'
-                ? copy.filterOnline
-                : copy.filterLocal;
-            const active = filter === tab;
-            return (
-              <button
-                key={tab}
-                type="button"
-                role="tab"
-                aria-selected={active}
-                onClick={() => setFilter(tab)}
-                className={`min-h-[40px] px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap shrink-0 transition-colors ${
-                  active
-                    ? 'bg-primary text-white shadow-sm'
-                    : 'text-text-muted hover:text-text-main'
-                }`}
-              >
-                {label}
-              </button>
-            );
-          })}
-        </div>
+        <SegmentedControl<StatisticsFilter>
+          value={filter}
+          onChange={setFilter}
+          size="sm"
+          className="self-start sm:self-auto"
+          options={[
+            { value: 'all', label: copy.filterAll },
+            { value: 'online', label: copy.filterOnline },
+            { value: 'local', label: copy.filterLocal },
+          ]}
+        />
       </div>
 
       {/* Local Pass & Play Player Filter */}
@@ -384,9 +369,9 @@ export const GameStatistics: React.FC<GameStatisticsProps> = ({
           <button
             type="button"
             onClick={() => setLocalPlayerFilter('__all__')}
-            className={`min-h-[36px] px-3 py-1 rounded-lg text-xs font-bold whitespace-nowrap shrink-0 border transition-colors ${
+            className={`min-h-[36px] px-3 py-1 rounded-[8px] text-xs font-bold whitespace-nowrap shrink-0 border transition-colors ${
               localPlayerFilter === '__all__'
-                ? 'bg-primary/20 border-primary text-primary'
+                ? 'bg-[#668F9A]/15 border-[#668F9A] text-cyan-text'
                 : 'bg-bg-surface border-border text-text-muted hover:text-text-main'
             }`}
           >
@@ -397,9 +382,9 @@ export const GameStatistics: React.FC<GameStatisticsProps> = ({
               key={name}
               type="button"
               onClick={() => setLocalPlayerFilter(name)}
-              className={`min-h-[36px] px-3 py-1 rounded-lg text-xs font-bold whitespace-nowrap shrink-0 border transition-colors ${
+              className={`min-h-[36px] px-3 py-1 rounded-[8px] text-xs font-bold whitespace-nowrap shrink-0 border transition-colors ${
                 localPlayerFilter === name
-                  ? 'bg-primary/20 border-primary text-primary'
+                  ? 'bg-[#668F9A]/15 border-[#668F9A] text-cyan-text'
                   : 'bg-bg-surface border-border text-text-muted hover:text-text-main'
               }`}
             >
@@ -411,103 +396,102 @@ export const GameStatistics: React.FC<GameStatisticsProps> = ({
 
       {/* Primary KPI Grid */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
-        <div className="card-modern p-4 flex flex-col justify-between text-start">
+        <PlayerIntelligenceCard className="p-4 flex flex-col justify-between text-start">
           <div className="flex items-center justify-between gap-2 mb-2">
-            <span className="text-xs font-bold text-text-muted">{copy.winLossRatio}</span>
-            <TrendingUp className="w-4 h-4 text-emerald-400 shrink-0" />
+            <span className="text-xs font-semibold text-text-muted">{copy.winLossRatio}</span>
+            <TrendingUp className="w-4 h-4 text-emerald-text shrink-0" />
           </div>
-          <div className="text-2xl font-black text-text-main tabular-nums">
+          <div className="text-2xl font-mono-code font-bold text-text-main tabular-nums">
             {computed.winLossRatioLabel}
           </div>
-          <div className="text-xs font-bold text-text-muted mt-1 tabular-nums">
+          <div className="text-xs font-medium text-text-muted mt-1 tabular-nums">
             {computed.wins} {copy.winShort} · {computed.losses} {copy.lossShort}
           </div>
-        </div>
+        </PlayerIntelligenceCard>
 
-        <div className="card-modern p-4 flex flex-col justify-between text-start">
+        <PlayerIntelligenceCard className="p-4 flex flex-col justify-between text-start">
           <div className="flex items-center justify-between gap-2 mb-2">
-            <span className="text-xs font-bold text-text-muted">{copy.winRate}</span>
-            <Target className="w-4 h-4 text-blue-400 shrink-0" />
+            <span className="text-xs font-semibold text-text-muted">{copy.winRate}</span>
+            <Target className="w-4 h-4 text-cyan-text shrink-0" />
           </div>
-          <div className="text-2xl font-black text-blue-400 tabular-nums">
+          <div className="text-2xl font-mono-code font-bold text-cyan-text tabular-nums">
             {computed.winRate}%
           </div>
-          <div className="text-xs font-bold text-text-muted mt-1 tabular-nums">
+          <div className="text-xs font-medium text-text-muted mt-1 tabular-nums">
             {computed.played} {copy.gamesPlayed}
           </div>
-        </div>
+        </PlayerIntelligenceCard>
 
-        <div className="card-modern p-4 flex flex-col justify-between text-start">
+        <PlayerIntelligenceCard className="p-4 flex flex-col justify-between text-start">
           <div className="flex items-center justify-between gap-2 mb-2">
-            <span className="text-xs font-bold text-text-muted">{copy.longestStreak}</span>
-            <Flame className="w-4 h-4 text-amber-400 shrink-0" />
+            <span className="text-xs font-semibold text-text-muted">{copy.longestStreak}</span>
+            <Flame className="w-4 h-4 text-primary-text shrink-0" />
           </div>
-          <div className="text-2xl font-black text-amber-400 tabular-nums">
+          <div className="text-2xl font-mono-code font-bold text-primary-text tabular-nums">
             {computed.longestStreak}
           </div>
-          <div className="text-xs font-bold text-text-muted mt-1 tabular-nums">
+          <div className="text-xs font-medium text-text-muted mt-1 tabular-nums">
             {copy.currentStreak}: {computed.currentStreak}
           </div>
-        </div>
+        </PlayerIntelligenceCard>
 
-        <div className="card-modern p-4 flex flex-col justify-between text-start">
+        <PlayerIntelligenceCard className="p-4 flex flex-col justify-between text-start">
           <div className="flex items-center justify-between gap-2 mb-2">
-            <span className="text-xs font-bold text-text-muted">
+            <span className="text-xs font-semibold text-text-muted">
               {filter === 'local' ? copy.localMatches : copy.hostedGames}
             </span>
-            <Crown className="w-4 h-4 text-purple-400 shrink-0" />
+            <Crown className="w-4 h-4 text-primary-text shrink-0" />
           </div>
-          <div className="text-2xl font-black text-purple-400 tabular-nums">
+          <div className="text-2xl font-mono-code font-bold text-primary-text tabular-nums">
             {computed.hosted}
           </div>
-          <div className="text-xs font-bold text-text-muted mt-1 tabular-nums">
+          <div className="text-xs font-medium text-text-muted mt-1 tabular-nums">
             {copy.gamesCount(computed.played)}
           </div>
-        </div>
+        </PlayerIntelligenceCard>
       </div>
 
       {/* Win vs Loss Balance & Favorite Roles Panel */}
-      <div className="card-modern p-5 space-y-5">
-        {/* Win / Loss Split Bar */}
+      <IntelligencePanel className="p-5 space-y-5">
         <div>
           <div className="flex items-center justify-between text-xs font-bold mb-2 tabular-nums">
-            <span className="text-emerald-400">
+            <span className="text-emerald-text">
               {computed.wins} {copy.winsLabel}
             </span>
-            <span className="text-rose-400">
+            <span className="text-danger-text">
               {computed.losses} {copy.lossesLabel}
             </span>
           </div>
-          <div className="h-2.5 w-full rounded-full bg-bg-dark overflow-hidden flex border border-white/5">
+          <div className="h-2 w-full rounded-full bg-bg-card overflow-hidden flex border border-border">
             {computed.played > 0 ? (
               <>
                 <div
-                  className="h-full bg-emerald-500 transition-all duration-300"
+                  className="h-full bg-[#3E7B67] transition-all duration-300"
                   style={{ width: `${computed.winSharePercent}%` }}
                 />
                 <div
-                  className="h-full bg-rose-500/80 transition-all duration-300"
+                  className="h-full bg-[#963F46] transition-all duration-300"
                   style={{ width: `${100 - computed.winSharePercent}%` }}
                 />
               </>
             ) : (
-              <div className="h-full w-full bg-white/10" />
+              <div className="h-full w-full bg-bg-card" />
             )}
           </div>
         </div>
 
         {/* Favorite Role Spotlight + Role Breakdown */}
         {computed.roles.length === 0 ? (
-          <div className="pt-4 border-t border-white/10 text-center py-4">
+          <div className="pt-4 border-t border-border text-center py-4">
             <Award className="w-8 h-8 text-text-muted/60 mx-auto mb-2" />
-            <p className="text-sm font-black text-text-main">{copy.noGamesYetTitle}</p>
-            <p className="text-xs font-bold text-text-muted mt-1">{copy.noGamesYetDesc}</p>
+            <p className="text-sm font-bold text-text-main">{copy.noGamesYetTitle}</p>
+            <p className="text-xs font-medium text-text-muted mt-1">{copy.noGamesYetDesc}</p>
           </div>
         ) : (
           <>
             {computed.favoriteRole && (
-              <div className="pt-4 border-t border-white/10">
-                <p className="text-xs font-bold text-text-muted mb-3">
+              <div className="pt-4 border-t border-border">
+                <p className="text-xs font-semibold text-text-muted mb-3">
                   {copy.favoriteRoleTitle}
                 </p>
                 <div className="flex items-center justify-between gap-4">
@@ -515,13 +499,13 @@ export const GameStatistics: React.FC<GameStatisticsProps> = ({
                     <RoleArtwork
                       role={computed.favoriteRole.role}
                       alt={getRoleTitle(computed.favoriteRole.role, normalizedLang)}
-                      sizeClass="w-14 h-14"
+                      sizeClass="w-12 h-12"
                     />
                     <div className="min-w-0 text-start">
-                      <h4 className="text-base sm:text-lg font-black text-text-main truncate">
+                      <h4 className="text-base font-bold text-text-main truncate">
                         {getRoleTitle(computed.favoriteRole.role, normalizedLang)}
                       </h4>
-                      <div className="text-xs font-bold text-text-muted flex items-center gap-1.5 flex-wrap tabular-nums mt-0.5">
+                      <div className="text-xs font-medium text-text-muted flex items-center gap-1.5 flex-wrap tabular-nums mt-0.5">
                         <span>{copy.gamesCount(computed.favoriteRole.played)}</span>
                         <span aria-hidden="true">·</span>
                         <span>
@@ -533,19 +517,19 @@ export const GameStatistics: React.FC<GameStatisticsProps> = ({
                   </div>
 
                   <div className="text-end shrink-0 tabular-nums">
-                    <div className="text-xl font-black text-primary">
+                    <div className="text-xl font-mono-code font-bold text-primary-text">
                       {computed.favoriteRole.winRate}%
                     </div>
-                    <div className="text-[11px] font-bold text-text-muted">{copy.winRate}</div>
+                    <div className="text-[11px] font-medium text-text-muted">{copy.winRate}</div>
                   </div>
                 </div>
               </div>
             )}
 
             {/* Detailed Role Mastery List */}
-            <div className="pt-4 border-t border-white/10 space-y-3">
+            <div className="pt-4 border-t border-border space-y-3">
               <div className="flex items-center justify-between gap-2">
-                <p className="text-xs font-bold text-text-muted">
+                <p className="text-xs font-semibold text-text-muted">
                   {copy.roleBreakdownTitle}
                 </p>
                 {hasLocalData && filter !== 'online' && (
@@ -554,7 +538,7 @@ export const GameStatistics: React.FC<GameStatisticsProps> = ({
                       <button
                         type="button"
                         onClick={() => setConfirmReset(true)}
-                        className="min-h-[36px] px-2.5 py-1 rounded-lg text-xs font-bold text-text-muted hover:text-rose-400 flex items-center gap-1 transition-colors"
+                        className="min-h-[36px] px-2.5 py-1 rounded-[8px] text-xs font-semibold text-text-muted hover:text-danger-text flex items-center gap-1 transition-colors"
                       >
                         <RotateCcw className="w-3.5 h-3.5" />
                         <span>{copy.resetLocal}</span>
@@ -564,14 +548,14 @@ export const GameStatistics: React.FC<GameStatisticsProps> = ({
                         <button
                           type="button"
                           onClick={handleConfirmResetLocal}
-                          className="min-h-[36px] px-2.5 py-1 rounded-lg text-xs font-bold bg-rose-500/20 text-rose-300 border border-rose-400/40"
+                          className="min-h-[36px] px-2.5 py-1 rounded-[8px] text-xs font-bold bg-[#963F46]/15 text-danger-text border border-[#963F46]/40"
                         >
                           {copy.confirmReset}
                         </button>
                         <button
                           type="button"
                           onClick={() => setConfirmReset(false)}
-                          className="min-h-[36px] px-2.5 py-1 rounded-lg text-xs font-bold text-text-muted hover:text-text-main"
+                          className="min-h-[36px] px-2.5 py-1 rounded-[8px] text-xs font-semibold text-text-muted hover:text-text-main"
                         >
                           {copy.cancel}
                         </button>
@@ -590,22 +574,22 @@ export const GameStatistics: React.FC<GameStatisticsProps> = ({
                         <div className="flex items-center gap-2.5 min-w-0">
                           <RoleArtwork role={entry.role} alt={title} sizeClass="w-9 h-9" />
                           <div className="min-w-0 text-start">
-                            <div className="text-sm font-black text-text-main truncate">
+                            <div className="text-sm font-bold text-text-main truncate">
                               {title}
                             </div>
-                            <div className="text-xs font-bold text-text-muted tabular-nums">
+                            <div className="text-xs font-medium text-text-muted tabular-nums">
                               {copy.gamesCount(entry.played)} · {entry.wins} {copy.winShort} ·{' '}
                               {entry.losses} {copy.lossShort}
                             </div>
                           </div>
                         </div>
-                        <span className="text-sm font-black text-text-main tabular-nums shrink-0">
+                        <span className="text-sm font-mono-code font-bold text-text-main tabular-nums shrink-0">
                           {entry.winRate}%
                         </span>
                       </div>
-                      <div className="h-1.5 w-full rounded-full bg-bg-dark overflow-hidden">
+                      <div className="h-1.5 w-full rounded-full bg-bg-card overflow-hidden">
                         <div
-                          className="h-full bg-primary rounded-full transition-all duration-300"
+                          className="h-full bg-[#B49A62] rounded-full transition-all duration-300"
                           style={{ width: `${Math.max(4, entry.winRate)}%` }}
                         />
                       </div>
@@ -616,7 +600,7 @@ export const GameStatistics: React.FC<GameStatisticsProps> = ({
             </div>
           </>
         )}
-      </div>
+      </IntelligencePanel>
     </section>
   );
 };

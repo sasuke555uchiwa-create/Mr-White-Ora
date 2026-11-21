@@ -24,10 +24,10 @@ export const ToastHost: React.FC = () => {
       <AnimatePresence>
         {toasts.map((toast) => {
           const styleMap = {
-            error: 'bg-rose-950/95 border-rose-500/70 text-rose-100',
-            warning: 'bg-amber-950/95 border-amber-400/70 text-amber-100',
-            success: 'bg-emerald-950/95 border-emerald-500/70 text-emerald-100',
-            info: 'bg-slate-900/95 border-sky-400/60 text-slate-100',
+            error: 'bg-bg-surface border-[#963F46] text-danger-text',
+            warning: 'bg-bg-surface border-[#B49A62] text-primary-text',
+            success: 'bg-bg-surface border-[#3E7B67] text-emerald-text',
+            info: 'bg-bg-surface border-[#668F9A] text-cyan-text',
           }[toast.type];
 
           const Icon = {
@@ -40,18 +40,20 @@ export const ToastHost: React.FC = () => {
           return (
             <motion.div
               key={toast.id}
-              initial={{ opacity: 0, y: -16, scale: 0.96 }}
+              initial={{ opacity: 0, y: -12, scale: 0.96 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -12, scale: 0.96 }}
-              className={`pointer-events-auto w-full max-w-md rounded-2xl border-2 px-4 py-3 shadow-2xl backdrop-blur-md flex items-center justify-between gap-3 ${styleMap}`}
+              exit={{ opacity: 0, y: -10, scale: 0.96 }}
+              className={`pointer-events-auto w-full max-w-md rounded-[12px] border px-4 py-3 shadow-[0_14px_36px_rgba(4,7,12,0.45)] backdrop-blur-md flex items-center justify-between gap-3 ${styleMap}`}
             >
               <div className="flex items-center gap-2.5 min-w-0">
-                <Icon size={18} className="shrink-0" />
-                <span className="text-xs sm:text-sm font-black leading-snug">{toast.text}</span>
+                <Icon size={17} className="shrink-0" />
+                <span className="text-xs sm:text-sm font-semibold text-text-main leading-snug">
+                  {toast.text}
+                </span>
               </div>
               <button
                 onClick={() => dismiss(toast.id)}
-                className="p-1 rounded-full hover:bg-white/10 transition-colors shrink-0"
+                className="w-8 h-8 flex items-center justify-center rounded-[6px] text-text-muted hover:text-text-main hover:bg-bg-card transition-colors shrink-0"
                 aria-label="Close"
               >
                 <X size={15} />

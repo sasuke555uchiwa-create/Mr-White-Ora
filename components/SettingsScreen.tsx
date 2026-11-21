@@ -23,6 +23,13 @@ import {
   CheckCircle,
   RefreshCw,
 } from 'lucide-react';
+import {
+  ClassifiedStamp,
+  IntelligencePanel,
+  ModalShell,
+  ScreenSectionHeader,
+  TacticalButton,
+} from './ui/BlacksiteUI';
 
 interface SettingsScreenProps {
   onBack: () => void;
@@ -34,13 +41,13 @@ interface SettingsScreenProps {
 }
 
 const LANGUAGES = [
-  { id: 'ar', labelKey: 'arabic', symbol: 'AR', color: 'bg-green-600' },
-  { id: 'en', labelKey: 'english', symbol: 'EN', color: 'bg-blue-600' },
-  { id: 'fr', labelKey: 'french', symbol: 'FR', color: 'bg-purple-600' },
-  { id: 'es', labelKey: 'spanish', symbol: 'ES', color: 'bg-amber-600' },
-  { id: 'de', labelKey: 'german', symbol: 'DE', color: 'bg-red-600' },
-  { id: 'tr', labelKey: 'turkish', symbol: 'TR', color: 'bg-rose-600' },
-  { id: 'pt', labelKey: 'portuguese', symbol: 'PT', color: 'bg-emerald-600' },
+  { id: 'ar', labelKey: 'arabic', symbol: 'AR' },
+  { id: 'en', labelKey: 'english', symbol: 'EN' },
+  { id: 'fr', labelKey: 'french', symbol: 'FR' },
+  { id: 'es', labelKey: 'spanish', symbol: 'ES' },
+  { id: 'de', labelKey: 'german', symbol: 'DE' },
+  { id: 'tr', labelKey: 'turkish', symbol: 'TR' },
+  { id: 'pt', labelKey: 'portuguese', symbol: 'PT' },
 ];
 
 export const SettingsScreen: React.FC<SettingsScreenProps> = ({
@@ -57,6 +64,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
   const [toastMsg, setToastMsg] = useState<string | null>(null);
   const [activePreviewSound, setActivePreviewSound] = useState<SoundType | null>(null);
   const lang = settings.language;
+  const isRTL = ['ar', 'sa'].includes(lang);
   const t = (key: string) => getUITranslation(lang, key);
 
   const showToast = (msg: string) => {
@@ -135,7 +143,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
       setAdminCheckMessage(
         granted
           ? t('adminSuccess')
-          : lang === 'ar'
+          : isRTL
           ? 'هذا الحساب لا يملك صلاحية إدارة من الخادم.'
           : 'This account does not have server-granted admin permissions.'
       );
@@ -144,91 +152,117 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
     }
   };
 
+  const grayLabel = isRTL ? 'رمادي داكن' : lang === 'fr' ? 'Gris Tactique' : 'Slate Gray';
+
   return (
-    <div className="flex flex-col h-full animate-fade-in overflow-hidden max-w-2xl mx-auto w-full relative">
+    <div className="flex flex-col h-full overflow-hidden max-w-2xl mx-auto w-full relative">
       {toastMsg && (
-        <div className="fixed top-16 left-1/2 -translate-x-1/2 z-50 bg-emerald-600 text-white px-5 py-2.5 rounded-2xl shadow-2xl font-black text-sm">
+        <div className="fixed top-16 left-1/2 -translate-x-1/2 z-50 bg-[#3E7B67] text-[#F4F6F8] px-5 py-2.5 rounded-[10px] border border-white/15 shadow-2xl font-bold text-sm">
           {toastMsg}
         </div>
       )}
 
-      <div className="flex-1 overflow-y-auto pt-4 px-4 pb-8 scrollbar-hide">
-        <div className="text-center mb-6 flex items-center justify-center gap-2">
-          <Settings size={26} className="text-text-main" />
-          <h2 className="text-2xl font-black text-text-main">{t('settings')}</h2>
+      <div className="flex-1 overflow-y-auto pt-4 px-4 pb-8 custom-scrollbar">
+        <div className="mb-5 flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="w-10 h-10 rounded-[10px] bg-bg-surface border border-border-strong flex items-center justify-center text-primary-text">
+              <Settings size={20} />
+            </div>
+            <h2 className="text-xl font-extrabold text-text-main">{t('settings')}</h2>
+          </div>
+          <ClassifiedStamp tone="gold">SYS-CONFIG</ClassifiedStamp>
         </div>
 
         <div className="space-y-4">
           {/* Language Section */}
-          <div className="card-modern p-5">
-            <h3 className="font-black text-text-main mb-4 flex items-center gap-2">
-              <Globe size={20} className="text-sky-400" />
-              <span>{t('language')}</span>
-            </h3>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
-              {LANGUAGES.map((langItem) => (
-                <button
-                  key={langItem.id}
-                  onClick={() => handleLanguageChange(langItem.id)}
-                  className={`py-3.5 px-3 rounded-2xl font-bold transition-all flex flex-col items-center justify-center gap-1 border ${
-                    settings.language === langItem.id
-                      ? `${langItem.color} text-white shadow-lg border-white/25`
-                      : 'bg-bg-dark/40 text-text-muted hover:bg-white/5 border-border'
-                  }`}
-                >
-                  <span className="text-lg font-black">{langItem.symbol}</span>
-                  <span className="text-xs">{t(langItem.labelKey) || langItem.labelKey}</span>
-                </button>
-              ))}
+          <IntelligencePanel className="p-4 sm:p-5">
+            <ScreenSectionHeader
+              title={t('language')}
+              icon={<Globe size={17} />}
+              className="mb-4"
+            />
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              {LANGUAGES.map((langItem) => {
+                const active = settings.language === langItem.id;
+                return (
+                  <button
+                    key={langItem.id}
+                    onClick={() => handleLanguageChange(langItem.id)}
+                    className={`min-h-[48px] py-2.5 px-3 rounded-[10px] font-bold transition-colors flex items-center justify-between gap-2 border ${
+                      active
+                        ? 'bg-[#B49A62]/15 border-[#B49A62] text-text-main'
+                        : 'bg-bg-card/80 text-text-muted hover:text-text-main border-border'
+                    }`}
+                  >
+                    <span className="text-xs sm:text-sm truncate">
+                      {t(langItem.labelKey) || langItem.labelKey}
+                    </span>
+                    <span
+                      dir="ltr"
+                      className={`font-mono-code text-[11px] font-semibold px-1.5 py-0.5 rounded-[6px] ${
+                        active ? 'bg-[#B49A62] text-[#080B10]' : 'bg-bg-dark/40 text-text-muted'
+                      }`}
+                    >
+                      {langItem.symbol}
+                    </span>
+                  </button>
+                );
+              })}
             </div>
-          </div>
+          </IntelligencePanel>
 
           {/* Theme Section */}
-          <div className="card-modern p-5">
-            <h3 className="font-black text-text-main mb-4 flex items-center gap-2">
-              <Palette size={20} className="text-pink-400" />
-              <span>{t('theme')}</span>
-            </h3>
-            <div className="grid grid-cols-3 gap-3 py-1">
+          <IntelligencePanel className="p-4 sm:p-5">
+            <ScreenSectionHeader
+              title={t('theme')}
+              icon={<Palette size={17} />}
+              className="mb-4"
+            />
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
               {[
-                { id: 'dark' as const, label: t('themeDark'), swatch: 'bg-slate-950 border-white/20' },
-                { id: 'light' as const, label: t('themeLight'), swatch: 'bg-white border-slate-300' },
+                { id: 'dark' as const, label: t('themeDark'), swatch: 'bg-[#080B10] border-[#B49A62]/40' },
+                { id: 'gray' as const, label: grayLabel, swatch: 'bg-[#202731] border-white/25' },
+                { id: 'light' as const, label: t('themeLight'), swatch: 'bg-[#F3F5F8] border-slate-400' },
                 {
                   id: 'system' as const,
                   label: t('themeSystem'),
-                  swatch: 'bg-gradient-to-br from-slate-950 to-white border-white/25',
+                  swatch: 'bg-gradient-to-br from-[#080B10] via-[#202B36] to-[#F3F5F8] border-border-strong',
                 },
-              ].map((item) => (
-                <button
-                  key={item.id}
-                  onClick={() => handleThemeChange(item.id)}
-                  className={`p-3 rounded-2xl border-2 flex flex-col items-center gap-2 transition-all active:scale-95 ${
-                    settings.theme === item.id
-                      ? 'border-pink-400 bg-pink-500/15'
-                      : 'border-border bg-bg-dark/40 opacity-75 hover:opacity-100'
-                  }`}
-                >
-                  <div className={`w-10 h-10 rounded-full border-2 shadow-inner ${item.swatch}`} />
-                  <span className="text-xs font-black text-text-main">{item.label}</span>
-                </button>
-              ))}
+              ].map((item) => {
+                const active = settings.theme === item.id;
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => handleThemeChange(item.id)}
+                    className={`p-3 rounded-[10px] border flex flex-col items-center gap-2 transition-colors min-h-[76px] ${
+                      active
+                        ? 'border-[#B49A62] bg-[#B49A62]/12 text-text-main'
+                        : 'border-border bg-bg-card/70 text-text-muted hover:text-text-main'
+                    }`}
+                  >
+                    <div className={`w-8 h-8 rounded-[8px] border shadow-inner ${item.swatch}`} />
+                    <span className="text-xs font-bold text-center">{item.label}</span>
+                  </button>
+                );
+              })}
             </div>
-          </div>
+          </IntelligencePanel>
 
-          {/* Button Color Section */}
-          <div className="card-modern p-5">
-            <h3 className="font-black text-text-main mb-4 flex items-center gap-2">
-              <PaintBucket size={20} className="text-amber-400" />
-              <span>{t('buttonColors')}</span>
-            </h3>
+          {/* Accent Color Section */}
+          <IntelligencePanel className="p-4 sm:p-5">
+            <ScreenSectionHeader
+              title={t('buttonColors')}
+              icon={<PaintBucket size={17} />}
+              className="mb-4"
+            />
             <div className="grid grid-cols-3 gap-2">
               {[
-                { id: 'default', color: 'bg-pink-500', name: t('colorDefault') },
-                { id: 'blue', color: 'bg-blue-500', name: t('colorBlue') },
-                { id: 'green', color: 'bg-emerald-500', name: t('colorGreen') },
-                { id: 'red', color: 'bg-rose-500', name: t('colorRed') },
-                { id: 'purple', color: 'bg-purple-500', name: t('colorPurple') },
-                { id: 'orange', color: 'bg-orange-500', name: t('colorOrange') },
+                { id: 'default', color: 'bg-[#B49A62]', name: t('colorDefault') },
+                { id: 'blue', color: 'bg-[#4B728F]', name: t('colorBlue') },
+                { id: 'green', color: 'bg-[#4E806F]', name: t('colorGreen') },
+                { id: 'red', color: 'bg-[#9E4A50]', name: t('colorRed') },
+                { id: 'purple', color: 'bg-[#636F85]', name: t('colorPurple') },
+                { id: 'orange', color: 'bg-[#A6764B]', name: t('colorOrange') },
               ].map((btnColor) => {
                 const isSelected =
                   settings.buttonColor === btnColor.id ||
@@ -237,38 +271,39 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
                   <button
                     key={btnColor.id}
                     onClick={() => handleButtonColorChange(btnColor.id as any)}
-                    className={`py-3 rounded-xl font-bold transition-all flex flex-col items-center justify-center gap-1.5 border ${
+                    className={`py-2.5 px-2 rounded-[10px] font-bold transition-colors flex flex-col items-center justify-center gap-1.5 border min-h-[60px] ${
                       isSelected
-                        ? 'bg-primary text-white shadow-lg border-white/25'
-                        : 'bg-bg-dark/50 text-text-muted hover:bg-white/5 border-border'
+                        ? 'bg-bg-card border-[#B49A62] text-text-main'
+                        : 'bg-bg-card/60 text-text-muted hover:text-text-main border-border'
                     }`}
                   >
                     <div
-                      className={`w-6 h-6 rounded-full ${btnColor.color} shadow-inner border border-white/25`}
+                      className={`w-5 h-5 rounded-[6px] ${btnColor.color} border border-white/20`}
                     />
-                    <span className="text-xs">{btnColor.name}</span>
+                    <span className="text-xs truncate max-w-full">{btnColor.name}</span>
                   </button>
                 );
               })}
             </div>
-          </div>
+          </IntelligencePanel>
 
           {/* Preferences Section */}
-          <div className="card-modern p-5">
-            <h3 className="font-black text-text-main mb-4 flex items-center gap-2">
-              <Volume2 size={20} className="text-emerald-400" />
-              <span>{t('soundVibration')}</span>
-            </h3>
+          <IntelligencePanel className="p-4 sm:p-5">
+            <ScreenSectionHeader
+              title={t('soundVibration')}
+              icon={<Volume2 size={17} />}
+              className="mb-4"
+            />
 
-            <div className="mb-6">
+            <div className="mb-5">
               <div className="flex justify-between mb-2">
                 <span className="text-sm font-bold text-text-muted">{t('volume')}</span>
-                <span className="text-sm text-primary font-black tabular-nums">
+                <span className="text-sm text-primary-text font-bold font-mono-code tabular-nums">
                   {Math.round(settings.soundVolume * 100)}%
                 </span>
               </div>
               <div className="flex items-center gap-3">
-                <Volume1 size={16} className="text-text-muted" />
+                <Volume1 size={16} className="text-text-muted shrink-0" />
                 <input
                   type="range"
                   min="0"
@@ -278,9 +313,9 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
                   onChange={handleVolumeChange}
                   onMouseUp={handleTestSound}
                   onTouchEnd={handleTestSound}
-                  className="w-full h-2 bg-bg-dark rounded-lg appearance-none cursor-pointer accent-primary border border-border"
+                  className="w-full h-2 bg-bg-card rounded-[6px] appearance-none cursor-pointer accent-[#B49A62] border border-border"
                 />
-                <Volume2 size={16} className="text-text-muted" />
+                <Volume2 size={16} className="text-text-muted shrink-0" />
               </div>
             </div>
 
@@ -293,28 +328,28 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
                   onChange={handleHapticChange}
                   className="sr-only peer"
                 />
-                <div className="w-11 h-6 bg-bg-dark rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary border border-border" />
+                <div className="w-11 h-6 bg-bg-card rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-[#080B10] after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-[#ECEFF4] after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#B49A62] border border-border-strong" />
               </label>
             </div>
 
             <div className="pt-4 border-t border-border">
               <div className="flex items-center justify-between mb-2.5">
-                <span className="text-xs font-black text-text-main">
-                  {lang === 'ar'
+                <span className="text-xs font-bold text-text-main">
+                  {isRTL
                     ? 'تجربة المؤثرات الصوتية'
                     : lang === 'fr'
                     ? 'Tester les effets sonores'
                     : 'Sound Effects Preview'}
                 </span>
-                <span className="text-[11px] font-bold text-text-muted tabular-nums">
+                <span className="text-[11px] font-mono-code font-semibold text-text-muted tabular-nums" dir="ltr">
                   {SOUND_EFFECT_LIST.length} SFX
                 </span>
               </div>
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-1.5">
                 {SOUND_EFFECT_LIST.map((sfx) => {
                   const isPlaying = activePreviewSound === sfx.id;
                   const label =
-                    lang === 'ar' ? sfx.labels.ar : lang === 'fr' ? sfx.labels.fr : sfx.labels.en;
+                    isRTL ? sfx.labels.ar : lang === 'fr' ? sfx.labels.fr : sfx.labels.en;
                   return (
                     <button
                       key={sfx.id}
@@ -326,10 +361,10 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
                           setActivePreviewSound((curr) => (curr === sfx.id ? null : curr));
                         }, 360);
                       }}
-                      className={`px-3 py-1.5 rounded-xl text-xs font-black border transition-all active:scale-95 ${
+                      className={`px-3 py-1.5 rounded-[8px] text-xs font-bold border transition-colors min-h-[36px] ${
                         isPlaying
-                          ? 'bg-emerald-500 text-white border-emerald-400 shadow-md'
-                          : 'bg-bg-dark/60 text-text-muted hover:text-text-main border-border hover:border-emerald-400/50'
+                          ? 'bg-[#668F9A] text-[#080B10] border-[#8CB3BE]'
+                          : 'bg-bg-card text-text-muted hover:text-text-main border-border hover:border-[#668F9A]/50'
                       }`}
                     >
                       {label}
@@ -338,46 +373,42 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
                 })}
               </div>
             </div>
-          </div>
+          </IntelligencePanel>
 
           {/* Server-Verified Admin Section */}
-          <div className="card-modern p-5">
-            <h3 className="font-black text-text-main mb-3 flex items-center gap-2">
-              <Shield
-                size={20}
-                className={isAdmin ? 'text-primary' : 'text-text-muted'}
-              />
-              <span>{t('adminMode')}</span>
-            </h3>
+          <IntelligencePanel className="p-4 sm:p-5">
+            <ScreenSectionHeader
+              title={t('adminMode')}
+              icon={<Shield size={17} className={isAdmin ? 'text-primary-text' : 'text-text-muted'} />}
+              className="mb-3"
+            />
 
             {isAdmin ? (
-              <div className="flex items-center gap-3 bg-primary/10 p-4 rounded-xl border border-primary/30">
-                <CheckCircle className="text-primary w-6 h-6 shrink-0" />
-                <span className="font-bold text-primary text-sm">{t('adminSuccess')}</span>
+              <div className="flex items-center gap-3 bg-[#B49A62]/12 p-3.5 rounded-[10px] border border-[#B49A62]/35">
+                <CheckCircle className="text-primary-text w-5 h-5 shrink-0" />
+                <span className="font-bold text-primary-text text-sm">{t('adminSuccess')}</span>
               </div>
             ) : (
               <div className="flex flex-col gap-3">
-                <p className="text-xs font-bold text-text-muted leading-relaxed">
+                <p className="text-xs font-medium text-text-muted leading-relaxed">
                   {user
-                    ? lang === 'ar'
+                    ? isRTL
                       ? 'يتم التحقق من صلاحيات الإدارة حصرياً عبر Firebase Custom Claims وسجل المشرفين على الخادم.'
                       : 'Admin privileges are verified strictly via server-side Firebase Custom Claims.'
-                    : lang === 'ar'
+                    : isRTL
                     ? 'سجّل الدخول أولاً للتحقق من صلاحيات الإدارة المرتبطة بحسابك.'
                     : 'Sign in first to verify server-granted admin permissions for your account.'}
                 </p>
                 {user && (
-                  <button
-                    type="button"
+                  <TacticalButton
+                    variant="secondary"
+                    fullWidth
+                    loading={checkingAdmin}
                     onClick={handleRefreshAdmin}
-                    disabled={checkingAdmin}
-                    className="btn-modern w-full py-3.5 rounded-xl font-black flex items-center justify-center gap-2 disabled:opacity-50"
+                    icon={<RefreshCw size={16} />}
                   >
-                    <RefreshCw size={17} className={checkingAdmin ? 'animate-spin' : ''} />
-                    <span>
-                      {lang === 'ar' ? 'التحقق من صلاحيات الإدارة' : 'Verify Admin Permissions'}
-                    </span>
-                  </button>
+                    {isRTL ? 'التحقق من صلاحيات الإدارة' : 'Verify Admin Permissions'}
+                  </TacticalButton>
                 )}
                 {adminCheckMessage && (
                   <p className="text-center text-xs font-bold text-text-muted">
@@ -386,82 +417,90 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
                 )}
               </div>
             )}
-          </div>
+          </IntelligencePanel>
 
           {/* Data Management Section */}
-          <div className="card-modern p-5">
-            <h3 className="font-black text-text-main mb-2">{t('dataManagement')}</h3>
-            <p className="text-text-muted text-sm mb-4 font-bold">
+          <IntelligencePanel className="p-4 sm:p-5">
+            <h3 className="font-bold text-base text-text-main mb-1.5">{t('dataManagement')}</h3>
+            <p className="text-text-muted text-xs mb-4 leading-relaxed">
               {t('dataManagementDesc')}
             </p>
 
-            <button
-              onClick={() => setPendingConfirm('scores')}
-              className="btn-modern btn-modern-danger w-full py-3.5 rounded-xl font-black mb-3 flex items-center justify-center gap-2"
-            >
-              <Trash2 size={18} />
-              <span>{t('resetScores')}</span>
-            </button>
+            <div className="space-y-2.5">
+              <TacticalButton
+                variant="danger"
+                fullWidth
+                onClick={() => setPendingConfirm('scores')}
+                icon={<Trash2 size={16} />}
+              >
+                {t('resetScores')}
+              </TacticalButton>
 
-            <button
-              onClick={() => setPendingConfirm('all')}
-              className="w-full py-3.5 rounded-xl font-black text-white bg-rose-900 hover:bg-rose-800 border border-rose-500/30 flex items-center justify-center gap-2 transition-colors"
-            >
-              <AlertOctagon size={18} />
-              <span>{t('resetApp')}</span>
-            </button>
-          </div>
+              <TacticalButton
+                variant="secondary"
+                fullWidth
+                onClick={() => setPendingConfirm('all')}
+                icon={<AlertOctagon size={16} className="text-danger-text" />}
+                className="border-[#963F46]/40 text-danger-text hover:bg-[#963F46]/10"
+              >
+                {t('resetApp')}
+              </TacticalButton>
+            </div>
+          </IntelligencePanel>
 
           {/* Info Section */}
-          <div className="card-modern p-5">
-            <h3 className="font-black text-text-main mb-2 flex items-center gap-2">
-              <Info size={20} className="text-sky-400" />
-              <span>{t('info')}</span>
-            </h3>
-            <div className="flex items-center justify-between bg-bg-dark/40 p-3 rounded-xl border border-border text-sm font-bold text-text-muted">
+          <IntelligencePanel className="p-4 sm:p-5">
+            <ScreenSectionHeader title={t('info')} icon={<Info size={17} />} className="mb-3" />
+            <div className="flex items-center justify-between bg-bg-card p-3 rounded-[10px] border border-border text-sm font-bold text-text-muted">
               <span>{t('language')}</span>
-              <span className="text-text-main uppercase">{settings.language}</span>
+              <span dir="ltr" className="font-mono-code text-text-main uppercase">
+                {settings.language}
+              </span>
             </div>
-          </div>
+          </IntelligencePanel>
         </div>
       </div>
 
       {/* Bottom Save & Back CTA */}
-      <div className="p-4 bg-bg-dark/90 backdrop-blur-md border-t border-border shrink-0">
-        <button
+      <div className="p-4 bg-bg-dark/90 backdrop-blur-xs border-t border-border shrink-0">
+        <TacticalButton
+          variant="primary"
+          size="lg"
+          fullWidth
           onClick={() => {
             playSound('click');
             onBack();
           }}
-          className="w-full py-4 rounded-full bg-[#ec4899] hover:bg-[#db2777] text-white text-lg font-black shadow-[0_5px_0_#9d174d] active:translate-y-0.5 active:shadow-none transition-all"
         >
           {t('saveBack')}
-        </button>
+        </TacticalButton>
       </div>
 
       {/* In-App Confirmation Modal */}
       {pendingConfirm && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-5">
-          <div className="w-full max-w-sm bg-bg-surface border border-border-strong rounded-[2rem] p-6 text-center shadow-2xl">
-            <h3 className="text-lg font-black text-text-main mb-2">{t('alert')}</h3>
-            <p className="text-sm font-bold text-text-muted mb-6 leading-relaxed">
+        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-xs flex items-center justify-center p-5">
+          <ModalShell maxWidthClass="max-w-sm" className="p-6 text-center">
+            <h3 className="text-lg font-extrabold text-text-main mb-2">{t('alert')}</h3>
+            <p className="text-sm font-medium text-text-muted mb-6 leading-relaxed">
               {pendingConfirm === 'scores' ? t('confirmResetScores') : t('confirmResetApp')}
             </p>
             <div className="flex gap-3">
-              <button
+              <TacticalButton
+                variant="secondary"
                 onClick={() => setPendingConfirm(null)}
-                className="flex-1 py-3 rounded-xl bg-bg-card border border-border text-text-main font-black"
+                className="flex-1"
               >
                 {t('cancel')}
-              </button>
-              <button
+              </TacticalButton>
+              <TacticalButton
+                variant="danger"
                 onClick={handleConfirmAction}
-                className="flex-1 py-3 rounded-xl bg-rose-500 hover:bg-rose-400 text-white font-black"
+                className="flex-1"
               >
                 {t('confirm')}
-              </button>
+              </TacticalButton>
             </div>
-          </div>
+          </ModalShell>
         </div>
       )}
     </div>

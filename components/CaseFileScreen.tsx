@@ -31,6 +31,14 @@ import { fetchOnlineCaseFile } from '../utils/caseFileService';
 import { getRoleAsset, getRoleTitle } from '../data/specialRoles';
 import { ACHIEVEMENT_ASSETS, CATEGORY_COVERS } from '../src/design/assetRegistry';
 import { playSound } from '../services/soundService';
+import {
+  ClassifiedDossierPanel,
+  ClassifiedStamp,
+  IntelligencePanel,
+  PlayerIntelligenceCard,
+  StatusIndicator,
+  TacticalButton,
+} from './ui/BlacksiteUI';
 
 interface CaseFileScreenProps {
   caseFile?: ClassifiedCaseFile | null;
@@ -88,7 +96,7 @@ export const CaseFileScreen: React.FC<CaseFileScreenProps> = ({
 }) => {
   const settings = getSettings();
   const lang = settings.language || 'ar';
-  const isRTL = lang === 'ar';
+  const isRTL = ['ar', 'sa'].includes(lang);
   const t = (key: string, params?: Record<string, any>) => {
     let text = getUITranslation(lang, key);
     if (params) {
@@ -148,8 +156,8 @@ export const CaseFileScreen: React.FC<CaseFileScreenProps> = ({
   if (loading) {
     return (
       <div className="min-h-[65vh] flex flex-col items-center justify-center p-6 text-center max-w-2xl mx-auto w-full">
-        <div className="w-12 h-12 border-4 border-sky-400 border-t-transparent rounded-full animate-spin mb-4" />
-        <p className="text-sm font-black text-sky-300 tracking-wide">{t('caseFileLoading')}</p>
+        <div className="w-10 h-10 border-2 border-[#668F9A] border-t-transparent rounded-full animate-spin mb-4" />
+        <p className="text-sm font-bold text-cyan-text">{t('caseFileLoading')}</p>
       </div>
     );
   }
@@ -157,26 +165,25 @@ export const CaseFileScreen: React.FC<CaseFileScreenProps> = ({
   if (loadError) {
     return (
       <div className="min-h-[65vh] flex flex-col items-center justify-center p-6 text-center max-w-md mx-auto w-full">
-        <div className="bg-bg-surface/90 border border-rose-400/35 rounded-3xl p-6 w-full shadow-xl space-y-4">
-          <p className="text-sm font-black text-rose-300">{t('caseFileLoadError')}</p>
+        <IntelligencePanel className="border-[#963F46]/40 p-6 w-full space-y-4">
+          <p className="text-sm font-bold text-danger-text">{t('caseFileLoadError')}</p>
           <div className="flex gap-3">
             {reportId && (
-              <button
+              <TacticalButton
                 onClick={() => void loadByReportId(reportId)}
-                className="flex-1 min-h-[44px] py-3 rounded-2xl bg-sky-500 hover:bg-sky-400 text-slate-950 font-black text-sm flex items-center justify-center gap-2"
+                variant="cyan"
+                size="md"
+                className="flex-1"
+                icon={<RefreshCw size={15} />}
               >
-                <RefreshCw size={16} />
-                <span>{t('retryLoad')}</span>
-              </button>
+                {t('retryLoad')}
+              </TacticalButton>
             )}
-            <button
-              onClick={onBack}
-              className="flex-1 min-h-[44px] py-3 rounded-2xl bg-white/10 hover:bg-white/15 text-text-main font-black text-sm"
-            >
+            <TacticalButton onClick={onBack} variant="secondary" size="md" className="flex-1">
               {t('caseFileBackToMatch')}
-            </button>
+            </TacticalButton>
           </div>
-        </div>
+        </IntelligencePanel>
       </div>
     );
   }
@@ -184,16 +191,13 @@ export const CaseFileScreen: React.FC<CaseFileScreenProps> = ({
   if (!resolvedFile) {
     return (
       <div className="min-h-[65vh] flex flex-col items-center justify-center p-6 text-center max-w-md mx-auto w-full">
-        <div className="bg-bg-surface/90 border border-border-strong rounded-3xl p-6 w-full shadow-xl space-y-4">
+        <IntelligencePanel className="p-6 w-full space-y-4">
           <FileText size={32} className="mx-auto text-text-muted" />
-          <p className="text-sm font-black text-text-muted">{t('caseFileNotFound')}</p>
-          <button
-            onClick={onBack}
-            className="w-full min-h-[44px] py-3 rounded-2xl bg-white/10 hover:bg-white/15 text-text-main font-black text-sm"
-          >
+          <p className="text-sm font-semibold text-text-muted">{t('caseFileNotFound')}</p>
+          <TacticalButton onClick={onBack} variant="secondary" size="md" fullWidth>
             {t('caseFileBackToMatch')}
-          </button>
-        </div>
+          </TacticalButton>
+        </IntelligencePanel>
       </div>
     );
   }
@@ -254,108 +258,108 @@ export const CaseFileScreen: React.FC<CaseFileScreenProps> = ({
     >
       {/* Top Bar */}
       <div className="flex items-center justify-between gap-3">
-        <button
+        <TacticalButton
           onClick={() => {
             playSound('click');
             onBack();
           }}
-          className="min-h-[44px] px-4 py-2 rounded-2xl bg-bg-surface/90 border border-border-strong hover:bg-bg-card text-text-main font-black text-sm flex items-center gap-2 transition-colors"
+          variant="secondary"
+          size="sm"
+          icon={<ArrowLeft size={16} className="rtl:rotate-180" />}
         >
-          <ArrowLeft size={17} className="rtl:rotate-180" />
-          <span>{t('caseFileBackToMatch')}</span>
-        </button>
+          {t('caseFileBackToMatch')}
+        </TacticalButton>
 
-        <span className="px-3 py-1.5 rounded-xl bg-amber-500/15 border border-amber-400/35 text-amber-300 font-mono text-xs font-black tracking-wider tabular-nums">
-          {resolvedFile.operationCode}
-        </span>
+        <ClassifiedStamp tone="gold">{resolvedFile.operationCode}</ClassifiedStamp>
       </div>
 
       {/* 1. CLASSIFIED COVER */}
       <motion.section
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="relative rounded-3xl overflow-hidden border border-sky-400/25 bg-[#070B14] shadow-[0_20px_50px_rgba(2,6,23,0.65)]"
+        className="relative rounded-[16px] overflow-hidden border border-[#B49A62]/35 bg-[#080B10] shadow-[0_20px_50px_rgba(4,7,12,0.55)]"
       >
         <img
           src={categoryCover}
           alt=""
           aria-hidden="true"
-          className="absolute inset-0 w-full h-full object-cover opacity-25"
+          referrerPolicy="no-referrer"
+          className="absolute inset-0 w-full h-full object-cover opacity-20"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#070B14] via-[#0B1120]/85 to-[#0B1120]/70" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#080B10] via-[#0D1219]/88 to-[#080B10]/75" />
 
         <div className="relative z-10 p-5 sm:p-6 space-y-4">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <div className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-sky-300">
-              <FileText size={15} />
+            <div
+              className={`flex items-center gap-2 text-xs font-bold text-[#8CB3BE] ${
+                !isRTL ? 'uppercase tracking-wider' : ''
+              }`}
+            >
+              <FileText size={14} />
               <span>{t('caseSectionCover')}</span>
             </div>
-            <span className="px-2.5 py-1 rounded-lg bg-emerald-500/15 border border-emerald-400/35 text-emerald-300 text-[11px] font-black tracking-wider">
-              {t('caseStatusClosed')}
-            </span>
+            <StatusIndicator tone="emerald">{t('caseStatusClosed')}</StatusIndicator>
           </div>
 
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
             <div className="text-start">
-              <p className="text-[11px] font-bold text-slate-400 mb-1">
+              <p className="text-[11px] font-semibold text-[#A8B1BA] mb-1">
                 {t('operationCodeLabel')} · {formattedDate}
               </p>
-              <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+              <h1 className="text-2xl sm:text-3xl font-bold text-[#ECEFF4] tracking-tight">
                 {factionLabel}
               </h1>
-              <p className="text-sm font-bold text-slate-300 mt-1">{winReasonLabel}</p>
+              <p className="text-sm font-medium text-[#A8B1BA] mt-1">{winReasonLabel}</p>
             </div>
 
             <div className="flex flex-wrap gap-2">
-              <span className="px-3 py-1.5 rounded-xl bg-white/10 border border-white/15 text-xs font-black text-white">
+              <span className="px-2.5 py-1 rounded-[6px] bg-white/10 border border-white/15 text-xs font-bold text-[#ECEFF4]">
                 {resolvedFile.mode === 'online' ? t('caseModeOnline') : t('caseModeLocal')}
               </span>
-              <span
-                className={`px-3 py-1.5 rounded-xl border text-xs font-black ${
-                  resolvedFile.difficulty === 'hard'
-                    ? 'bg-rose-500/15 border-rose-400/35 text-rose-200'
-                    : 'bg-sky-500/15 border-sky-400/35 text-sky-200'
-                }`}
-              >
+              <StatusIndicator tone={resolvedFile.difficulty === 'hard' ? 'crimson' : 'cyan'}>
                 {resolvedFile.difficulty === 'hard' ? t('difficultyHard') : t('difficultyEasy')}
-              </span>
+              </StatusIndicator>
             </div>
           </div>
         </div>
       </motion.section>
 
       {/* 2. OPERATION SUMMARY */}
-      <section className="rounded-3xl bg-bg-surface/90 border border-border-strong p-5 space-y-4 shadow-xl">
-        <div className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-sky-400">
-          <Layers size={15} />
+      <ClassifiedDossierPanel className="p-5 space-y-4">
+        <div
+          className={`flex items-center gap-2 text-xs font-bold text-cyan-text ${
+            !isRTL ? 'uppercase tracking-wider' : ''
+          }`}
+        >
+          <Layers size={14} />
           <h2>{t('caseSectionSummary')}</h2>
         </div>
 
         <div className="grid grid-cols-3 gap-2.5">
-          <div className="rounded-2xl bg-bg-dark/70 border border-white/10 p-3 text-center">
-            <div className="flex items-center justify-center gap-1 text-[11px] font-bold text-text-muted mb-1">
+          <div className="rounded-[10px] bg-bg-card border border-border p-3 text-center">
+            <div className="flex items-center justify-center gap-1 text-[11px] font-semibold text-text-muted mb-1">
               <Clock size={12} />
               <span>{t('durationLabel')}</span>
             </div>
-            <p className="text-lg font-black text-text-main tabular-nums">
+            <p className="text-lg font-bold text-text-main font-mono-code tabular-nums">
               {formatDuration(resolvedFile.durationSeconds)}
             </p>
           </div>
-          <div className="rounded-2xl bg-bg-dark/70 border border-white/10 p-3 text-center">
-            <div className="flex items-center justify-center gap-1 text-[11px] font-bold text-text-muted mb-1">
+          <div className="rounded-[10px] bg-bg-card border border-border p-3 text-center">
+            <div className="flex items-center justify-center gap-1 text-[11px] font-semibold text-text-muted mb-1">
               <Target size={12} />
               <span>{t('roundsLabel')}</span>
             </div>
-            <p className="text-lg font-black text-text-main tabular-nums">
+            <p className="text-lg font-bold text-text-main font-mono-code tabular-nums">
               {resolvedFile.roundCount}
             </p>
           </div>
-          <div className="rounded-2xl bg-bg-dark/70 border border-white/10 p-3 text-center">
-            <div className="flex items-center justify-center gap-1 text-[11px] font-bold text-text-muted mb-1">
+          <div className="rounded-[10px] bg-bg-card border border-border p-3 text-center">
+            <div className="flex items-center justify-center gap-1 text-[11px] font-semibold text-text-muted mb-1">
               <Users size={12} />
               <span>{t('playersCountLabel')}</span>
             </div>
-            <p className="text-lg font-black text-text-main tabular-nums">
+            <p className="text-lg font-bold text-text-main font-mono-code tabular-nums">
               {resolvedFile.playerCount}
             </p>
           </div>
@@ -366,36 +370,44 @@ export const CaseFileScreen: React.FC<CaseFileScreenProps> = ({
             hasUndercover && resolvedFile.undercoverWord ? 'sm:grid-cols-2' : ''
           } gap-3`}
         >
-          <div className="rounded-2xl bg-sky-500/10 border border-sky-400/30 p-3.5 flex items-center justify-between gap-3">
-            <div className="text-start">
-              <p className="text-[11px] font-black text-sky-300 uppercase tracking-wider flex items-center gap-1.5">
-                <Key size={13} />
-                <span>{t('secretWordLabel')}</span>
-              </p>
-              <p className="text-xl font-black text-white mt-0.5">{resolvedFile.secretWord}</p>
-            </div>
+          <div className="rounded-[10px] bg-[#668F9A]/10 border border-[#668F9A]/35 p-3.5 text-start">
+            <p
+              className={`text-[11px] font-bold text-cyan-text flex items-center gap-1.5 ${
+                !isRTL ? 'uppercase tracking-wider' : ''
+              }`}
+            >
+              <Key size={13} />
+              <span>{t('secretWordLabel')}</span>
+            </p>
+            <p className="text-xl font-bold text-text-main mt-0.5">{resolvedFile.secretWord}</p>
           </div>
 
           {hasUndercover && resolvedFile.undercoverWord && (
-            <div className="rounded-2xl bg-orange-500/10 border border-orange-400/30 p-3.5 flex items-center justify-between gap-3">
-              <div className="text-start">
-                <p className="text-[11px] font-black text-orange-300 uppercase tracking-wider flex items-center gap-1.5">
-                  <Key size={13} />
-                  <span>{t('undercoverWordLabel')}</span>
-                </p>
-                <p className="text-xl font-black text-white mt-0.5">
-                  {resolvedFile.undercoverWord}
-                </p>
-              </div>
+            <div className="rounded-[10px] bg-[#A46F44]/10 border border-[#A46F44]/35 p-3.5 text-start">
+              <p
+                className={`text-[11px] font-bold text-[#C88D5E] flex items-center gap-1.5 ${
+                  !isRTL ? 'uppercase tracking-wider' : ''
+                }`}
+              >
+                <Key size={13} />
+                <span>{t('undercoverWordLabel')}</span>
+              </p>
+              <p className="text-xl font-bold text-text-main mt-0.5">
+                {resolvedFile.undercoverWord}
+              </p>
             </div>
           )}
         </div>
-      </section>
+      </ClassifiedDossierPanel>
 
       {/* 3. PLAYER INTELLIGENCE DOSSIERS */}
-      <section className="rounded-3xl bg-bg-surface/90 border border-border-strong p-5 space-y-4 shadow-xl">
-        <div className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-sky-400">
-          <Users size={15} />
+      <IntelligencePanel className="p-5 space-y-4">
+        <div
+          className={`flex items-center gap-2 text-xs font-bold text-cyan-text ${
+            !isRTL ? 'uppercase tracking-wider' : ''
+          }`}
+        >
+          <Users size={14} />
           <h2>{t('caseSectionDossiers')}</h2>
         </div>
 
@@ -406,43 +418,42 @@ export const CaseFileScreen: React.FC<CaseFileScreenProps> = ({
             const roleImg = getRoleAsset(p.role);
 
             return (
-              <div
+              <PlayerIntelligenceCard
                 key={p.playerId}
-                className={`rounded-2xl p-3.5 border transition-colors ${
-                  p.won
-                    ? 'bg-emerald-500/5 border-emerald-400/30'
-                    : 'bg-bg-dark/65 border-white/10'
+                className={`p-3.5 ${
+                  p.won ? 'bg-[#3E7B67]/10 border-[#3E7B67]/35' : ''
                 }`}
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-center gap-3 min-w-0">
-                    <Avatar avatar={p.avatar} name={p.name} size={46} />
+                    <Avatar avatar={p.avatar} name={p.name} size={44} />
                     <div className="min-w-0 text-start">
                       <div className="flex items-center gap-1.5 flex-wrap">
-                        <span className="text-sm font-black text-text-main truncate">
-                          {p.name}
-                        </span>
-                        {p.won && <CheckCircle2 size={14} className="text-emerald-400 shrink-0" />}
+                        <span className="text-sm font-bold text-text-main truncate">{p.name}</span>
+                        {p.won && (
+                          <CheckCircle2 size={14} className="text-emerald-text shrink-0" />
+                        )}
                       </div>
                       <div className="flex items-center gap-1.5 mt-1 flex-wrap">
                         <img
                           src={roleImg}
                           alt={roleTitle}
-                          className="w-5 h-5 rounded-full object-cover border border-white/20"
+                          referrerPolicy="no-referrer"
+                          className="w-4 h-4 rounded-[4px] object-cover border border-border"
                         />
                         <span
-                          className={`text-xs font-black ${
+                          className={`text-xs font-bold ${
                             p.role === 'mrwhite'
-                              ? 'text-amber-300'
+                              ? 'text-primary-text'
                               : p.role === 'undercover'
-                              ? 'text-orange-300'
-                              : 'text-sky-300'
+                              ? 'text-[#C88D5E]'
+                              : 'text-cyan-text'
                           }`}
                         >
                           {roleTitle}
                         </span>
                         {specialTitle && (
-                          <span className="text-[11px] font-bold text-violet-300">
+                          <span className="text-[11px] font-semibold text-primary-text">
                             · {specialTitle}
                           </span>
                         )}
@@ -450,50 +461,50 @@ export const CaseFileScreen: React.FC<CaseFileScreenProps> = ({
                     </div>
                   </div>
 
-                  <span
-                    className={`px-2.5 py-1 rounded-lg text-[11px] font-black shrink-0 ${
-                      p.survived
-                        ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-400/30'
-                        : 'bg-rose-500/15 text-rose-300 border border-rose-400/30'
-                    }`}
-                  >
+                  <StatusIndicator tone={p.survived ? 'emerald' : 'crimson'}>
                     {p.survived
                       ? t('survivedLabel')
                       : p.eliminatedRound
                       ? t('eliminatedRoundLabel', { round: p.eliminatedRound })
                       : t('eliminatedLabel')}
-                  </span>
+                  </StatusIndicator>
                 </div>
 
-                <div className="grid grid-cols-3 gap-2 mt-3 pt-3 border-t border-white/10 text-center">
+                <div className="grid grid-cols-3 gap-2 mt-3 pt-3 border-t border-border text-center">
                   <div>
-                    <p className="text-[10px] font-bold text-text-muted">{t('pointsEarnedLabel')}</p>
-                    <p className="text-xs font-black text-text-main tabular-nums mt-0.5">
+                    <p className="text-[10px] font-semibold text-text-muted">
+                      {t('pointsEarnedLabel')}
+                    </p>
+                    <p className="text-xs font-bold text-text-main font-mono-code tabular-nums mt-0.5">
                       {p.pointsEarned >= 0 ? `+${p.pointsEarned}` : p.pointsEarned}
                       {p.xpEarned !== undefined && (
-                        <span className="text-[10px] text-sky-300 block">
+                        <span className="text-[10px] text-cyan-text block">
                           +{p.xpEarned} {t('xpEarnedLabel')}
                         </span>
                       )}
                     </p>
                   </div>
                   <div>
-                    <p className="text-[10px] font-bold text-text-muted">{t('cluesCountLabel')}</p>
-                    <p className="text-xs font-black text-text-main tabular-nums mt-0.5">
+                    <p className="text-[10px] font-semibold text-text-muted">
+                      {t('cluesCountLabel')}
+                    </p>
+                    <p className="text-xs font-bold text-text-main font-mono-code tabular-nums mt-0.5">
                       {p.cluesCount}
                     </p>
                   </div>
                   <div>
-                    <p className="text-[10px] font-bold text-text-muted">{t('voteAccuracyLabel')}</p>
+                    <p className="text-[10px] font-semibold text-text-muted">
+                      {t('voteAccuracyLabel')}
+                    </p>
                     {p.voteAccuracyStatus === 'verified' && p.voteAccuracyPct !== null ? (
-                      <p className="text-xs font-black text-sky-300 tabular-nums mt-0.5">
+                      <p className="text-xs font-bold text-cyan-text font-mono-code tabular-nums mt-0.5">
                         {p.voteAccuracyPct}%{' '}
                         <span className="text-[10px] text-text-muted">
                           ({p.accurateVotes}/{p.verifiableVotesCast})
                         </span>
                       </p>
                     ) : (
-                      <p className="text-[10px] font-bold text-text-muted mt-0.5">
+                      <p className="text-[10px] font-semibold text-text-muted mt-0.5">
                         {t('insufficientData')}
                       </p>
                     )}
@@ -501,29 +512,29 @@ export const CaseFileScreen: React.FC<CaseFileScreenProps> = ({
                 </div>
 
                 {p.awardsEarned.length > 0 && (
-                  <div className="flex flex-wrap gap-1.5 mt-2.5 pt-2 border-t border-white/5">
+                  <div className="flex flex-wrap gap-1.5 mt-2.5 pt-2 border-t border-border">
                     {p.awardsEarned.map((awId) => (
-                      <span
-                        key={awId}
-                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-500/15 border border-amber-400/30 text-[10px] font-black text-amber-200"
-                      >
-                        <Award size={10} />
-                        <span>{t(`caseAwardTitle_${awId}`)}</span>
-                      </span>
+                      <StatusIndicator key={awId} tone="gold" icon={<Award size={10} />}>
+                        {t(`caseAwardTitle_${awId}`)}
+                      </StatusIndicator>
                     ))}
                   </div>
                 )}
-              </div>
+              </PlayerIntelligenceCard>
             );
           })}
         </div>
-      </section>
+      </IntelligencePanel>
 
       {/* 4 & 5. ROUND-BY-ROUND TIMELINE + VOTING ANALYSIS */}
-      <section className="rounded-3xl bg-bg-surface/90 border border-border-strong p-5 space-y-4 shadow-xl">
+      <IntelligencePanel className="p-5 space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-sky-400">
-            <Vote size={15} />
+          <div
+            className={`flex items-center gap-2 text-xs font-bold text-cyan-text ${
+              !isRTL ? 'uppercase tracking-wider' : ''
+            }`}
+          >
+            <Vote size={14} />
             <h2>
               {t('caseSectionTimeline')} · {t('caseSectionVoting')}
             </h2>
@@ -538,10 +549,10 @@ export const CaseFileScreen: React.FC<CaseFileScreenProps> = ({
                     playSound('click');
                     setSelectedRoundIdx(idx);
                   }}
-                  className={`min-h-[38px] px-3 py-1.5 rounded-xl text-xs font-black transition-colors tabular-nums ${
+                  className={`min-h-[38px] px-3 py-1.5 rounded-[8px] font-mono-code text-xs font-bold transition-colors tabular-nums border ${
                     idx === selectedRoundIdx
-                      ? 'bg-sky-500 text-slate-950'
-                      : 'bg-bg-dark/70 text-text-muted hover:text-text-main border border-white/10'
+                      ? 'bg-[#668F9A] text-[#080B10] border-[#8CB3BE]/50'
+                      : 'bg-bg-card text-text-muted hover:text-text-main border-border'
                   }`}
                 >
                   {t('roundTabLabel', { round: r.roundNumber })}
@@ -552,19 +563,19 @@ export const CaseFileScreen: React.FC<CaseFileScreenProps> = ({
         </div>
 
         {!activeRound ? (
-          <p className="text-xs font-bold text-text-muted py-4 text-center">
+          <p className="text-xs font-medium text-text-muted py-4 text-center">
             {t('noVotesRecordedRound')}
           </p>
         ) : (
           <div className="space-y-4">
             {/* Clues in Round */}
-            <div className="rounded-2xl bg-bg-dark/65 border border-white/10 p-4 space-y-2.5">
-              <div className="flex items-center gap-1.5 text-xs font-black text-text-muted">
+            <div className="rounded-[12px] bg-bg-card border border-border p-4 space-y-2.5">
+              <div className="flex items-center gap-1.5 text-xs font-bold text-text-muted">
                 <MessageSquare size={13} />
                 <span>{t('cluesFeedTitle')}</span>
               </div>
               {activeRound.clues.length === 0 ? (
-                <p className="text-xs font-bold text-text-muted/80 py-2">
+                <p className="text-xs font-medium text-text-muted py-2">
                   {t('noCluesRecordedRound')}
                 </p>
               ) : (
@@ -572,15 +583,15 @@ export const CaseFileScreen: React.FC<CaseFileScreenProps> = ({
                   {activeRound.clues.map((clue) => (
                     <div
                       key={clue.id}
-                      className="flex items-center gap-2.5 px-3 py-2 rounded-xl bg-bg-surface/80 border border-white/5"
+                      className="flex items-center gap-2.5 px-3 py-2 rounded-[8px] bg-bg-surface border border-border"
                     >
                       <Avatar avatar={clue.playerAvatar} name={clue.playerName} size={28} />
                       <div className="min-w-0 text-start">
-                        <span className="text-[11px] font-black text-text-muted block truncate">
+                        <span className="text-[11px] font-bold text-text-muted block truncate">
                           {clue.playerName}
                         </span>
                         <span
-                          className={`text-xs font-bold break-words ${
+                          className={`text-xs font-medium break-words ${
                             clue.skipped ? 'text-text-muted italic' : 'text-text-main'
                           }`}
                         >
@@ -594,9 +605,9 @@ export const CaseFileScreen: React.FC<CaseFileScreenProps> = ({
             </div>
 
             {/* Voting Analysis in Round */}
-            <div className="rounded-2xl bg-bg-dark/65 border border-white/10 p-4 space-y-3">
+            <div className="rounded-[12px] bg-bg-card border border-border p-4 space-y-3">
               <div className="flex flex-wrap items-center justify-between gap-2">
-                <span className="text-xs font-black text-text-main">
+                <span className="text-xs font-bold text-text-main">
                   {activeRound.voteMode === 'group'
                     ? t('groupConsensusVoteLabel')
                     : activeRound.voteMode === 'online_secret'
@@ -606,30 +617,24 @@ export const CaseFileScreen: React.FC<CaseFileScreenProps> = ({
 
                 <div className="flex flex-wrap gap-1.5">
                   {activeRound.tieBrokenByJustice && (
-                    <span className="px-2 py-0.5 rounded-md bg-emerald-500/15 border border-emerald-400/30 text-[11px] font-black text-emerald-300">
-                      {t('tieBrokenByJusticeLabel')}
-                    </span>
+                    <StatusIndicator tone="emerald">{t('tieBrokenByJusticeLabel')}</StatusIndicator>
                   )}
                   {activeRound.tieBroken && !activeRound.tieBrokenByJustice && (
-                    <span className="px-2 py-0.5 rounded-md bg-amber-500/15 border border-amber-400/30 text-[11px] font-black text-amber-300">
-                      {t('tieBrokenLabel')}
-                    </span>
+                    <StatusIndicator tone="gold">{t('tieBrokenLabel')}</StatusIndicator>
                   )}
                   {activeRound.wasSavedBySpecial === 'protector' && (
-                    <span className="px-2 py-0.5 rounded-md bg-sky-500/15 border border-sky-400/30 text-[11px] font-black text-sky-300">
-                      {t('savedByShieldLabel')}
-                    </span>
+                    <StatusIndicator tone="cyan">{t('savedByShieldLabel')}</StatusIndicator>
                   )}
                   {activeRound.bouncedFromName && (
-                    <span className="px-2 py-0.5 rounded-md bg-rose-500/15 border border-rose-400/30 text-[11px] font-black text-rose-300">
+                    <StatusIndicator tone="crimson">
                       {t('bouncedByBoomerangLabel')} ({activeRound.bouncedFromName})
-                    </span>
+                    </StatusIndicator>
                   )}
                 </div>
               </div>
 
               {/* Target & Elimination Summary */}
-              <div className="flex flex-wrap gap-3 text-xs font-bold">
+              <div className="flex flex-wrap gap-3 text-xs font-semibold">
                 {activeRound.mostVotedName && (
                   <span className="text-text-muted">
                     {t('mostVotedLabel')}:{' '}
@@ -637,7 +642,7 @@ export const CaseFileScreen: React.FC<CaseFileScreenProps> = ({
                   </span>
                 )}
                 {activeRound.eliminatedNames.length > 0 && (
-                  <span className="text-rose-300">
+                  <span className="text-danger-text">
                     {t('eliminatedOutcomeLabel')}:{' '}
                     <strong>{activeRound.eliminatedNames.join(', ')}</strong>
                   </span>
@@ -646,17 +651,17 @@ export const CaseFileScreen: React.FC<CaseFileScreenProps> = ({
 
               {activeRound.mrWhiteGuess && (
                 <div
-                  className={`p-3 rounded-xl border text-xs font-bold flex flex-wrap items-center justify-between gap-2 ${
+                  className={`p-3 rounded-[8px] border text-xs font-semibold flex flex-wrap items-center justify-between gap-2 ${
                     activeRound.mrWhiteGuess.isCorrect
-                      ? 'bg-amber-500/15 border-amber-400/40 text-amber-200'
-                      : 'bg-white/5 border-white/10 text-text-muted'
+                      ? 'bg-[#B49A62]/15 border-[#B49A62]/40 text-primary-text'
+                      : 'bg-bg-surface border-border text-text-muted'
                   }`}
                 >
                   <span>
                     {t('mrWhiteGuessAttemptLabel')} ({activeRound.mrWhiteGuess.playerName})
                     {activeRound.mrWhiteGuess.guess ? `: "${activeRound.mrWhiteGuess.guess}"` : ''}
                   </span>
-                  <span className="font-black">
+                  <span className="font-bold">
                     {activeRound.mrWhiteGuess.forcedMissing
                       ? t('mrWhiteGuessMissing')
                       : activeRound.mrWhiteGuess.isCorrect
@@ -667,26 +672,28 @@ export const CaseFileScreen: React.FC<CaseFileScreenProps> = ({
               )}
 
               {activeRound.voteMode === 'group' ? (
-                <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-400/25 flex items-start gap-2.5 text-xs font-bold text-amber-200">
-                  <Info size={16} className="shrink-0 mt-0.5" />
+                <div className="p-3 rounded-[8px] bg-[#B49A62]/10 border border-[#B49A62]/30 flex items-start gap-2.5 text-xs font-medium text-primary-text">
+                  <Info size={15} className="shrink-0 mt-0.5" />
                   <span>{t('groupVoteNoBallotNote')}</span>
                 </div>
               ) : (
                 <>
                   {activeRound.voteTally.length > 0 && (
-                    <div className="space-y-1.5">
+                    <div className="space-y-2">
                       {activeRound.voteTally.map((item) => {
                         const maxVotes = Math.max(1, activeRound.voteTally[0]?.count || 1);
                         const pct = Math.round((item.count / maxVotes) * 100);
                         return (
                           <div key={item.targetId} className="space-y-1">
-                            <div className="flex justify-between text-xs font-bold">
+                            <div className="flex justify-between text-xs font-semibold">
                               <span className="text-text-main">{item.targetName}</span>
-                              <span className="text-sky-300 tabular-nums">{item.count}</span>
+                              <span className="text-cyan-text font-mono-code tabular-nums">
+                                {item.count}
+                              </span>
                             </div>
-                            <div className="h-2 rounded-full bg-white/10 overflow-hidden">
+                            <div className="h-1.5 rounded-full bg-bg-surface overflow-hidden">
                               <div
-                                className="h-full bg-sky-400 rounded-full"
+                                className="h-full bg-[#668F9A] rounded-full"
                                 style={{ width: `${pct}%` }}
                               />
                             </div>
@@ -697,15 +704,17 @@ export const CaseFileScreen: React.FC<CaseFileScreenProps> = ({
                   )}
 
                   {activeRound.votes.length > 0 && (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 pt-2 border-t border-white/10">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 pt-2 border-t border-border">
                       {activeRound.votes.map((v) => (
                         <div
                           key={`${v.voterId}-${v.targetId}`}
-                          className="text-xs font-bold text-text-muted bg-bg-surface/60 px-3 py-1.5 rounded-lg flex items-center justify-between gap-2"
+                          className="text-xs font-semibold text-text-muted bg-bg-surface px-3 py-1.5 rounded-[8px] flex items-center justify-between gap-2 border border-border"
                         >
                           <span className="text-text-main truncate">{v.voterName}</span>
                           <span className="text-[10px] opacity-70">{t('voteTargetLabel')}</span>
-                          <span className="text-rose-300 font-black truncate">{v.targetName}</span>
+                          <span className="text-danger-text font-bold truncate">
+                            {v.targetName}
+                          </span>
                         </div>
                       ))}
                     </div>
@@ -715,20 +724,24 @@ export const CaseFileScreen: React.FC<CaseFileScreenProps> = ({
             </div>
           </div>
         )}
-      </section>
+      </IntelligencePanel>
 
       {/* 6. SPECIAL EVENTS & TURNING POINTS */}
-      <section className="rounded-3xl bg-bg-surface/90 border border-border-strong p-5 space-y-4 shadow-xl">
-        <div className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-amber-400">
-          <Zap size={15} />
+      <IntelligencePanel className="p-5 space-y-4">
+        <div
+          className={`flex items-center gap-2 text-xs font-bold text-primary-text ${
+            !isRTL ? 'uppercase tracking-wider' : ''
+          }`}
+        >
+          <Zap size={14} />
           <h2>{t('caseSectionEvents')}</h2>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
-            <h3 className="text-xs font-black text-text-muted">{t('turningPointsHeading')}</h3>
+            <h3 className="text-xs font-bold text-text-muted">{t('turningPointsHeading')}</h3>
             {resolvedFile.turningPoints.length === 0 ? (
-              <p className="text-xs font-bold text-text-muted/80 py-2">
+              <p className="text-xs font-medium text-text-muted py-2">
                 {t('noSpecialEventsRecorded')}
               </p>
             ) : (
@@ -736,17 +749,15 @@ export const CaseFileScreen: React.FC<CaseFileScreenProps> = ({
                 {resolvedFile.turningPoints.map((tp, idx) => (
                   <div
                     key={`${tp.kind}-${tp.round}-${idx}`}
-                    className="rounded-xl bg-bg-dark/70 border border-white/10 p-3 flex items-start gap-2.5"
+                    className="rounded-[10px] bg-bg-card border border-border p-3 flex items-start gap-2.5"
                   >
-                    <span className="px-2 py-0.5 rounded-md bg-amber-500/15 text-amber-300 text-[10px] font-black tabular-nums shrink-0">
-                      R{tp.round}
-                    </span>
+                    <ClassifiedStamp tone="gold">R{tp.round}</ClassifiedStamp>
                     <div className="text-start min-w-0">
-                      <p className="text-xs font-black text-text-main">
+                      <p className="text-xs font-bold text-text-main">
                         {t(TURNING_POINT_KEY_MAP[tp.kind])}
                       </p>
                       {(tp.actorName || tp.targetName) && (
-                        <p className="text-[11px] font-bold text-text-muted mt-0.5">
+                        <p className="text-[11px] font-medium text-text-muted mt-0.5">
                           {[tp.actorName, tp.targetName].filter(Boolean).join(' → ')}
                         </p>
                       )}
@@ -758,9 +769,9 @@ export const CaseFileScreen: React.FC<CaseFileScreenProps> = ({
           </div>
 
           <div className="space-y-2">
-            <h3 className="text-xs font-black text-text-muted">{t('eventsLogHeading')}</h3>
+            <h3 className="text-xs font-bold text-text-muted">{t('eventsLogHeading')}</h3>
             {resolvedFile.specialEvents.length === 0 ? (
-              <p className="text-xs font-bold text-text-muted/80 py-2">
+              <p className="text-xs font-medium text-text-muted py-2">
                 {t('noSpecialEventsRecorded')}
               </p>
             ) : (
@@ -768,33 +779,35 @@ export const CaseFileScreen: React.FC<CaseFileScreenProps> = ({
                 {resolvedFile.specialEvents.map((ev) => (
                   <div
                     key={ev.id}
-                    className="rounded-xl bg-bg-dark/70 border border-white/10 p-2.5 flex items-center justify-between gap-2 text-xs"
+                    className="rounded-[10px] bg-bg-card border border-border p-2.5 flex items-center justify-between gap-2 text-xs"
                   >
                     <div className="min-w-0 text-start">
-                      <span className="font-black text-text-main block truncate">
+                      <span className="font-bold text-text-main block truncate">
                         {t(EVENT_TYPE_KEY_MAP[ev.type])}
                       </span>
                       {(ev.actorName || ev.targetName) && (
-                        <span className="text-[11px] font-bold text-text-muted">
+                        <span className="text-[11px] font-medium text-text-muted">
                           {[ev.actorName, ev.targetName].filter(Boolean).join(' → ')}
                         </span>
                       )}
                     </div>
-                    <span className="text-[10px] font-black text-sky-300 px-2 py-0.5 rounded-md bg-sky-500/10 tabular-nums shrink-0">
-                      R{ev.round}
-                    </span>
+                    <ClassifiedStamp tone="cyan">R{ev.round}</ClassifiedStamp>
                   </div>
                 ))}
               </div>
             )}
           </div>
         </div>
-      </section>
+      </IntelligencePanel>
 
       {/* 7. FINAL VERDICT & DETERMINISTIC AWARDS */}
-      <section className="rounded-3xl bg-bg-surface/90 border border-border-strong p-5 space-y-4 shadow-xl">
-        <div className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-amber-400">
-          <Sparkles size={15} />
+      <ClassifiedDossierPanel className="p-5 space-y-4">
+        <div
+          className={`flex items-center gap-2 text-xs font-bold text-primary-text ${
+            !isRTL ? 'uppercase tracking-wider' : ''
+          }`}
+        >
+          <Sparkles size={14} />
           <h2>{t('caseSectionVerdict')}</h2>
         </div>
 
@@ -804,30 +817,33 @@ export const CaseFileScreen: React.FC<CaseFileScreenProps> = ({
             return (
               <div
                 key={award.awardId}
-                className={`rounded-2xl p-4 border flex flex-col justify-between gap-3 ${
+                className={`rounded-[12px] p-4 border flex flex-col justify-between gap-3 ${
                   isAwarded
-                    ? 'bg-gradient-to-b from-amber-500/10 to-bg-dark/70 border-amber-400/35'
-                    : 'bg-bg-dark/50 border-white/10 opacity-80'
+                    ? 'bg-[#B49A62]/10 border-[#B49A62]/40'
+                    : 'bg-bg-card/60 border-border opacity-75'
                 }`}
               >
                 <div className="flex items-start gap-3">
-                  <div className="w-12 h-12 rounded-xl overflow-hidden bg-[#0B1120] border border-white/10 shrink-0">
+                  <div className="w-11 h-11 rounded-[8px] overflow-hidden bg-[#080B10] border border-border shrink-0">
                     <img
                       src={AWARD_IMAGE_MAP[award.awardId]}
                       alt={t(`caseAwardTitle_${award.awardId}`)}
-                      className={`w-full h-full object-cover ${isAwarded ? '' : 'grayscale opacity-50'}`}
+                      referrerPolicy="no-referrer"
+                      className={`w-full h-full object-cover ${
+                        isAwarded ? '' : 'grayscale opacity-50'
+                      }`}
                     />
                   </div>
                   <div className="min-w-0 text-start">
-                    <h3 className="text-sm font-black text-text-main leading-tight">
+                    <h3 className="text-sm font-bold text-text-main leading-tight">
                       {t(`caseAwardTitle_${award.awardId}`)}
                     </h3>
                     {isAwarded ? (
-                      <p className="text-xs font-black text-amber-300 mt-1 truncate">
+                      <p className="text-xs font-bold text-primary-text mt-1 truncate">
                         {award.recipientName}
                       </p>
                     ) : (
-                      <p className="text-[11px] font-black text-text-muted mt-1 flex items-center gap-1">
+                      <p className="text-[11px] font-semibold text-text-muted mt-1 flex items-center gap-1">
                         <Shield size={11} />
                         <span>
                           {award.status === 'not_applicable'
@@ -841,15 +857,15 @@ export const CaseFileScreen: React.FC<CaseFileScreenProps> = ({
 
                 <div className="text-start space-y-1">
                   {isAwarded && award.metricValue !== null && (
-                    <p className="text-xs font-black text-sky-300 tabular-nums">
+                    <p className="text-xs font-mono-code font-bold text-cyan-text tabular-nums">
                       {formatMetric(award.metricValue, award.metricUnit)}
                     </p>
                   )}
-                  <p className="text-[11px] font-bold text-text-muted leading-relaxed">
+                  <p className="text-[11px] font-medium text-text-muted leading-relaxed">
                     {t(award.reasonKey)}
                   </p>
                   {award.tiedCandidates && award.tiedCandidates.length > 1 && (
-                    <p className="text-[10px] font-bold text-amber-200/80">
+                    <p className="text-[10px] font-semibold text-primary-text">
                       {t('tiedWithLabel')}: {award.tiedCandidates.join(', ')}
                     </p>
                   )}
@@ -858,7 +874,7 @@ export const CaseFileScreen: React.FC<CaseFileScreenProps> = ({
             );
           })}
         </div>
-      </section>
+      </ClassifiedDossierPanel>
     </div>
   );
 };

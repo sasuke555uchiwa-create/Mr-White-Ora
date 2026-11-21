@@ -33,8 +33,8 @@ export const SPECIAL_ROLES: SpecialRoleDefinition[] = [
   {
     id: 'fool',
     image: ROLE_PORTRAITS.fool,
-    accentColor: '#7c3aed',
-    badgeBg: 'bg-violet-500/20 border-violet-400/50 text-violet-300',
+    accentColor: '#9A8866',
+    badgeBg: 'bg-[#9A8866]/15 border-[#9A8866]/40 text-[#D4C39E]',
     minPlayers: 4,
     isNew: true,
     names: {
@@ -51,8 +51,8 @@ export const SPECIAL_ROLES: SpecialRoleDefinition[] = [
   {
     id: 'boomerang',
     image: ROLE_PORTRAITS.boomerang,
-    accentColor: '#ef4444',
-    badgeBg: 'bg-rose-500/20 border-rose-400/50 text-rose-300',
+    accentColor: '#963F46',
+    badgeBg: 'bg-[#963F46]/15 border-[#963F46]/45 text-danger-text',
     minPlayers: 4,
     names: {
       ar: 'Mr. Boomerang',
@@ -68,8 +68,8 @@ export const SPECIAL_ROLES: SpecialRoleDefinition[] = [
   {
     id: 'protector',
     image: ROLE_PORTRAITS.protector,
-    accentColor: '#3b82f6',
-    badgeBg: 'bg-blue-500/20 border-blue-400/50 text-blue-300',
+    accentColor: '#5A819E',
+    badgeBg: 'bg-[#5A819E]/15 border-[#5A819E]/45 text-cyan-text',
     minPlayers: 4,
     names: {
       ar: 'Mr. Shield',
@@ -85,8 +85,8 @@ export const SPECIAL_ROLES: SpecialRoleDefinition[] = [
   {
     id: 'justice',
     image: ROLE_PORTRAITS.justice,
-    accentColor: '#10b981',
-    badgeBg: 'bg-emerald-500/20 border-emerald-400/50 text-emerald-300',
+    accentColor: '#3E7B67',
+    badgeBg: 'bg-[#3E7B67]/15 border-[#3E7B67]/45 text-emerald-text',
     minPlayers: 4,
     names: {
       ar: 'Mr. Justice',
@@ -102,8 +102,8 @@ export const SPECIAL_ROLES: SpecialRoleDefinition[] = [
   {
     id: 'ghost',
     image: ROLE_PORTRAITS.ghost,
-    accentColor: '#0ea5e9',
-    badgeBg: 'bg-sky-500/20 border-sky-400/50 text-sky-300',
+    accentColor: '#668F9A',
+    badgeBg: 'bg-[#668F9A]/15 border-[#668F9A]/45 text-cyan-text',
     minPlayers: 4,
     names: {
       ar: 'Mr. Ghost',
@@ -119,8 +119,8 @@ export const SPECIAL_ROLES: SpecialRoleDefinition[] = [
   {
     id: 'lovers',
     image: ROLE_PORTRAITS.lovers,
-    accentColor: '#ec4899',
-    badgeBg: 'bg-pink-500/20 border-pink-400/50 text-pink-300',
+    accentColor: '#A8826B',
+    badgeBg: 'bg-[#A8826B]/15 border-[#A8826B]/45 text-primary-text',
     minPlayers: 5,
     isPair: true,
     names: {
@@ -137,8 +137,8 @@ export const SPECIAL_ROLES: SpecialRoleDefinition[] = [
   {
     id: 'avenger',
     image: ROLE_PORTRAITS.avenger,
-    accentColor: '#f97316',
-    badgeBg: 'bg-orange-500/20 border-orange-400/50 text-orange-300',
+    accentColor: '#A45A44',
+    badgeBg: 'bg-[#A45A44]/15 border-[#A45A44]/45 text-primary-text',
     minPlayers: 5,
     names: {
       ar: 'Mr. Avenger',
@@ -154,8 +154,8 @@ export const SPECIAL_ROLES: SpecialRoleDefinition[] = [
   {
     id: 'mr_meme',
     image: ROLE_PORTRAITS.mr_meme,
-    accentColor: '#64748b',
-    badgeBg: 'bg-slate-500/20 border-slate-400/50 text-slate-300',
+    accentColor: '#7B8794',
+    badgeBg: 'bg-[#7B8794]/15 border-[#7B8794]/40 text-text-muted',
     minPlayers: 4,
     names: {
       ar: 'Mr. Meme',

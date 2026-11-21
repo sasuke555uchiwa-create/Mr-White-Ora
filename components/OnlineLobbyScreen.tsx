@@ -38,6 +38,15 @@ import { Avatar } from './Avatar';
 import { getUITranslation } from '../translations';
 import { getSettings } from '../services/storageService';
 import { showToast } from '../utils/toast';
+import {
+  ClassifiedStamp,
+  IconButton,
+  IntelligencePanel,
+  ModalShell,
+  PlayerIntelligenceCard,
+  StatusIndicator,
+  TacticalButton,
+} from './ui/BlacksiteUI';
 
 interface OnlineLobbyScreenProps {
   roomId: string;
@@ -107,7 +116,6 @@ export const OnlineLobbyScreen: React.FC<OnlineLobbyScreenProps> = ({
     }
   }, [room, user, onStartGame]);
 
-  // Safety join if navigated directly to lobby before joinRoom completed
   useEffect(() => {
     if (!room || !user || isLeavingRef.current || joinAttemptedRef.current) return;
     const currentPlayers: any[] = room.players || [];
@@ -275,8 +283,8 @@ export const OnlineLobbyScreen: React.FC<OnlineLobbyScreenProps> = ({
 
   if (!room) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-bg-dark">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+      <div className="min-h-full flex items-center justify-center">
+        <div className="animate-spin rounded-full h-10 w-10 border-2 border-[#B49A62] border-t-transparent" />
       </div>
     );
   }
@@ -295,120 +303,113 @@ export const OnlineLobbyScreen: React.FC<OnlineLobbyScreenProps> = ({
     objects: isRTL ? 'أشياء وأدوات' : t('catObjects'),
   };
 
+  const meReady = playersArr.find((p: any) => p.uid === user?.uid)?.isReady;
+
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.95 }}
-      className="flex flex-col bg-bg-dark p-4 max-w-3xl mx-auto w-full pb-24 relative"
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -6 }}
+      className="flex flex-col p-4 max-w-3xl mx-auto w-full pb-24 relative min-h-full"
     >
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <button
-          onClick={handleLeave}
-          className="min-h-[44px] min-w-[44px] flex items-center justify-center card-modern"
-          aria-label={t('leaveRoom')}
-        >
-          <ArrowRight className={`w-6 h-6 ${isRTL ? '' : 'rotate-180'}`} />
-        </button>
+      <div className="flex items-center justify-between mb-5">
+        <IconButton onClick={handleLeave} aria-label={t('leaveRoom')} variant="secondary">
+          <ArrowRight className={`w-5 h-5 ${isRTL ? '' : 'rotate-180'}`} />
+        </IconButton>
         <div className="text-center min-w-0 px-2">
-          <h2 className="text-xl sm:text-2xl font-black drop-shadow-sm truncate">
+          <h2 className="text-lg sm:text-xl font-extrabold text-text-main truncate">
             {t('waitingRoom')}
           </h2>
-          <p className="text-xs sm:text-sm text-text-muted font-bold truncate">
+          <p className="text-xs text-text-muted font-medium truncate">
             {t('hostLabel')} {room.hostName}
           </p>
         </div>
-        <button
+        <IconButton
           onClick={() => setShowChat(true)}
-          className="min-h-[44px] min-w-[44px] flex items-center justify-center card-modern relative"
           aria-label={t('chat')}
+          variant="secondary"
+          className="relative"
         >
-          <MessageCircle className="w-6 h-6" />
+          <MessageCircle className="w-5 h-5" />
           {room.messages?.length > 0 && (
-            <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-primary rounded-full border-2 border-bg-dark"></span>
+            <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-[#B49A62] rounded-full" />
           )}
-        </button>
+        </IconButton>
       </div>
 
       {/* Room Code & Live Settings Card */}
-      <div className="card-modern p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5">
-        <div className="flex items-center gap-3">
+      <IntelligencePanel className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-3">
+        <div className="flex items-center gap-2.5">
           <div>
-            <p className="text-[10px] text-text-muted mb-0.5 font-bold uppercase tracking-wider">
-              {t('roomCodeLabel')}
-            </p>
-            <p className="text-2xl font-black tracking-widest drop-shadow-sm text-primary tabular-nums" dir="ltr">
+            <p className="text-[11px] text-text-muted mb-0.5 font-bold">{t('roomCodeLabel')}</p>
+            <p
+              className="text-2xl font-extrabold font-mono-code tracking-widest text-primary-text tabular-nums"
+              dir="ltr"
+            >
               {roomSecretCode}
             </p>
           </div>
-          <button
+          <IconButton
             onClick={copyCode}
-            className="min-h-[44px] min-w-[44px] flex items-center justify-center bg-primary/20 text-primary rounded-xl hover:bg-primary hover:text-white transition-colors border border-primary/30"
+            variant="primary"
             aria-label={t('codeCopied')}
           >
             {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-          </button>
-          <button
+          </IconButton>
+          <IconButton
             onClick={shareRoom}
-            className="min-h-[44px] min-w-[44px] flex items-center justify-center bg-white/5 text-text-main rounded-xl hover:bg-white/10 transition-colors border border-white/10"
+            variant="secondary"
             aria-label={t('shareRoom')}
           >
             <Share2 className="w-4 h-4" />
-          </button>
+          </IconButton>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2 text-xs font-black text-text-muted">
-          <span className="px-2.5 py-1 rounded-lg bg-bg-dark border border-white/10 flex items-center gap-1">
-            <Globe size={12} />
+        <div className="flex flex-wrap items-center gap-1.5 text-xs font-bold">
+          <ClassifiedStamp tone="neutral">
             {(room.language || 'ar').toUpperCase()}
-          </span>
-          <span className="px-2.5 py-1 rounded-lg bg-bg-dark border border-white/10 flex items-center gap-1">
-            {room.isPrivate ? (
-              <Lock size={12} className="text-accent" />
-            ) : (
-              <Globe size={12} className="text-emerald-400" />
-            )}
-            {room.isPrivate ? t('privateRoom') : t('publicRoom')}
-          </span>
-          <span
-            className={`px-2.5 py-1 rounded-lg bg-bg-dark border border-white/10 ${
-              room.difficulty === 'hard' ? 'text-rose-400' : 'text-sky-400'
-            }`}
+          </ClassifiedStamp>
+          <StatusIndicator
+            tone={room.isPrivate ? 'gold' : 'emerald'}
+            icon={room.isPrivate ? <Lock size={11} /> : <Globe size={11} />}
           >
+            {room.isPrivate ? t('privateRoom') : t('publicRoom')}
+          </StatusIndicator>
+          <StatusIndicator tone={room.difficulty === 'hard' ? 'crimson' : 'cyan'}>
             {room.difficulty === 'hard' ? t('difficultyHard') : t('difficultyEasy')}
-          </span>
-          <span className="px-2.5 py-1 rounded-lg bg-bg-dark border border-white/10">
+          </StatusIndicator>
+          <StatusIndicator tone="neutral">
             {categoryLabels[room.category || 'standard'] || t('standardWords')}
-          </span>
-          <span className="px-2.5 py-1 rounded-lg bg-bg-dark border border-white/10 flex items-center gap-1 tabular-nums">
-            <Clock size={12} className="text-amber-400" />
+          </StatusIndicator>
+          <StatusIndicator tone="gold" icon={<Clock size={11} />}>
             {room.turnDurationSeconds || 45}
             {t('secondsShort')}
-          </span>
+          </StatusIndicator>
           {isHost && (
-            <button
+            <TacticalButton
+              variant="secondary"
+              size="sm"
               onClick={openEditSettings}
-              className="min-h-[36px] px-3 py-1 rounded-lg bg-primary/20 text-primary hover:bg-primary hover:text-white border border-primary/40 flex items-center gap-1 transition-colors"
+              icon={<SlidersHorizontal size={13} />}
             >
-              <SlidersHorizontal size={13} />
-              <span>{t('editRoomSettings')}</span>
-            </button>
+              {t('editRoomSettings')}
+            </TacticalButton>
           )}
         </div>
-      </div>
-      <p className="text-[11px] font-bold text-text-muted px-2 mb-4 text-center">
+      </IntelligencePanel>
+      <p className="text-[11px] font-medium text-text-muted px-2 mb-5 text-center">
         {t('onlineClassicRolesNote')}
       </p>
 
       {/* Players List */}
       <div className="mb-6">
         <div className="flex items-center justify-between mb-3 px-1">
-          <h3 className="font-black text-lg sm:text-xl flex items-center gap-2 drop-shadow-sm">
-            <Users className="w-5 h-5 text-primary" />
+          <h3 className="font-extrabold text-base sm:text-lg flex items-center gap-2 text-text-main">
+            <Users className="w-5 h-5 text-primary-text" />
             {t('playersList')}
           </h3>
-          <span className="text-text-muted font-black tabular-nums" dir="ltr">
+          <span className="text-text-muted font-mono-code font-bold text-sm tabular-nums" dir="ltr">
             {playersArr.length} / {room.maxPlayers}
           </span>
         </div>
@@ -417,12 +418,12 @@ export const OnlineLobbyScreen: React.FC<OnlineLobbyScreenProps> = ({
           {playersArr.map((player: any) => {
             const isCardHost = player.uid === room.hostId;
             return (
-              <div
+              <PlayerIntelligenceCard
                 key={player.uid}
-                className="card-modern p-3 flex flex-col items-center text-center relative overflow-hidden group"
+                className="p-3.5 flex flex-col items-center text-center relative overflow-hidden bg-bg-surface border-border-strong"
               >
                 {isCardHost && (
-                  <div className="absolute top-0 right-0 bg-primary text-white text-[10px] font-black px-2 py-0.5 rounded-bl-lg z-10 shadow-sm">
+                  <div className="absolute top-0 right-0 bg-[#B49A62] text-[#080B10] text-[10px] font-extrabold px-2 py-0.5 rounded-bl-[8px] z-10">
                     {t('host')}
                   </div>
                 )}
@@ -431,7 +432,7 @@ export const OnlineLobbyScreen: React.FC<OnlineLobbyScreenProps> = ({
                   <div className="absolute top-1.5 right-1.5 flex items-center gap-1 z-10">
                     <button
                       onClick={() => handlePromoteHost(player)}
-                      className="min-h-[34px] min-w-[34px] flex items-center justify-center bg-amber-500/20 text-amber-300 rounded-full hover:bg-amber-500 hover:text-slate-950 active:scale-95 transition-all border border-amber-400/40"
+                      className="min-h-[34px] min-w-[34px] flex items-center justify-center bg-[#B49A62]/15 text-primary-text rounded-[8px] hover:bg-[#B49A62] hover:text-[#080B10] transition-colors border border-[#B49A62]/35"
                       title={t('promoteToHost')}
                       aria-label={t('promoteToHost')}
                     >
@@ -439,7 +440,7 @@ export const OnlineLobbyScreen: React.FC<OnlineLobbyScreenProps> = ({
                     </button>
                     <button
                       onClick={() => handleKickPlayer(player.uid)}
-                      className="min-h-[34px] min-w-[34px] flex items-center justify-center bg-danger/25 text-danger rounded-full hover:bg-danger hover:text-white active:scale-95 transition-all border border-danger/40"
+                      className="min-h-[34px] min-w-[34px] flex items-center justify-center bg-[#963F46]/15 text-danger-text rounded-[8px] hover:bg-[#963F46] hover:text-[#F4F6F8] transition-colors border border-[#963F46]/40"
                       title={t('kickPlayer')}
                       aria-label={t('kickPlayer')}
                     >
@@ -451,7 +452,7 @@ export const OnlineLobbyScreen: React.FC<OnlineLobbyScreenProps> = ({
                 {player.uid !== user?.uid && (
                   <button
                     onClick={() => handleSendFriendRequest(player.uid)}
-                    className="absolute top-1.5 left-1.5 min-h-[34px] min-w-[34px] flex items-center justify-center bg-primary/25 text-primary rounded-full hover:bg-primary hover:text-white active:scale-95 transition-all z-10 border border-primary/40"
+                    className="absolute top-1.5 left-1.5 min-h-[34px] min-w-[34px] flex items-center justify-center bg-[#668F9A]/15 text-cyan-text rounded-[8px] hover:bg-[#668F9A] hover:text-[#080B10] transition-colors z-10 border border-[#668F9A]/35"
                     title={t('sendFriendRequest')}
                     aria-label={t('sendFriendRequest')}
                   >
@@ -463,34 +464,33 @@ export const OnlineLobbyScreen: React.FC<OnlineLobbyScreenProps> = ({
                   <Avatar
                     avatar={player.avatar}
                     name={player.name}
-                    size={62}
+                    size={58}
                     showName={true}
                     status={isCardHost ? 'none' : player.isReady ? 'ready' : 'waiting'}
                     badge={
                       isCardHost ? (
-                        <div className="bg-yellow-400 p-1 rounded-full border-2 border-white shadow-sm">
-                          <Crown className="w-2.5 h-2.5 text-white" />
+                        <div className="bg-[#B49A62] p-1 rounded-[6px] border border-bg-surface shadow-xs">
+                          <Crown className="w-2.5 h-2.5 text-[#080B10]" />
                         </div>
                       ) : player.isReady ? (
-                        <div className="bg-emerald-500 p-1 rounded-full border-2 border-white shadow-sm">
-                          <Check className="w-2.5 h-2.5 text-white" />
+                        <div className="bg-[#3E7B67] p-1 rounded-[6px] border border-bg-surface shadow-xs">
+                          <Check className="w-2.5 h-2.5 text-[#F4F6F8]" />
                         </div>
                       ) : null
                     }
                   />
                 </div>
-              </div>
+              </PlayerIntelligenceCard>
             );
           })}
 
-          {/* Empty Slots */}
           {Array.from({ length: emptySlotsCount }).map((_, i) => (
             <div
               key={`empty-${i}`}
-              className="card-modern p-3 flex flex-col items-center justify-center border border-dashed border-white/20 opacity-50 min-h-[128px]"
+              className="rounded-[12px] p-3 flex flex-col items-center justify-center border border-dashed border-border-strong bg-bg-surface/40 opacity-60 min-h-[124px]"
             >
-              <div className="w-14 h-14 rounded-full bg-bg-dark mb-2 border border-white/10 shadow-inner"></div>
-              <p className="text-xs font-bold text-text-muted">{t('waitingForPlayer')}</p>
+              <div className="w-12 h-12 rounded-[10px] bg-bg-card mb-2 border border-border" />
+              <p className="text-xs font-medium text-text-muted">{t('waitingForPlayer')}</p>
             </div>
           ))}
         </div>
@@ -499,230 +499,234 @@ export const OnlineLobbyScreen: React.FC<OnlineLobbyScreenProps> = ({
       {/* Action Buttons */}
       <div className="mt-auto">
         {isHost ? (
-          <button
-            onClick={handleStartGame}
+          <TacticalButton
+            variant="primary"
+            size="lg"
+            fullWidth
             disabled={!canStart}
-            className={`btn-modern w-full min-h-[54px] py-4 rounded-[2rem] font-black flex items-center justify-center gap-2 tracking-wide text-base ${
-              canStart ? '' : 'opacity-50 grayscale cursor-not-allowed'
-            }`}
+            loading={busyAction}
+            onClick={handleStartGame}
+            icon={<Play className="w-4 h-4 fill-current" />}
           >
-            <Play className="w-5 h-5" />
             {playersArr.length < 3
               ? t('needAtLeast3Players')
               : !allReady
               ? t('waitingForPlayersReady')
               : t('startGame')}
-          </button>
+          </TacticalButton>
         ) : (
-          <button
+          <TacticalButton
+            variant={meReady ? 'secondary' : 'cyan'}
+            size="lg"
+            fullWidth
+            loading={busyAction}
             onClick={handleToggleReady}
-            className={`btn-modern w-full min-h-[54px] py-4 rounded-[2rem] font-black flex items-center justify-center gap-2 tracking-wide text-base ${
-              playersArr.find((p: any) => p.uid === user?.uid)?.isReady ? 'btn-modern-accent' : ''
-            }`}
+            icon={<Check className="w-4 h-4" />}
           >
-            <Check className="w-5 h-5" />
-            {playersArr.find((p: any) => p.uid === user?.uid)?.isReady
-              ? t('cancelReady')
-              : t('imReady')}
-          </button>
+            {meReady ? t('cancelReady') : t('imReady')}
+          </TacticalButton>
         )}
       </div>
 
       {/* Live Edit Settings Modal (Host Only) */}
       {showEditSettings && isHost && (
-        <div className="fixed inset-0 bg-bg-dark/90 backdrop-blur-md flex items-center justify-center p-4 z-50 overflow-y-auto">
+        <div className="fixed inset-0 bg-black/75 backdrop-blur-xs flex items-center justify-center p-4 z-50 overflow-y-auto">
           <motion.div
-            initial={{ opacity: 0, scale: 0.92 }}
+            initial={{ opacity: 0, scale: 0.96 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="card-modern p-6 w-full max-w-md my-auto max-h-[90vh] overflow-y-auto"
+            className="w-full max-w-md my-auto"
           >
-            <h3 className="text-xl font-black mb-5 text-center">{t('editRoomSettings')}</h3>
+            <ModalShell maxWidthClass="max-w-md" className="p-5 sm:p-6 max-h-[90vh] overflow-y-auto">
+              <h3 className="text-lg font-extrabold mb-4 text-center text-text-main">
+                {t('editRoomSettings')}
+              </h3>
 
-            <div className="space-y-4 mb-6">
-              <div>
-                <label className="block text-xs font-bold text-text-muted mb-1.5">
-                  {t('numberOfPlayers')}
-                </label>
-                <div className="flex items-center justify-between bg-bg-dark border border-white/10 rounded-2xl p-2">
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setEditDraft((prev) => ({
-                        ...prev,
-                        maxPlayers: Math.max(Math.max(3, playersArr.length), prev.maxPlayers - 1),
-                      }))
-                    }
-                    className="min-h-[44px] min-w-[44px] rounded-xl bg-white/5 hover:bg-white/10 flex items-center justify-center"
-                  >
-                    <Minus size={18} />
-                  </button>
-                  <span className="text-xl font-black tabular-nums">{editDraft.maxPlayers}</span>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setEditDraft((prev) => ({
-                        ...prev,
-                        maxPlayers: Math.min(10, prev.maxPlayers + 1),
-                      }))
-                    }
-                    className="min-h-[44px] min-w-[44px] rounded-xl bg-white/5 hover:bg-white/10 flex items-center justify-center"
-                  >
-                    <Plus size={18} />
-                  </button>
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-text-muted mb-1.5">
-                  {t('gameLanguage')}
-                </label>
-                <div className="grid grid-cols-2 gap-2">
-                  {[
-                    { code: 'ar', label: t('standardArabic') },
-                    { code: 'en', label: t('english') },
-                    { code: 'fr', label: t('french') },
-                    { code: 'es', label: t('spanish') },
-                  ].map((item) => (
+              <div className="space-y-4 mb-6">
+                <div>
+                  <label className="block text-xs font-bold text-text-muted mb-1.5">
+                    {t('numberOfPlayers')}
+                  </label>
+                  <div className="flex items-center justify-between bg-bg-card border border-border rounded-[10px] p-1.5">
                     <button
-                      key={item.code}
                       type="button"
-                      onClick={() => setEditDraft({ ...editDraft, language: item.code })}
-                      className={`min-h-[44px] rounded-xl font-black text-xs border ${
-                        editDraft.language === item.code
-                          ? 'bg-primary text-white border-primary/60'
-                          : 'bg-bg-dark text-text-muted border-white/5'
+                      onClick={() =>
+                        setEditDraft((prev) => ({
+                          ...prev,
+                          maxPlayers: Math.max(Math.max(3, playersArr.length), prev.maxPlayers - 1),
+                        }))
+                      }
+                      className="min-h-[44px] min-w-[44px] rounded-[8px] bg-bg-surface hover:bg-bg-main flex items-center justify-center border border-border"
+                    >
+                      <Minus size={16} />
+                    </button>
+                    <span className="text-xl font-extrabold font-mono-code tabular-nums text-text-main">
+                      {editDraft.maxPlayers}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setEditDraft((prev) => ({
+                          ...prev,
+                          maxPlayers: Math.min(10, prev.maxPlayers + 1),
+                        }))
+                      }
+                      className="min-h-[44px] min-w-[44px] rounded-[8px] bg-bg-surface hover:bg-bg-main flex items-center justify-center border border-border"
+                    >
+                      <Plus size={16} />
+                    </button>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-text-muted mb-1.5">
+                    {t('gameLanguage')}
+                  </label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {[
+                      { code: 'ar', label: t('standardArabic') },
+                      { code: 'en', label: t('english') },
+                      { code: 'fr', label: t('french') },
+                      { code: 'es', label: t('spanish') },
+                    ].map((item) => (
+                      <button
+                        key={item.code}
+                        type="button"
+                        onClick={() => setEditDraft({ ...editDraft, language: item.code })}
+                        className={`min-h-[44px] rounded-[10px] font-bold text-xs border ${
+                          editDraft.language === item.code
+                            ? 'bg-[#B49A62]/15 text-primary-text border-[#B49A62]'
+                            : 'bg-bg-card text-text-muted border-border'
+                        }`}
+                      >
+                        {item.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-text-muted mb-1.5">
+                    {t('wordCategory')}
+                  </label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {(['standard', 'animals', 'food', 'places', 'objects'] as const).map((cat) => (
+                      <button
+                        key={cat}
+                        type="button"
+                        onClick={() => setEditDraft({ ...editDraft, category: cat })}
+                        className={`min-h-[44px] px-3 rounded-[10px] font-bold text-xs border truncate ${
+                          editDraft.category === cat
+                            ? 'bg-[#668F9A]/15 text-cyan-text border-[#668F9A]'
+                            : 'bg-bg-card text-text-muted border-border'
+                        } ${cat === 'standard' ? 'col-span-2' : ''}`}
+                      >
+                        {categoryLabels[cat]}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-text-muted mb-1.5">
+                    {t('difficulty')}
+                  </label>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setEditDraft({ ...editDraft, difficulty: 'easy' })}
+                      className={`flex-1 min-h-[44px] rounded-[10px] font-bold text-xs flex items-center justify-center gap-1.5 border ${
+                        editDraft.difficulty === 'easy'
+                          ? 'bg-[#668F9A]/15 text-cyan-text border-[#668F9A]'
+                          : 'bg-bg-card text-text-muted border-border'
                       }`}
                     >
-                      {item.label}
+                      <Eye size={14} />
+                      {t('difficultyEasy')}
                     </button>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-text-muted mb-1.5">
-                  {t('wordCategory')}
-                </label>
-                <div className="grid grid-cols-2 gap-2">
-                  {(['standard', 'animals', 'food', 'places', 'objects'] as const).map((cat) => (
                     <button
-                      key={cat}
                       type="button"
-                      onClick={() => setEditDraft({ ...editDraft, category: cat })}
-                      className={`min-h-[44px] px-3 rounded-xl font-black text-xs border truncate ${
-                        editDraft.category === cat
-                          ? 'bg-emerald-500/20 text-emerald-300 border-emerald-400/60'
-                          : 'bg-bg-dark text-text-muted border-white/5'
-                      } ${cat === 'standard' ? 'col-span-2' : ''}`}
-                    >
-                      {categoryLabels[cat]}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-text-muted mb-1.5">
-                  {t('difficulty')}
-                </label>
-                <div className="flex gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setEditDraft({ ...editDraft, difficulty: 'easy' })}
-                    className={`flex-1 min-h-[44px] rounded-xl font-black text-xs flex items-center justify-center gap-1.5 border ${
-                      editDraft.difficulty === 'easy'
-                        ? 'bg-sky-500/20 text-sky-300 border-sky-400/60'
-                        : 'bg-bg-dark text-text-muted border-white/5'
-                    }`}
-                  >
-                    <Eye size={14} />
-                    {t('difficultyEasy')}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setEditDraft({ ...editDraft, difficulty: 'hard' })}
-                    className={`flex-1 min-h-[44px] rounded-xl font-black text-xs flex items-center justify-center gap-1.5 border ${
-                      editDraft.difficulty === 'hard'
-                        ? 'bg-rose-500/20 text-rose-300 border-rose-400/60'
-                        : 'bg-bg-dark text-text-muted border-white/5'
-                    }`}
-                  >
-                    <EyeOff size={14} />
-                    {t('difficultyHard')}
-                  </button>
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-text-muted mb-1.5">
-                  {t('turnDuration')}
-                </label>
-                <div className="grid grid-cols-4 gap-2">
-                  {[30, 45, 60, 90].map((sec) => (
-                    <button
-                      key={sec}
-                      type="button"
-                      onClick={() => setEditDraft({ ...editDraft, turnDurationSeconds: sec })}
-                      className={`min-h-[44px] rounded-xl font-black text-xs tabular-nums border ${
-                        editDraft.turnDurationSeconds === sec
-                          ? 'bg-amber-500/20 text-amber-300 border-amber-400/60'
-                          : 'bg-bg-dark text-text-muted border-white/5'
+                      onClick={() => setEditDraft({ ...editDraft, difficulty: 'hard' })}
+                      className={`flex-1 min-h-[44px] rounded-[10px] font-bold text-xs flex items-center justify-center gap-1.5 border ${
+                        editDraft.difficulty === 'hard'
+                          ? 'bg-[#963F46]/18 text-danger-text border-[#963F46]'
+                          : 'bg-bg-card text-text-muted border-border'
                       }`}
                     >
-                      {sec}
-                      {t('secondsShort')}
+                      <EyeOff size={14} />
+                      {t('difficultyHard')}
                     </button>
-                  ))}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-text-muted mb-1.5">
+                    {t('turnDuration')}
+                  </label>
+                  <div className="grid grid-cols-4 gap-2">
+                    {[30, 45, 60, 90].map((sec) => (
+                      <button
+                        key={sec}
+                        type="button"
+                        onClick={() => setEditDraft({ ...editDraft, turnDurationSeconds: sec })}
+                        className={`min-h-[44px] rounded-[10px] font-mono-code font-bold text-xs tabular-nums border ${
+                          editDraft.turnDurationSeconds === sec
+                            ? 'bg-[#B49A62]/15 text-primary-text border-[#B49A62]'
+                            : 'bg-bg-card text-text-muted border-border'
+                        }`}
+                      >
+                        {sec}
+                        {t('secondsShort')}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-text-muted mb-1.5">
+                    {t('roomType')}
+                  </label>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setEditDraft({ ...editDraft, isPrivate: false })}
+                      className={`flex-1 min-h-[44px] rounded-[10px] font-bold text-xs flex items-center justify-center gap-1.5 border ${
+                        !editDraft.isPrivate
+                          ? 'bg-[#3E7B67]/18 text-emerald-text border-[#3E7B67]'
+                          : 'bg-bg-card text-text-muted border-border'
+                      }`}
+                    >
+                      <Globe size={14} />
+                      {t('public')}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setEditDraft({ ...editDraft, isPrivate: true })}
+                      className={`flex-1 min-h-[44px] rounded-[10px] font-bold text-xs flex items-center justify-center gap-1.5 border ${
+                        editDraft.isPrivate
+                          ? 'bg-[#B49A62]/15 text-primary-text border-[#B49A62]'
+                          : 'bg-bg-card text-text-muted border-border'
+                      }`}
+                    >
+                      <Lock size={14} />
+                      {t('private')}
+                    </button>
+                  </div>
                 </div>
               </div>
 
-              <div>
-                <label className="block text-xs font-bold text-text-muted mb-1.5">
-                  {t('roomType')}
-                </label>
-                <div className="flex gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setEditDraft({ ...editDraft, isPrivate: false })}
-                    className={`flex-1 min-h-[44px] rounded-xl font-black text-xs flex items-center justify-center gap-1.5 border ${
-                      !editDraft.isPrivate
-                        ? 'bg-emerald-500 text-white border-emerald-400'
-                        : 'bg-bg-dark text-text-muted border-white/5'
-                    }`}
-                  >
-                    <Globe size={14} />
-                    {t('public')}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setEditDraft({ ...editDraft, isPrivate: true })}
-                    className={`flex-1 min-h-[44px] rounded-xl font-black text-xs flex items-center justify-center gap-1.5 border ${
-                      editDraft.isPrivate
-                        ? 'bg-accent text-white border-accent'
-                        : 'bg-bg-dark text-text-muted border-white/5'
-                    }`}
-                  >
-                    <Lock size={14} />
-                    {t('private')}
-                  </button>
-                </div>
+              <div className="flex gap-3">
+                <TacticalButton
+                  variant="secondary"
+                  onClick={() => setShowEditSettings(false)}
+                  className="flex-1"
+                >
+                  {t('cancel')}
+                </TacticalButton>
+                <TacticalButton variant="primary" onClick={saveEditSettings} className="flex-1">
+                  {t('save')}
+                </TacticalButton>
               </div>
-            </div>
-
-            <div className="flex gap-3">
-              <button
-                onClick={() => setShowEditSettings(false)}
-                className="btn-modern btn-modern-outline flex-1 min-h-[48px] rounded-2xl"
-              >
-                {t('cancel')}
-              </button>
-              <button
-                onClick={saveEditSettings}
-                className="btn-modern flex-1 min-h-[48px] rounded-2xl"
-              >
-                {t('save')}
-              </button>
-            </div>
+            </ModalShell>
           </motion.div>
         </div>
       )}

@@ -1,28 +1,120 @@
 import React, { useState, useEffect } from 'react';
 import {
-  User, Smile, Ghost, Cat, Dog, Bird, Fish,
-  Gamepad2, Trophy, Star, Heart, Zap,
-  Crown, Skull, Rocket, Plane, Car, Bike,
-  Music, Camera, Video, Mic, Headphones,
-  Coffee, Pizza, Beer, Cake, Gift,
-  Sun, Moon, Cloud, Umbrella, Flame,
-  Anchor, Compass, Map, Globe, Flag,
-  Bug, Cpu, Feather, Flower, Gem, Glasses,
-  Key, Leaf, Lightbulb, Palette, Puzzle, Shield,
-  Snowflake, Sparkles, Swords, Tent, Trees, Wand
+  User,
+  Smile,
+  Ghost,
+  Cat,
+  Dog,
+  Bird,
+  Fish,
+  Gamepad2,
+  Trophy,
+  Star,
+  Heart,
+  Zap,
+  Crown,
+  Skull,
+  Rocket,
+  Plane,
+  Car,
+  Bike,
+  Music,
+  Camera,
+  Video,
+  Mic,
+  Headphones,
+  Coffee,
+  Pizza,
+  Beer,
+  Cake,
+  Gift,
+  Sun,
+  Moon,
+  Cloud,
+  Umbrella,
+  Flame,
+  Anchor,
+  Compass,
+  Map,
+  Globe,
+  Flag,
+  Bug,
+  Cpu,
+  Feather,
+  Flower,
+  Gem,
+  Glasses,
+  Key,
+  Leaf,
+  Lightbulb,
+  Palette,
+  Puzzle,
+  Shield,
+  Snowflake,
+  Sparkles,
+  Swords,
+  Tent,
+  Trees,
+  Wand,
 } from 'lucide-react';
 
 export const AVATAR_ICONS: Record<string, React.ElementType> = {
-  User, Smile, Ghost, Cat, Dog, Bird, Fish,
-  Gamepad2, Trophy, Star, Heart, Zap,
-  Crown, Skull, Rocket, Plane, Car, Bike,
-  Music, Camera, Video, Mic, Headphones,
-  Coffee, Pizza, Beer, Cake, Gift,
-  Sun, Moon, Cloud, Umbrella, Flame,
-  Anchor, Compass, Map, Globe, Flag,
-  Bug, Cpu, Feather, Flower, Gem, Glasses,
-  Key, Leaf, Lightbulb, Palette, Puzzle, Shield,
-  Snowflake, Sparkles, Swords, Tent, Trees, Wand
+  User,
+  Smile,
+  Ghost,
+  Cat,
+  Dog,
+  Bird,
+  Fish,
+  Gamepad2,
+  Trophy,
+  Star,
+  Heart,
+  Zap,
+  Crown,
+  Skull,
+  Rocket,
+  Plane,
+  Car,
+  Bike,
+  Music,
+  Camera,
+  Video,
+  Mic,
+  Headphones,
+  Coffee,
+  Pizza,
+  Beer,
+  Cake,
+  Gift,
+  Sun,
+  Moon,
+  Cloud,
+  Umbrella,
+  Flame,
+  Anchor,
+  Compass,
+  Map,
+  Globe,
+  Flag,
+  Bug,
+  Cpu,
+  Feather,
+  Flower,
+  Gem,
+  Glasses,
+  Key,
+  Leaf,
+  Lightbulb,
+  Palette,
+  Puzzle,
+  Shield,
+  Snowflake,
+  Sparkles,
+  Swords,
+  Tent,
+  Trees,
+  Wand,
 };
 
 interface AvatarProps {
@@ -46,7 +138,7 @@ export const Avatar: React.FC<AvatarProps> = ({
   showName = false,
   badge,
   badgePosition = 'bottom-right',
-  status = 'none'
+  status = 'none',
 }) => {
   const [imgError, setImgError] = useState(false);
 
@@ -74,7 +166,9 @@ export const Avatar: React.FC<AvatarProps> = ({
           referrerPolicy="no-referrer"
           onError={() => setImgError(true)}
           className={`w-full h-full rounded-full ${
-            avatar === '/assets/roles/wizard.png' ? 'object-contain bg-slate-800/80 p-1' : 'object-cover'
+            avatar === '/assets/roles/wizard.png'
+              ? 'object-contain bg-[#0D1219] p-1'
+              : 'object-cover'
           }`}
         />
       );
@@ -83,15 +177,23 @@ export const Avatar: React.FC<AvatarProps> = ({
     if (name) {
       const firstLetter = name.trim().charAt(0).toUpperCase();
       const colors = [
-        'bg-orange-500', 'bg-blue-500', 'bg-emerald-600', 'bg-purple-500',
-        'bg-pink-500', 'bg-amber-600', 'bg-indigo-500', 'bg-rose-500'
+        'bg-[#202B36]',
+        'bg-[#4A6B74]',
+        'bg-[#8A7548]',
+        'bg-[#2F5E4E]',
+        'bg-[#783339]',
+        'bg-[#825836]',
+        'bg-[#384454]',
+        'bg-[#2B3A4A]',
       ];
       const colorIndex = name.length % colors.length;
       const bgColor = colors[colorIndex];
 
       return (
-        <div className={`w-full h-full flex items-center justify-center rounded-full ${bgColor} text-white font-black shadow-inner`}>
-          <span style={{ fontSize: size * 0.48 }}>{firstLetter || '?'}</span>
+        <div
+          className={`w-full h-full flex items-center justify-center rounded-full ${bgColor} text-[#ECEFF4] font-bold shadow-inner`}
+        >
+          <span style={{ fontSize: size * 0.46 }}>{firstLetter || '?'}</span>
         </div>
       );
     }
@@ -100,8 +202,8 @@ export const Avatar: React.FC<AvatarProps> = ({
       const iconName = avatar.split(':')[1];
       const IconComponent = AVATAR_ICONS[iconName] || User;
       return (
-        <div className="w-full h-full flex items-center justify-center rounded-full bg-bg-dark border border-white/10">
-          <IconComponent size={size * 0.6} className="text-text-muted" />
+        <div className="w-full h-full flex items-center justify-center rounded-full bg-bg-card border border-border-strong">
+          <IconComponent size={size * 0.58} className="text-text-muted" />
         </div>
       );
     }
@@ -115,26 +217,32 @@ export const Avatar: React.FC<AvatarProps> = ({
     }
 
     return (
-      <div className="w-full h-full flex items-center justify-center rounded-full bg-bg-dark border border-white/10">
-        <User size={size * 0.6} className="text-text-muted" />
+      <div className="w-full h-full flex items-center justify-center rounded-full bg-bg-card border border-border-strong">
+        <User size={size * 0.58} className="text-text-muted" />
       </div>
     );
   };
 
-  const borderThickness = size < 40 ? 'border-2' : size < 80 ? 'border-[3px]' : 'border-4';
+  const borderThickness = size < 40 ? 'border' : 'border-2';
 
   return (
     <div className="flex flex-col items-center gap-2">
       <div className="relative group">
         <div
-          className={`relative rounded-full ${frameUrl ? 'border-0' : `${borderThickness} border-white/80`} shadow-lg overflow-hidden ${className}`}
+          className={`relative rounded-full ${
+            frameUrl ? 'border-0' : `${borderThickness} border-border-strong`
+          } shadow-md overflow-hidden ${className}`}
           style={{ width: size, height: size }}
         >
           {renderAvatar()}
 
           {status !== 'none' && (
-            <div className={`absolute inset-0 flex items-center justify-center bg-black/40 transition-opacity ${status === 'ready' ? 'opacity-0' : 'opacity-100'}`}>
-              <span className="text-white text-xs font-black tracking-wider">
+            <div
+              className={`absolute inset-0 flex items-center justify-center bg-[#080B10]/55 transition-opacity ${
+                status === 'ready' ? 'opacity-0' : 'opacity-100'
+              }`}
+            >
+              <span className="text-[#ECEFF4] text-xs font-bold tracking-wider">
                 {status === 'waiting' ? '...' : ''}
               </span>
             </div>
@@ -146,20 +254,31 @@ export const Avatar: React.FC<AvatarProps> = ({
             src={frameUrl}
             alt=""
             aria-hidden="true"
+            referrerPolicy="no-referrer"
             className="pointer-events-none absolute -inset-[12%] w-[124%] h-[124%] object-contain z-10 select-none"
           />
         )}
 
         {badge && (
-          <div className={`absolute z-20 ${badgePosition === 'bottom-center' ? '-bottom-3 left-1/2 -translate-x-1/2' : '-bottom-1 -right-1'}`}>
+          <div
+            className={`absolute z-20 ${
+              badgePosition === 'bottom-center'
+                ? '-bottom-3 left-1/2 -translate-x-1/2'
+                : '-bottom-1 -right-1'
+            }`}
+          >
             {badge}
           </div>
         )}
       </div>
 
       {showName && name && (
-        <div className={`bg-white px-3.5 py-1 rounded-lg shadow-md border border-slate-200 min-w-[76px] text-center ${badgePosition === 'bottom-center' && badge ? 'mt-5' : ''}`}>
-          <span className="text-slate-900 font-black text-xs sm:text-sm truncate block max-w-[100px]">
+        <div
+          className={`bg-bg-surface px-3 py-1 rounded-[8px] shadow-sm border border-border-strong min-w-[76px] text-center ${
+            badgePosition === 'bottom-center' && badge ? 'mt-5' : ''
+          }`}
+        >
+          <span className="text-text-main font-bold text-xs sm:text-sm truncate block max-w-[100px]">
             {name}
           </span>
         </div>

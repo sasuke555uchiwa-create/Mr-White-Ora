@@ -6,6 +6,13 @@ import { db } from '../firebase';
 import { Avatar } from './Avatar';
 import { getUITranslation } from '../translations';
 import { getSettings } from '../services/storageService';
+import {
+  IconButton,
+  ModalShell,
+  PlayerIntelligenceCard,
+  StatusIndicator,
+  TacticalButton,
+} from './ui/BlacksiteUI';
 
 interface PlayerStatsModalProps {
   isOpen: boolean;
@@ -24,7 +31,7 @@ export const PlayerStatsModal: React.FC<PlayerStatsModalProps> = ({
   name,
   avatar,
   onVote,
-  isVotingPhase
+  isVotingPhase,
 }) => {
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -43,7 +50,7 @@ export const PlayerStatsModal: React.FC<PlayerStatsModalProps> = ({
             setProfile(docSnap.data());
           }
         } catch (error) {
-          console.error("Error fetching profile:", error);
+          console.error('Error fetching profile:', error);
         } finally {
           setLoading(false);
         }
@@ -56,66 +63,85 @@ export const PlayerStatsModal: React.FC<PlayerStatsModalProps> = ({
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" dir={isRTL ? 'rtl' : 'ltr'}>
+      <div
+        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#080B10]/80 backdrop-blur-md"
+        dir={isRTL ? 'rtl' : 'ltr'}
+      >
         <motion.div
-          initial={{ opacity: 0, scale: 0.95, y: 20 }}
+          initial={{ opacity: 0, scale: 0.94, y: 12 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.95, y: 20 }}
-          className="bg-bg-dark border border-border rounded-3xl p-6 w-full max-w-sm relative shadow-2xl card-modern"
+          exit={{ opacity: 0, scale: 0.94, y: 12 }}
+          className="w-full max-w-sm"
         >
-          <button
-            onClick={onClose}
-            className={`absolute top-4 ${isRTL ? 'left-4' : 'right-4'} p-2 bg-bg-surface rounded-full text-text-muted hover:text-white transition-colors`}
-          >
-            <X className="w-5 h-5" />
-          </button>
-
-          <div className="flex flex-col items-center mb-6 mt-4">
-            <Avatar avatar={avatar} name={name} size={96} showName={true} />
-            
-            {loading ? (
-              <div className="h-6 w-24 bg-bg-surface animate-pulse rounded-full mt-2"></div>
-            ) : profile ? (
-              <div className="flex items-center gap-2 bg-primary/20 text-primary px-4 py-1.5 rounded-full mt-2">
-                <Star className="w-4 h-4 fill-current" />
-                <span className="font-bold text-sm">{getUITranslation(lang, 'level')} {profile.level || 1}</span>
-              </div>
-            ) : (
-              <span className="text-text-muted text-sm mt-2">{getUITranslation(lang, 'noStats')}</span>
-            )}
-          </div>
-
-          {!loading && profile && (
-            <div className="grid grid-cols-2 gap-3 mb-6">
-              <div className="card-modern p-3 flex flex-col items-center justify-center text-center">
-                <Gamepad2 className="w-6 h-6 text-blue-400 mb-2" />
-                <span className="text-2xl font-black text-white">{profile.stats?.played || 0}</span>
-                <span className="text-xs text-text-muted font-medium">{getUITranslation(lang, 'played')}</span>
-              </div>
-              <div className="card-modern p-3 flex flex-col items-center justify-center text-center">
-                <Trophy className="w-6 h-6 text-yellow-400 mb-2" />
-                <span className="text-2xl font-black text-white">{profile.stats?.wins || 0}</span>
-                <span className="text-xs text-text-muted font-medium">{getUITranslation(lang, 'wins')}</span>
-              </div>
-              <div className="card-modern p-3 flex flex-col items-center justify-center text-center col-span-2">
-                <Crown className="w-6 h-6 text-purple-400 mb-2" />
-                <span className="text-2xl font-black text-white">{profile.stats?.hosted || 0}</span>
-                <span className="text-xs text-text-muted font-medium">{getUITranslation(lang, 'hosted')}</span>
-              </div>
+          <ModalShell className="p-6 relative">
+            <div className={`absolute top-4 ${isRTL ? 'left-4' : 'right-4'}`}>
+              <IconButton onClick={onClose} size="sm" variant="ghost" aria-label="Close">
+                <X className="w-4 h-4" />
+              </IconButton>
             </div>
-          )}
 
-          {isVotingPhase && onVote && (
-            <button
-              onClick={() => {
-                onVote();
-                onClose();
-              }}
-              className="btn-modern btn-modern-danger w-full py-4 rounded-2xl font-black text-lg"
-            >
-              {getUITranslation(lang, 'voteFor')} {name}
-            </button>
-          )}
+            <div className="flex flex-col items-center mb-6 mt-2">
+              <Avatar avatar={avatar} name={name} size={88} showName={true} />
+
+              {loading ? (
+                <div className="h-6 w-24 bg-bg-card animate-pulse rounded-[6px] mt-3" />
+              ) : profile ? (
+                <StatusIndicator tone="gold" icon={<Star className="w-3.5 h-3.5 fill-current" />} className="mt-3">
+                  {getUITranslation(lang, 'level')} {profile.level || 1}
+                </StatusIndicator>
+              ) : (
+                <span className="text-text-muted text-xs font-medium mt-3">
+                  {getUITranslation(lang, 'noStats')}
+                </span>
+              )}
+            </div>
+
+            {!loading && profile && (
+              <div className="grid grid-cols-2 gap-3 mb-5">
+                <PlayerIntelligenceCard className="p-3 flex flex-col items-center justify-center text-center">
+                  <Gamepad2 className="w-5 h-5 text-cyan-text mb-1.5" />
+                  <span className="text-xl font-mono-code font-bold text-text-main tabular-nums">
+                    {profile.stats?.played || 0}
+                  </span>
+                  <span className="text-xs text-text-muted font-medium">
+                    {getUITranslation(lang, 'played')}
+                  </span>
+                </PlayerIntelligenceCard>
+                <PlayerIntelligenceCard className="p-3 flex flex-col items-center justify-center text-center">
+                  <Trophy className="w-5 h-5 text-primary-text mb-1.5" />
+                  <span className="text-xl font-mono-code font-bold text-text-main tabular-nums">
+                    {profile.stats?.wins || 0}
+                  </span>
+                  <span className="text-xs text-text-muted font-medium">
+                    {getUITranslation(lang, 'wins')}
+                  </span>
+                </PlayerIntelligenceCard>
+                <PlayerIntelligenceCard className="p-3 flex flex-col items-center justify-center text-center col-span-2">
+                  <Crown className="w-5 h-5 text-primary-text mb-1.5" />
+                  <span className="text-xl font-mono-code font-bold text-text-main tabular-nums">
+                    {profile.stats?.hosted || 0}
+                  </span>
+                  <span className="text-xs text-text-muted font-medium">
+                    {getUITranslation(lang, 'hosted')}
+                  </span>
+                </PlayerIntelligenceCard>
+              </div>
+            )}
+
+            {isVotingPhase && onVote && (
+              <TacticalButton
+                onClick={() => {
+                  onVote();
+                  onClose();
+                }}
+                variant="danger"
+                size="lg"
+                fullWidth
+              >
+                {getUITranslation(lang, 'voteFor')} {name}
+              </TacticalButton>
+            )}
+          </ModalShell>
         </motion.div>
       </div>
     </AnimatePresence>

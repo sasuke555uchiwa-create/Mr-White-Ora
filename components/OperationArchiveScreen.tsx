@@ -25,6 +25,16 @@ import {
 } from '../utils/caseFileService';
 import { getUITranslation } from '../translations';
 import { playSound } from '../services/soundService';
+import {
+  ClassifiedStamp,
+  IconButton,
+  IntelligencePanel,
+  ModalShell,
+  PlayerIntelligenceCard,
+  SegmentedControl,
+  StatusIndicator,
+  TacticalButton,
+} from './ui/BlacksiteUI';
 
 interface OperationArchiveScreenProps {
   onBack: () => void;
@@ -38,7 +48,7 @@ export const OperationArchiveScreen: React.FC<OperationArchiveScreenProps> = ({
   const { user } = useAuth();
   const settings = getSettings();
   const lang = settings.language || 'ar';
-  const isRTL = lang === 'ar';
+  const isRTL = ['ar', 'sa'].includes(lang);
   const t = (key: string) => getUITranslation(lang, key);
 
   const [localFiles, setLocalFiles] = useState<ClassifiedCaseFile[]>(() => getLocalCaseFiles());
@@ -122,37 +132,37 @@ export const OperationArchiveScreen: React.FC<OperationArchiveScreenProps> = ({
     >
       {/* Header */}
       <div className="flex items-center justify-between gap-3">
-        <button
+        <TacticalButton
           onClick={() => {
             playSound('click');
             onBack();
           }}
-          className="min-h-[44px] px-4 py-2 rounded-2xl bg-bg-surface/90 border border-border-strong hover:bg-bg-card text-text-main font-black text-sm flex items-center gap-2 transition-colors"
+          variant="secondary"
+          size="sm"
+          icon={<ArrowLeft size={16} className="rtl:rotate-180" />}
         >
-          <ArrowLeft size={17} className="rtl:rotate-180" />
-          <span>{t('back')}</span>
-        </button>
+          {t('back')}
+        </TacticalButton>
 
-        <div className="flex items-center gap-2 text-amber-300 font-black text-sm">
-          <Archive size={17} />
-          <span>{t('operationArchive')}</span>
-        </div>
+        <StatusIndicator tone="gold" icon={<Archive size={13} />}>
+          {t('operationArchive')}
+        </StatusIndicator>
       </div>
 
       {/* Intro Banner */}
-      <div className="rounded-3xl bg-bg-surface/90 border border-border-strong p-5 shadow-xl space-y-3">
+      <IntelligencePanel className="p-5 space-y-3.5">
         <div className="text-start">
-          <h1 className="text-xl sm:text-2xl font-black text-text-main">
+          <h1 className="text-xl sm:text-2xl font-bold text-text-main">
             {t('operationArchive')}
           </h1>
-          <p className="text-xs font-bold text-text-muted mt-1">{t('operationArchiveSubtitle')}</p>
+          <p className="text-xs font-medium text-text-muted mt-1">{t('operationArchiveSubtitle')}</p>
         </div>
 
         {/* Search + Filters */}
         <div className="flex flex-col sm:flex-row gap-2.5">
           <div className="relative flex-1">
             <Search
-              size={16}
+              size={15}
               className="absolute top-1/2 -translate-y-1/2 start-3.5 text-text-muted pointer-events-none"
             />
             <input
@@ -160,60 +170,51 @@ export const OperationArchiveScreen: React.FC<OperationArchiveScreenProps> = ({
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder={t('searchArchivePlaceholder')}
-              className="w-full min-h-[44px] ps-10 pe-4 rounded-2xl bg-bg-dark/80 border border-white/10 text-sm font-bold text-text-main placeholder:text-text-muted/70 outline-none focus:border-sky-400/60"
+              className="w-full min-h-[44px] ps-10 pe-4 rounded-[10px] bg-bg-card border border-border-strong text-sm font-medium text-text-main placeholder:text-text-muted/70 outline-none focus:border-[#668F9A]"
             />
           </div>
 
-          <div className="flex gap-1.5">
-            {(['all', 'local', 'online'] as const).map((tab) => (
-              <button
-                key={tab}
-                onClick={() => {
-                  playSound('click');
-                  setFilter(tab);
-                }}
-                className={`min-h-[44px] px-3.5 rounded-2xl text-xs font-black transition-colors ${
-                  filter === tab
-                    ? 'bg-sky-500 text-slate-950'
-                    : 'bg-bg-dark/70 text-text-muted hover:text-text-main border border-white/10'
-                }`}
-              >
-                {tab === 'all'
-                  ? t('filterAll')
-                  : tab === 'local'
-                  ? t('filterLocal')
-                  : t('filterOnline')}
-              </button>
-            ))}
-          </div>
+          <SegmentedControl
+            value={filter}
+            onChange={(tab) => {
+              playSound('click');
+              setFilter(tab);
+            }}
+            size="sm"
+            options={[
+              { value: 'all', label: t('filterAll') },
+              { value: 'local', label: t('filterLocal') },
+              { value: 'online', label: t('filterOnline') },
+            ]}
+          />
         </div>
 
         {onlineNotice && (
-          <div className="p-3 rounded-2xl bg-amber-500/10 border border-amber-400/25 flex items-center gap-2 text-xs font-bold text-amber-200">
+          <div className="p-3 rounded-[10px] bg-[#B49A62]/10 border border-[#B49A62]/30 flex items-center gap-2 text-xs font-medium text-primary-text">
             <Info size={15} className="shrink-0" />
             <span>{t('operationArchiveOnlineNotice')}</span>
           </div>
         )}
-      </div>
+      </IntelligencePanel>
 
       {/* Loading Indicator */}
       {onlineLoading && combinedFiles.length === 0 && (
         <div className="py-12 flex flex-col items-center justify-center">
-          <div className="w-10 h-10 border-4 border-sky-400 border-t-transparent rounded-full animate-spin mb-3" />
-          <p className="text-xs font-black text-text-muted">{t('caseFileLoading')}</p>
+          <div className="w-9 h-9 border-2 border-[#668F9A] border-t-transparent rounded-full animate-spin mb-3" />
+          <p className="text-xs font-bold text-text-muted">{t('caseFileLoading')}</p>
         </div>
       )}
 
       {/* Empty State */}
       {!onlineLoading && combinedFiles.length === 0 && (
-        <div className="rounded-3xl bg-bg-surface/80 border border-border p-10 text-center space-y-3">
-          <FolderOpen size={36} className="mx-auto text-text-muted/60" />
-          <p className="text-sm font-bold text-text-muted">{t('operationArchiveEmpty')}</p>
-        </div>
+        <IntelligencePanel className="p-10 text-center space-y-3">
+          <FolderOpen size={34} className="mx-auto text-text-muted/60" />
+          <p className="text-sm font-medium text-text-muted">{t('operationArchiveEmpty')}</p>
+        </IntelligencePanel>
       )}
 
       {/* Case Files List */}
-      <div className="space-y-3">
+      <div className="space-y-2.5">
         {combinedFiles.map((item) => {
           const factionLabel =
             item.winningFaction === 'citizens'
@@ -229,90 +230,96 @@ export const OperationArchiveScreen: React.FC<OperationArchiveScreenProps> = ({
               key={item.reportId}
               initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0 }}
-              className="rounded-2xl bg-bg-surface/90 border border-border-strong hover:border-sky-400/40 p-4 shadow-lg transition-colors flex items-center justify-between gap-3"
             >
-              <button
-                onClick={() => {
-                  playSound('click');
-                  onOpenCaseFile(item);
-                }}
-                className="flex-1 min-w-0 text-start space-y-1.5"
-              >
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="px-2 py-0.5 rounded-md bg-amber-500/15 border border-amber-400/30 text-amber-300 font-mono text-[11px] font-black tabular-nums">
-                    {item.operationCode}
-                  </span>
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-white/5 text-[11px] font-bold text-text-muted">
-                    {item.mode === 'online' ? <Globe size={11} /> : <Smartphone size={11} />}
-                    <span>
-                      {item.mode === 'online' ? t('filterOnline') : t('filterLocal')}
-                    </span>
-                  </span>
-                  <span className="text-[11px] font-bold text-text-muted">
-                    {formatDate(item.endedAtMs)}
-                  </span>
-                </div>
-
-                <p className="text-sm sm:text-base font-black text-text-main truncate">
-                  {factionLabel} — <span className="text-sky-300">{item.secretWord}</span>
-                </p>
-
-                <div className="flex flex-wrap items-center gap-3 text-[11px] font-bold text-text-muted tabular-nums">
-                  <span className="inline-flex items-center gap-1">
-                    <Users size={12} />
-                    {item.playerCount}
-                  </span>
-                  <span className="inline-flex items-center gap-1">
-                    <Clock size={12} />
-                    {item.roundCount} {t('roundsLabel')}
-                  </span>
-                </div>
-              </button>
-
-              {item.mode === 'local' && (
+              <PlayerIntelligenceCard className="hover:border-[#668F9A]/50 p-4 flex items-center justify-between gap-3">
                 <button
-                  onClick={() => setPendingDeleteId(item.reportId)}
-                  aria-label="Delete"
-                  className="min-h-[44px] min-w-[44px] rounded-xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-400/25 text-rose-300 flex items-center justify-center shrink-0 transition-colors"
+                  onClick={() => {
+                    playSound('click');
+                    onOpenCaseFile(item);
+                  }}
+                  className="flex-1 min-w-0 text-start space-y-1.5"
                 >
-                  <Trash2 size={16} />
+                  <div className="flex flex-wrap items-center gap-2">
+                    <ClassifiedStamp tone="gold">{item.operationCode}</ClassifiedStamp>
+                    <StatusIndicator
+                      tone="neutral"
+                      icon={item.mode === 'online' ? <Globe size={11} /> : <Smartphone size={11} />}
+                    >
+                      {item.mode === 'online' ? t('filterOnline') : t('filterLocal')}
+                    </StatusIndicator>
+                    <span className="text-[11px] font-medium text-text-muted">
+                      {formatDate(item.endedAtMs)}
+                    </span>
+                  </div>
+
+                  <p className="text-sm sm:text-base font-bold text-text-main truncate">
+                    {factionLabel} — <span className="text-cyan-text">{item.secretWord}</span>
+                  </p>
+
+                  <div className="flex flex-wrap items-center gap-3 text-[11px] font-mono-code font-semibold text-text-muted tabular-nums">
+                    <span className="inline-flex items-center gap-1">
+                      <Users size={12} />
+                      {item.playerCount}
+                    </span>
+                    <span className="inline-flex items-center gap-1">
+                      <Clock size={12} />
+                      {item.roundCount} {t('roundsLabel')}
+                    </span>
+                  </div>
                 </button>
-              )}
+
+                {item.mode === 'local' && (
+                  <IconButton
+                    onClick={() => setPendingDeleteId(item.reportId)}
+                    variant="danger"
+                    size="md"
+                    aria-label="Delete"
+                  >
+                    <Trash2 size={16} />
+                  </IconButton>
+                )}
+              </PlayerIntelligenceCard>
             </motion.div>
           );
         })}
       </div>
 
-      {/* Delete Confirmation Modal (No native window.confirm) */}
+      {/* Delete Confirmation Modal */}
       <AnimatePresence>
         {pendingDeleteId && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-5"
+            className="fixed inset-0 z-50 bg-[#080B10]/80 backdrop-blur-sm flex items-center justify-center p-5"
           >
             <motion.div
-              initial={{ scale: 0.92, opacity: 0 }}
+              initial={{ scale: 0.94, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.92, opacity: 0 }}
-              className="w-full max-w-sm rounded-3xl bg-bg-surface border border-border-strong p-6 text-center space-y-5 shadow-2xl"
+              exit={{ scale: 0.94, opacity: 0 }}
+              className="w-full max-w-sm"
             >
-              <p className="text-sm font-black text-text-main">{t('deleteCaseFileConfirm')}</p>
-              <div className="flex gap-3">
-                <button
-                  onClick={confirmDeleteLocal}
-                  className="flex-1 min-h-[44px] py-2.5 rounded-2xl bg-rose-500 hover:bg-rose-400 text-white font-black text-sm"
-                >
-                  {t('confirm')}
-                </button>
-                <button
-                  onClick={() => setPendingDeleteId(null)}
-                  className="flex-1 min-h-[44px] py-2.5 rounded-2xl bg-white/10 hover:bg-white/15 text-text-main font-black text-sm"
-                >
-                  {t('cancel')}
-                </button>
-              </div>
+              <ModalShell className="p-6 text-center space-y-5">
+                <p className="text-sm font-bold text-text-main">{t('deleteCaseFileConfirm')}</p>
+                <div className="flex gap-3">
+                  <TacticalButton
+                    onClick={confirmDeleteLocal}
+                    variant="danger"
+                    size="md"
+                    className="flex-1"
+                  >
+                    {t('confirm')}
+                  </TacticalButton>
+                  <TacticalButton
+                    onClick={() => setPendingDeleteId(null)}
+                    variant="secondary"
+                    size="md"
+                    className="flex-1"
+                  >
+                    {t('cancel')}
+                  </TacticalButton>
+                </div>
+              </ModalShell>
             </motion.div>
           </motion.div>
         )}

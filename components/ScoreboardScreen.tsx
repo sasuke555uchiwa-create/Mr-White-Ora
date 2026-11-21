@@ -3,6 +3,12 @@ import { getScores, getSettings, getInventoryMap } from '../services/storageServ
 import { SHOP_ITEMS } from '../data/shopItems';
 import { Medal, TrendingDown, ArrowLeft, Play, Archive } from 'lucide-react';
 import { getUITranslation } from '../translations';
+import {
+  ClassifiedStamp,
+  IntelligencePanel,
+  PlayerIntelligenceCard,
+  TacticalButton,
+} from './ui/BlacksiteUI';
 
 interface ScoreboardScreenProps {
   onBack: () => void;
@@ -42,60 +48,58 @@ export const ScoreboardScreen: React.FC<ScoreboardScreenProps> = ({
     <div className="flex flex-col min-h-full animate-fade-in relative px-4 py-4 max-w-2xl mx-auto w-full pb-28">
       <div className="w-full max-w-lg mx-auto flex flex-col">
         {/* Header Banner */}
-        <div className="bg-bg-surface/90 border border-border-strong rounded-3xl p-5 text-center mb-5 shadow-xl flex flex-col items-center">
+        <IntelligencePanel className="p-5 text-center mb-5 flex flex-col items-center">
+          <div className="w-full flex justify-between items-center mb-2">
+            <ClassifiedStamp tone="gold">RANKINGS</ClassifiedStamp>
+          </div>
           <img
             src="/i1.png"
             alt={t('playerRanking')}
             referrerPolicy="no-referrer"
-            className="w-14 h-14 object-contain mb-2 drop-shadow-md"
+            className="w-12 h-12 object-contain mb-2"
           />
-          <h2 className="text-xl sm:text-2xl font-black text-text-main">
-            {t('playerRanking')}
-          </h2>
-          <p className="text-text-muted text-xs sm:text-sm font-bold mt-1">
+          <h2 className="text-xl sm:text-2xl font-bold text-text-main">{t('playerRanking')}</h2>
+          <p className="text-text-muted text-xs sm:text-sm font-medium mt-1">
             {t('whoIsTheBoss')}
           </p>
-        </div>
+        </IntelligencePanel>
 
         {/* Standings List */}
         <div className="pb-4">
           {sortedPlayers.length === 0 ? (
-            <div className="bg-bg-surface/80 border border-border rounded-3xl flex flex-col items-center justify-center h-64 text-text-muted p-6">
-              <TrendingDown size={36} className="mb-3 opacity-50" />
-              <p className="text-sm font-bold">{t('noScoreRecorded')}</p>
-            </div>
+            <IntelligencePanel className="flex flex-col items-center justify-center h-64 text-text-muted p-6">
+              <TrendingDown size={34} className="mb-3 opacity-50" />
+              <p className="text-sm font-semibold">{t('noScoreRecorded')}</p>
+            </IntelligencePanel>
           ) : (
             <div className="space-y-2.5">
               {sortedPlayers.map(([name, score], index) => {
-                let rankStyle = 'bg-bg-surface/90 border-border-strong';
+                let rankStyle = '';
                 let rankIcon = (
-                  <span className="font-mono font-black text-text-muted text-sm tabular-nums">
+                  <span className="font-mono-code font-bold text-text-muted text-sm tabular-nums">
                     #{index + 1}
                   </span>
                 );
 
                 if (index === 0) {
-                  rankStyle =
-                    'bg-gradient-to-r from-amber-500/20 to-yellow-500/10 border-amber-400/50 shadow-lg';
-                  rankIcon = <Medal size={20} className="text-amber-400" />;
+                  rankStyle = 'bg-[#B49A62]/12 border-[#B49A62]/50';
+                  rankIcon = <Medal size={19} className="text-primary-text" />;
                 } else if (index === 1) {
-                  rankStyle =
-                    'bg-gradient-to-r from-slate-300/20 to-slate-400/10 border-slate-300/40';
-                  rankIcon = <Medal size={20} className="text-slate-300" />;
+                  rankStyle = 'bg-[#A8B1BA]/10 border-[#A8B1BA]/35';
+                  rankIcon = <Medal size={19} className="text-text-muted" />;
                 } else if (index === 2) {
-                  rankStyle =
-                    'bg-gradient-to-r from-orange-500/20 to-orange-600/10 border-orange-400/40';
-                  rankIcon = <Medal size={20} className="text-orange-400" />;
+                  rankStyle = 'bg-[#A46F44]/10 border-[#A46F44]/40';
+                  rankIcon = <Medal size={19} className="text-[#C88D5E]" />;
                 }
 
                 return (
-                  <div
+                  <PlayerIntelligenceCard
                     key={name}
-                    className={`flex items-center justify-between p-3.5 rounded-2xl border backdrop-blur-md transition-all ${rankStyle}`}
+                    className={`flex items-center justify-between p-3.5 ${rankStyle}`}
                   >
                     <div className="flex items-center gap-3 min-w-0">
                       <div className="w-7 flex justify-center shrink-0">{rankIcon}</div>
-                      <span className="font-black text-sm sm:text-base text-text-main truncate flex items-center gap-1.5">
+                      <span className="font-bold text-sm sm:text-base text-text-main truncate flex items-center gap-1.5">
                         <span className="truncate">{name}</span>
                         {getPlayerBadges(name).map((item) =>
                           item.image ? (
@@ -105,7 +109,7 @@ export const ScoreboardScreen: React.FC<ScoreboardScreenProps> = ({
                               alt={item.names[lang] || item.names.en}
                               title={item.names[lang] || item.names.en}
                               referrerPolicy="no-referrer"
-                              className="w-5 h-5 rounded-md object-cover border border-white/15 shrink-0"
+                              className="w-5 h-5 rounded-[4px] object-cover border border-border shrink-0"
                             />
                           ) : (
                             <span key={item.id} className="text-sm select-none shrink-0">
@@ -115,13 +119,13 @@ export const ScoreboardScreen: React.FC<ScoreboardScreenProps> = ({
                         )}
                       </span>
                     </div>
-                    <div className="bg-bg-dark/80 px-3 py-1.5 rounded-xl border border-border-strong shrink-0">
-                      <span className="text-sky-400 font-black text-sm tabular-nums">
+                    <div className="bg-bg-surface px-3 py-1 rounded-[8px] border border-border-strong shrink-0">
+                      <span className="text-cyan-text font-mono-code font-bold text-sm tabular-nums">
                         {score}{' '}
-                        <span className="text-xs text-text-muted font-bold">{t('points')}</span>
+                        <span className="text-xs text-text-muted font-semibold">{t('points')}</span>
                       </span>
                     </div>
-                  </div>
+                  </PlayerIntelligenceCard>
                 );
               })}
             </div>
@@ -130,30 +134,36 @@ export const ScoreboardScreen: React.FC<ScoreboardScreenProps> = ({
 
         <div className="mt-4 flex flex-col gap-2.5">
           {onOpenArchive && (
-            <button
+            <TacticalButton
               onClick={onOpenArchive}
-              className="w-full min-h-[48px] py-3 rounded-2xl bg-sky-500/15 hover:bg-sky-500/25 border border-sky-400/35 text-sky-200 font-black flex items-center justify-center gap-2 text-sm transition-colors"
+              variant="cyan"
+              size="lg"
+              fullWidth
+              icon={<Archive size={16} />}
             >
-              <Archive size={17} />
-              <span>{t('operationArchive')}</span>
-            </button>
+              {t('operationArchive')}
+            </TacticalButton>
           )}
           {onNextRound && (
-            <button
+            <TacticalButton
               onClick={onNextRound}
-              className="w-full py-4 rounded-full bg-[#22c55e] hover:bg-[#16a34a] text-white font-black flex items-center justify-center gap-2 text-lg shadow-[0_5px_0_#15803d] active:translate-y-0.5 active:shadow-none transition-all"
+              variant="primary"
+              size="lg"
+              fullWidth
+              icon={<Play size={16} className="fill-current" />}
             >
-              <Play size={18} className="fill-current" />
-              <span>{t('nextRound')}</span>
-            </button>
+              {t('nextRound')}
+            </TacticalButton>
           )}
-          <button
+          <TacticalButton
             onClick={onBack}
-            className="w-full py-3.5 rounded-full bg-bg-surface border border-border-strong hover:bg-bg-card text-text-main font-black flex items-center justify-center gap-2 text-base transition-colors"
+            variant="secondary"
+            size="lg"
+            fullWidth
+            icon={<ArrowLeft size={16} className="rtl:rotate-180" />}
           >
-            <ArrowLeft size={18} className="rtl:rotate-180" />
-            <span>{onNextRound ? t('endGame') : t('back')}</span>
-          </button>
+            {onNextRound ? t('endGame') : t('back')}
+          </TacticalButton>
         </div>
       </div>
     </div>

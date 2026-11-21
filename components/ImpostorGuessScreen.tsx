@@ -7,6 +7,7 @@ import { getUITranslation } from '../translations';
 import { getSettings } from '../services/storageService';
 import { isMrWhiteGuessMatch } from '../src/game/wordEngine';
 import { ROLE_PORTRAITS } from '../src/design/assetRegistry';
+import { ClassifiedStamp, ModalShell, TacticalButton } from './ui/BlacksiteUI';
 
 interface ImpostorGuessScreenProps {
   impostor: Player;
@@ -60,7 +61,9 @@ export const ImpostorGuessScreen: React.FC<ImpostorGuessScreenProps> = ({
         setHasGuessed(true);
         playSound(matched ? 'mrWhiteWin' : 'trumpets_sad');
       } catch {
-        setSubmitError(lang === 'ar' ? 'تعذر إرسال التخمين، حاول مرة أخرى.' : 'Failed to submit guess.');
+        setSubmitError(
+          lang === 'ar' ? 'تعذر إرسال التخمين، حاول مرة أخرى.' : 'Failed to submit guess.'
+        );
       } finally {
         setSubmitting(false);
       }
@@ -79,108 +82,120 @@ export const ImpostorGuessScreen: React.FC<ImpostorGuessScreenProps> = ({
   };
 
   return (
-    <div className="flex flex-col h-full items-center justify-center p-6 animate-fade-in bg-black/80 backdrop-blur-md fixed inset-0 z-[100]">
+    <div className="flex flex-col h-full items-center justify-center p-5 animate-fade-in bg-[#080B10]/88 backdrop-blur-md fixed inset-0 z-[100]">
       <motion.div
-        initial={{ scale: 0.88, opacity: 0 }}
+        initial={{ scale: 0.94, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
-        className="w-full max-w-sm flex flex-col items-center text-center bg-slate-900 border border-white/15 rounded-[2.5rem] p-8 shadow-2xl relative"
+        className="w-full max-w-sm"
       >
-        {!hasGuessed ? (
-          <>
-            <div className="mb-5 relative">
-              <div className="w-24 h-24 rounded-full bg-[#0B1120] border-4 border-amber-400/70 flex items-center justify-center shadow-[0_0_30px_rgba(245,158,11,0.2)] overflow-hidden">
-                <img
-                  src={ROLE_PORTRAITS.mrwhite}
-                  alt="Mr. White"
-                  referrerPolicy="no-referrer"
-                  className="w-full h-full object-cover"
-                />
+        <ModalShell className="border-[#B49A62]/45 p-7 text-center flex flex-col items-center">
+          <div className="w-full flex items-center justify-between mb-4">
+            <ClassifiedStamp tone="gold">PRIORITY-OVERRIDE</ClassifiedStamp>
+          </div>
+
+          {!hasGuessed ? (
+            <>
+              <div className="mb-4">
+                <div className="w-24 h-24 rounded-[14px] bg-[#080B10] border-2 border-[#B49A62]/65 flex items-center justify-center overflow-hidden shadow-lg">
+                  <img
+                    src={ROLE_PORTRAITS.mrwhite}
+                    alt="Mr. White"
+                    referrerPolicy="no-referrer"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
               </div>
-            </div>
 
-            <h2 className="text-2xl font-black text-white mb-2 leading-tight">
-              {lang === 'ar'
-                ? `Mr. White (${impostor.name})`
-                : t('mrWhiteGuessTitle', { name: impostor.name })}
-            </h2>
-
-            <div className="w-full space-y-6">
-              <p className="text-slate-300 font-bold text-sm leading-relaxed">
+              <h2 className="text-xl font-bold text-text-main mb-2 leading-tight">
                 {lang === 'ar'
-                  ? 'هذه فرصتك الأخيرة! خمن كلمة المدنيين السرية لسرقة الفوز باللعبة!'
-                  : t('mrWhiteGuessSub')}
-              </p>
+                  ? `Mr. White (${impostor.name})`
+                  : t('mrWhiteGuessTitle', { name: impostor.name })}
+              </h2>
 
-              <div className="relative pb-2 border-b-2 border-amber-400 mb-4">
-                <input
-                  type="text"
-                  value={guess}
-                  onChange={(e) => setGuess(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') void handleGuess();
-                  }}
-                  placeholder={lang === 'ar' ? 'اكتب الكلمة هنا...' : 'Type word here...'}
-                  className="w-full bg-transparent outline-none text-center text-2xl font-black text-white placeholder-slate-500 transition-all"
-                  autoFocus
-                />
+              <div className="w-full space-y-5">
+                <p className="text-text-muted font-medium text-xs sm:text-sm leading-relaxed">
+                  {lang === 'ar'
+                    ? 'هذه فرصتك الأخيرة! خمن كلمة المدنيين السرية لسرقة الفوز باللعبة!'
+                    : t('mrWhiteGuessSub')}
+                </p>
+
+                <div className="relative pb-2 border-b-2 border-[#B49A62]">
+                  <input
+                    type="text"
+                    value={guess}
+                    onChange={(e) => setGuess(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') void handleGuess();
+                    }}
+                    placeholder={lang === 'ar' ? 'اكتب الكلمة هنا...' : 'Type word here...'}
+                    className="w-full bg-transparent outline-none text-center text-2xl font-bold text-text-main placeholder-text-muted/60"
+                    autoFocus
+                  />
+                </div>
+
+                <TacticalButton
+                  onClick={() => void handleGuess()}
+                  disabled={!guess.trim() || submitting}
+                  loading={submitting}
+                  variant="primary"
+                  size="lg"
+                  fullWidth
+                >
+                  {lang === 'ar' ? 'تأكيد التخمين' : t('ok')}
+                </TacticalButton>
+
+                {submitError && (
+                  <p className="text-xs font-semibold text-danger-text">{submitError}</p>
+                )}
+              </div>
+            </>
+          ) : (
+            <div className="w-full flex flex-col items-center">
+              <div className="mb-4">
+                <div
+                  className={`w-20 h-20 rounded-[14px] flex items-center justify-center border-2 ${
+                    isCorrect
+                      ? 'bg-[#3E7B67]/20 border-[#3E7B67] text-emerald-text'
+                      : 'bg-[#963F46]/20 border-[#963F46] text-danger-text'
+                  }`}
+                >
+                  {isCorrect ? <Trophy size={38} /> : <Skull size={38} />}
+                </div>
               </div>
 
-              <button
-                onClick={() => void handleGuess()}
-                disabled={!guess.trim() || submitting}
-                className="w-full py-4 rounded-2xl bg-amber-400 hover:bg-amber-300 text-slate-950 text-lg font-black transition-all shadow-lg active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed"
-              >
-                {lang === 'ar' ? 'تأكيد التخمين' : t('ok')}
-              </button>
-              {submitError && (
-                <p className="text-xs font-bold text-rose-400 mt-2">{submitError}</p>
-              )}
-            </div>
-          </>
-        ) : (
-          <div className="w-full animate-scale-in flex flex-col items-center">
-            <div className="mb-5">
-              <div
-                className={`w-24 h-24 rounded-full flex items-center justify-center border-4 shadow-2xl ${
-                  isCorrect
-                    ? 'bg-emerald-500/20 border-emerald-400 text-emerald-400'
-                    : 'bg-rose-500/20 border-rose-500 text-rose-400'
+              <h2
+                className={`text-xl font-bold mb-4 ${
+                  isCorrect ? 'text-emerald-text' : 'text-danger-text'
                 }`}
               >
-                {isCorrect ? <Trophy size={44} /> : <Skull size={44} />}
-              </div>
+                {isCorrect
+                  ? lang === 'ar'
+                    ? 'تخمين صحيح! Mr. White سرق الفوز!'
+                    : t('heGuessedIt')
+                  : lang === 'ar'
+                  ? 'تخمين خاطئ! Mr. White أُقصي رسمياً!'
+                  : t('mrWhiteWrongGuess')}
+              </h2>
+
+              {!onSubmitGuessText && isCorrect && secretWord && (
+                <p className="text-sm text-text-muted mb-6 font-medium">
+                  {lang === 'ar'
+                    ? `كلمة المدنيين كانت: "${secretWord}"`
+                    : `Civilian word was: "${secretWord}"`}
+                </p>
+              )}
+
+              <TacticalButton
+                onClick={handleProceed}
+                variant="cyan"
+                size="lg"
+                fullWidth
+              >
+                {lang === 'ar' ? 'متابعة' : t('ok')}
+              </TacticalButton>
             </div>
-
-            <h2
-              className={`text-2xl font-black mb-5 ${
-                isCorrect ? 'text-emerald-400' : 'text-rose-400'
-              }`}
-            >
-              {isCorrect
-                ? lang === 'ar'
-                  ? 'تخمين صحيح! Mr. White سرق الفوز!'
-                  : t('heGuessedIt')
-                : lang === 'ar'
-                ? 'تخمين خاطئ! Mr. White أُقصي رسمياً!'
-                : t('mrWhiteWrongGuess')}
-            </h2>
-
-            {!onSubmitGuessText && isCorrect && secretWord && (
-              <p className="text-sm text-slate-300 mb-7 font-bold">
-                {lang === 'ar'
-                  ? `كلمة المدنيين كانت: "${secretWord}"`
-                  : `Civilian word was: "${secretWord}"`}
-              </p>
-            )}
-
-            <button
-              onClick={handleProceed}
-              className="w-full py-4 rounded-2xl bg-sky-500 hover:bg-sky-400 text-white text-lg font-black shadow-lg active:scale-95 transition-all"
-            >
-              {lang === 'ar' ? 'متابعة' : t('ok')}
-            </button>
-          </div>
-        )}
+          )}
+        </ModalShell>
       </motion.div>
     </div>
   );

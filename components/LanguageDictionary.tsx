@@ -11,6 +11,13 @@ import {
 import { WORD_PAIRS } from '../data/offlineData';
 import { getUITranslation } from '../translations';
 import { useAuth } from '../contexts/AuthContext';
+import {
+  IconButton,
+  IntelligencePanel,
+  ModalShell,
+  StatusIndicator,
+  TacticalButton,
+} from './ui/BlacksiteUI';
 
 interface LanguageDictionaryProps {
   onBack: () => void;
@@ -45,13 +52,13 @@ export const LanguageDictionary: React.FC<LanguageDictionaryProps> = ({ onBack }
   };
 
   const languages = [
-    { code: 'ar', name: t('arabic'), icon: '🇸🇦' },
-    { code: 'en', name: t('english'), icon: '🇺🇸' },
-    { code: 'fr', name: t('french'), icon: '🇫🇷' },
-    { code: 'es', name: t('spanish'), icon: '🇪🇸' },
-    { code: 'de', name: t('german'), icon: '🇩🇪' },
-    { code: 'tr', name: t('turkish'), icon: '🇹🇷' },
-    { code: 'pt', name: t('portuguese'), icon: '🇵🇹' },
+    { code: 'ar', name: t('arabic'), symbol: 'AR' },
+    { code: 'en', name: t('english'), symbol: 'EN' },
+    { code: 'fr', name: t('french'), symbol: 'FR' },
+    { code: 'es', name: t('spanish'), symbol: 'ES' },
+    { code: 'de', name: t('german'), symbol: 'DE' },
+    { code: 'tr', name: t('turkish'), symbol: 'TR' },
+    { code: 'pt', name: t('portuguese'), symbol: 'PT' },
   ];
 
   useEffect(() => {
@@ -137,66 +144,65 @@ export const LanguageDictionary: React.FC<LanguageDictionaryProps> = ({ onBack }
   };
 
   return (
-    <div className="flex flex-col h-full w-full bg-bg-main relative max-w-2xl mx-auto">
+    <div className="flex flex-col h-full w-full relative max-w-2xl mx-auto">
       {/* Header */}
-      <div className="p-4 flex items-center justify-between border-b border-border bg-bg-surface/50 backdrop-blur-md sticky top-0 z-20">
-        <div className="flex items-center gap-3">
-          <button
-            onClick={onBack}
-            className="p-2 hover:bg-white/10 rounded-full transition-colors"
-          >
-            <ArrowLeft className={`w-6 h-6 ${isRTL ? 'rotate-180' : ''}`} />
-          </button>
-          <div>
-            <h2 className="text-xl font-black uppercase tracking-tight">{t('gameWords')}</h2>
-            <p className="text-xs text-text-muted font-bold">{t('dataManagementDesc')}</p>
+      <div className="p-4 flex items-center justify-between border-b border-border bg-bg-surface/80 backdrop-blur-xs sticky top-0 z-20">
+        <div className="flex items-center gap-3 min-w-0">
+          <IconButton onClick={onBack} aria-label={t('back')} variant="secondary">
+            <ArrowLeft className={`w-5 h-5 ${isRTL ? 'rotate-180' : ''}`} />
+          </IconButton>
+          <div className="min-w-0">
+            <h2 className="text-lg font-extrabold text-text-main truncate">{t('gameWords')}</h2>
+            <p className="text-xs text-text-muted truncate">{t('dataManagementDesc')}</p>
           </div>
         </div>
-        <button
+        <IconButton
+          variant="primary"
           onClick={() => {
             setNewCategory(selectedCategory === 'all' ? 'standard' : selectedCategory);
             setIsAdding(true);
           }}
-          className="h-10 w-10 btn-chunky bg-primary text-white flex items-center justify-center p-0"
+          aria-label={t('addWord')}
         >
-          <Plus className="w-6 h-6" />
-        </button>
+          <Plus className="w-5 h-5" />
+        </IconButton>
       </div>
 
       {/* Language Selector */}
-      <div className="p-4 overflow-x-auto whitespace-nowrap scrollbar-hide flex gap-2 border-b border-border bg-bg-dark/20">
-        {languages.map((langItem) => (
-          <button
-            key={langItem.code}
-            onClick={() => setSelectedLanguage(langItem.code)}
-            className={`px-4 py-2 rounded-xl border flex items-center gap-2 transition-all shrink-0 ${
-              selectedLanguage === langItem.code
-                ? 'bg-primary border-primary text-white shadow-lg'
-                : 'bg-bg-surface border-border text-text-muted opacity-70'
-            }`}
-          >
-            <span>{langItem.icon}</span>
-            <span className="font-bold text-sm">{langItem.name}</span>
-            <span
-              className={`text-[10px] px-1.5 py-0.5 rounded-full tabular-nums ${
-                selectedLanguage === langItem.code ? 'bg-white/20' : 'bg-black/20'
+      <div className="p-3.5 overflow-x-auto whitespace-nowrap scrollbar-hide flex gap-2 border-b border-border bg-bg-main/60">
+        {languages.map((langItem) => {
+          const active = selectedLanguage === langItem.code;
+          return (
+            <button
+              key={langItem.code}
+              onClick={() => setSelectedLanguage(langItem.code)}
+              className={`min-h-[40px] px-3 py-1.5 rounded-[10px] border flex items-center gap-2 transition-colors shrink-0 ${
+                active
+                  ? 'bg-[#B49A62]/15 border-[#B49A62] text-text-main'
+                  : 'bg-bg-surface border-border text-text-muted hover:text-text-main'
               }`}
             >
-              {getWordCount(langItem.code)}
-            </span>
-          </button>
-        ))}
+              <span className="font-mono-code text-[11px] font-semibold text-primary-text">
+                {langItem.symbol}
+              </span>
+              <span className="font-bold text-xs sm:text-sm">{langItem.name}</span>
+              <span className="font-mono-code text-[11px] px-1.5 py-0.5 rounded-[6px] bg-bg-card tabular-nums text-text-muted">
+                {getWordCount(langItem.code)}
+              </span>
+            </button>
+          );
+        })}
       </div>
 
       {/* Category Filter Tabs */}
-      <div className="px-4 py-2.5 overflow-x-auto whitespace-nowrap scrollbar-hide flex gap-2 border-b border-border bg-bg-surface/20">
+      <div className="px-3.5 py-2.5 overflow-x-auto whitespace-nowrap scrollbar-hide flex gap-2 border-b border-border bg-bg-surface/40">
         {CATEGORIES.map((cat) => (
           <button
             key={cat}
             onClick={() => setSelectedCategory(cat)}
-            className={`px-3 py-1.5 rounded-lg text-xs font-black transition-all shrink-0 border ${
+            className={`min-h-[36px] px-3 py-1 rounded-[8px] text-xs font-bold transition-colors shrink-0 border ${
               selectedCategory === cat
-                ? 'bg-emerald-500/20 border-emerald-400 text-emerald-300'
+                ? 'bg-[#668F9A]/15 border-[#668F9A] text-cyan-text'
                 : 'bg-bg-surface border-border text-text-muted hover:text-text-main'
             }`}
           >
@@ -207,88 +213,90 @@ export const LanguageDictionary: React.FC<LanguageDictionaryProps> = ({ onBack }
 
       {/* Stats Bar */}
       <div className="p-4 grid grid-cols-2 gap-3">
-        <div className="card-modern p-3 flex flex-col items-center justify-center bg-bg-surface/30">
-          <span className="text-[10px] font-black text-text-muted uppercase mb-1 flex items-center gap-1">
-            <BookOpen size={12} />
+        <IntelligencePanel className="p-3 flex flex-col items-center justify-center">
+          <span className="text-[11px] font-bold text-text-muted mb-1 flex items-center gap-1.5">
+            <BookOpen size={13} className="text-primary-text" />
             {t('builtInCount')}
           </span>
-          <span className="text-xl font-black text-primary tabular-nums">{baseCount}</span>
-        </div>
-        <div className="card-modern p-3 flex flex-col items-center justify-center bg-bg-surface/30 relative">
-          <span className="text-[10px] font-black text-text-muted uppercase mb-1 flex items-center gap-1">
-            <UserCircle size={12} />
+          <span className="text-xl font-extrabold text-primary-text font-mono-code tabular-nums">
+            {baseCount}
+          </span>
+        </IntelligencePanel>
+        <IntelligencePanel className="p-3 flex flex-col items-center justify-center relative">
+          <span className="text-[11px] font-bold text-text-muted mb-1 flex items-center gap-1.5">
+            <UserCircle size={13} className="text-cyan-text" />
             {t('myWordsCount')}
           </span>
-          <span className="text-xl font-black text-accent tabular-nums">{myCount}</span>
+          <span className="text-xl font-extrabold text-cyan-text font-mono-code tabular-nums">
+            {myCount}
+          </span>
 
           {myCount > 0 && (
             <button
               onClick={handleJumpToMyWords}
-              className="absolute -bottom-2 right-2 bg-accent text-white rounded-full p-1.5 shadow-lg active:scale-95 transition-transform"
+              className="absolute -bottom-2 right-2 bg-[#668F9A] text-[#080B10] rounded-[8px] p-1.5 shadow-md active:scale-95 transition-transform"
               title={t('jumpToMyWords')}
             >
               <ChevronDown size={14} />
             </button>
           )}
-        </div>
+        </IntelligencePanel>
       </div>
 
       {/* Word List */}
-      <div className="flex-1 overflow-y-auto px-4 pb-20 space-y-3">
+      <div className="flex-1 overflow-y-auto px-4 pb-20 space-y-2.5 custom-scrollbar">
         {currentPairs.map((pair, index) => (
           <React.Fragment key={pair.id}>
             {!pair.isBase && currentPairs[index - 1]?.isBase && (
-              <div ref={customWordsRef} className="py-4 flex items-center gap-3">
-                <div className="h-px flex-1 bg-primary/20" />
-                <span className="text-[10px] font-black text-primary uppercase tracking-widest">
-                  {t('myWordsCount')}
-                </span>
-                <div className="h-px flex-1 bg-primary/20" />
+              <div ref={customWordsRef} className="py-3 flex items-center gap-3">
+                <div className="h-px flex-1 bg-border-strong" />
+                <span className="text-xs font-bold text-primary-text">{t('myWordsCount')}</span>
+                <div className="h-px flex-1 bg-border-strong" />
               </div>
             )}
             <motion.div
               layout
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className={`card-modern p-4 flex items-center justify-between gap-3 border-2 ${
-                pair.isBase ? 'border-border/30' : 'border-primary/30'
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              className={`rounded-[12px] bg-bg-surface p-3.5 flex items-center justify-between gap-3 border ${
+                pair.isBase ? 'border-border' : 'border-[#B49A62]/40'
               }`}
             >
-              <div className="flex items-center gap-4 flex-1">
-                <div className="flex-1 text-center">
-                  <span className="text-sm font-black text-text-main block">
+              <div className="flex items-center gap-3 flex-1 min-w-0">
+                <div className="flex-1 text-center min-w-0">
+                  <span className="text-sm font-bold text-text-main block truncate">
                     {pair.isBase && !isAdmin ? '••••' : pair.word1}
                   </span>
                 </div>
-                <div className="w-px h-8 bg-border" />
-                <div className="flex-1 text-center">
-                  <span className="text-sm font-black text-text-main block">
+                <div className="w-px h-7 bg-border" />
+                <div className="flex-1 text-center min-w-0">
+                  <span className="text-sm font-bold text-text-main block truncate">
                     {pair.isBase && !isAdmin ? '••••' : pair.word2}
                   </span>
                 </div>
               </div>
 
-              <span className="text-[10px] font-black px-2 py-0.5 rounded-md bg-white/5 text-text-muted shrink-0">
+              <StatusIndicator tone="neutral">
                 {categoryLabels[pair.category || 'standard']}
-              </span>
+              </StatusIndicator>
 
               {!pair.isBase ? (
                 <button
                   onClick={() => handleDeleteCustom(pair.id)}
-                  className="p-2 text-danger hover:bg-danger/10 rounded-xl transition-colors"
+                  className="p-2 text-danger-text hover:bg-[#963F46]/15 rounded-[8px] transition-colors"
                   title="Delete"
                 >
-                  <Trash2 className="w-5 h-5" />
+                  <Trash2 className="w-4 h-4" />
                 </button>
               ) : (
-                <Info className="w-4 h-4 text-text-muted/30 shrink-0" />
+                <Info className="w-4 h-4 text-text-muted/40 shrink-0" />
               )}
             </motion.div>
           </React.Fragment>
         ))}
         {currentPairs.length === 0 && (
-          <div className="py-20 text-center">
-            <p className="text-text-muted font-bold">{t('preparing')}</p>
+          <div className="py-16 text-center">
+            <p className="text-text-muted font-bold text-sm">{t('preparing')}</p>
           </div>
         )}
       </div>
@@ -296,87 +304,91 @@ export const LanguageDictionary: React.FC<LanguageDictionaryProps> = ({ onBack }
       {/* Add Modal */}
       <AnimatePresence>
         {isAdding && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-6 sm:p-0">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-5">
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/80 backdrop-blur-sm"
+              className="fixed inset-0 bg-black/75 backdrop-blur-xs"
               onClick={() => setIsAdding(false)}
             />
             <motion.div
-              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              initial={{ scale: 0.96, opacity: 0, y: 10 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.9, opacity: 0, y: 20 }}
-              className="w-full max-w-sm bg-bg-surface border-4 border-border rounded-[2.5rem] p-7 relative z-10 shadow-2xl"
+              exit={{ scale: 0.97, opacity: 0, y: 8 }}
+              className="w-full max-w-sm relative z-10"
             >
-              <h3 className="text-2xl font-black text-center mb-5 uppercase tracking-tight">
-                {t('gameWords')}
-              </h3>
+              <ModalShell maxWidthClass="max-w-sm" className="p-6">
+                <h3 className="text-lg font-extrabold text-center text-text-main mb-4">
+                  {t('gameWords')}
+                </h3>
 
-              <div className="space-y-4 mb-7">
-                <div>
-                  <label className="text-xs font-black uppercase text-text-muted mb-2 block">
-                    {t('wordCategory')}
-                  </label>
-                  <div className="grid grid-cols-2 gap-1.5">
-                    {(['standard', 'animals', 'food', 'places', 'objects'] as const).map((cat) => (
-                      <button
-                        key={cat}
-                        type="button"
-                        onClick={() => setNewCategory(cat)}
-                        className={`py-2 px-2 rounded-xl text-xs font-black border transition-colors ${
-                          newCategory === cat
-                            ? 'bg-emerald-500/20 border-emerald-400 text-emerald-300'
-                            : 'bg-bg-dark border-border text-text-muted'
-                        } ${cat === 'standard' ? 'col-span-2' : ''}`}
-                      >
-                        {categoryLabels[cat]}
-                      </button>
-                    ))}
+                <div className="space-y-4 mb-6">
+                  <div>
+                    <label className="text-xs font-bold text-text-muted mb-2 block">
+                      {t('wordCategory')}
+                    </label>
+                    <div className="grid grid-cols-2 gap-1.5">
+                      {(['standard', 'animals', 'food', 'places', 'objects'] as const).map((cat) => (
+                        <button
+                          key={cat}
+                          type="button"
+                          onClick={() => setNewCategory(cat)}
+                          className={`min-h-[40px] py-2 px-2 rounded-[8px] text-xs font-bold border transition-colors ${
+                            newCategory === cat
+                              ? 'bg-[#668F9A]/15 border-[#668F9A] text-cyan-text'
+                              : 'bg-bg-card border-border text-text-muted'
+                          } ${cat === 'standard' ? 'col-span-2' : ''}`}
+                        >
+                          {categoryLabels[cat]}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold text-text-muted mb-1.5 block">
+                      {t('wordIs')}
+                    </label>
+                    <input
+                      type="text"
+                      value={newWord1}
+                      onChange={(e) => setNewWord1(e.target.value)}
+                      className="w-full bg-bg-card border border-border-strong rounded-[10px] py-3 px-4 font-bold text-center text-text-main focus:border-[#668F9A] transition-colors outline-none"
+                      placeholder="..."
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold text-text-muted mb-1.5 block">
+                      {t('wordIs')}
+                    </label>
+                    <input
+                      type="text"
+                      value={newWord2}
+                      onChange={(e) => setNewWord2(e.target.value)}
+                      className="w-full bg-bg-card border border-border-strong rounded-[10px] py-3 px-4 font-bold text-center text-text-main focus:border-[#668F9A] transition-colors outline-none"
+                      placeholder="..."
+                    />
                   </div>
                 </div>
-                <div>
-                  <label className="text-xs font-black uppercase text-text-muted mb-2 block">
-                    {t('wordIs')}
-                  </label>
-                  <input
-                    type="text"
-                    value={newWord1}
-                    onChange={(e) => setNewWord1(e.target.value)}
-                    className="w-full bg-bg-dark border-2 border-border rounded-2xl py-3.5 px-4 font-bold text-center focus:border-primary transition-colors outline-none"
-                    placeholder="..."
-                  />
-                </div>
-                <div>
-                  <label className="text-xs font-black uppercase text-text-muted mb-2 block">
-                    {t('wordIs')}
-                  </label>
-                  <input
-                    type="text"
-                    value={newWord2}
-                    onChange={(e) => setNewWord2(e.target.value)}
-                    className="w-full bg-bg-dark border-2 border-border rounded-2xl py-3.5 px-4 font-bold text-center focus:border-primary transition-colors outline-none"
-                    placeholder="..."
-                  />
-                </div>
-              </div>
 
-              <div className="flex gap-4">
-                <button
-                  onClick={() => setIsAdding(false)}
-                  className="flex-1 py-4 btn-chunky-white text-sm"
-                >
-                  {t('cancel')}
-                </button>
-                <button
-                  onClick={handleAddPair}
-                  disabled={!newWord1.trim() || !newWord2.trim()}
-                  className="flex-1 py-4 btn-chunky bg-primary text-white text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {t('save')}
-                </button>
-              </div>
+                <div className="flex gap-3">
+                  <TacticalButton
+                    variant="secondary"
+                    onClick={() => setIsAdding(false)}
+                    className="flex-1"
+                  >
+                    {t('cancel')}
+                  </TacticalButton>
+                  <TacticalButton
+                    variant="primary"
+                    onClick={handleAddPair}
+                    disabled={!newWord1.trim() || !newWord2.trim()}
+                    className="flex-1"
+                  >
+                    {t('save')}
+                  </TacticalButton>
+                </div>
+              </ModalShell>
             </motion.div>
           </div>
         )}
@@ -384,4 +396,3 @@ export const LanguageDictionary: React.FC<LanguageDictionaryProps> = ({ onBack }
     </div>
   );
 };
-

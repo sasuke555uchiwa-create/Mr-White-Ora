@@ -28,7 +28,7 @@ import { auth } from './firebase';
 import { Header } from './components/Header';
 import { saveRecentPlayers, getSettings } from './services/storageService';
 import { playSound } from './services/soundService';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, motion, MotionConfig } from 'framer-motion';
 import { getUITranslation } from './translations';
 import { ToastHost } from './components/ToastHost';
 import { showToast } from './utils/toast';
@@ -41,6 +41,7 @@ import {
 import { getRoleAsset, getRoleTitle } from './data/specialRoles';
 import { useOfflineMatch } from './hooks/useOfflineMatch';
 import { hasSpecialRole } from './src/game/voteEngine';
+import { ModalShell, TacticalButton } from './components/ui/BlacksiteUI';
 
 const ACTIVE_GAME_PHASES = [
   GamePhase.REVEAL,
@@ -268,15 +269,15 @@ function AppContent() {
   };
 
   const pageVariants = {
-    initial: { opacity: 0, x: 20 },
-    animate: { opacity: 1, x: 0 },
-    exit: { opacity: 0, x: -20 },
+    initial: { opacity: 0, y: 8 },
+    animate: { opacity: 1, y: 0 },
+    exit: { opacity: 0, y: -6 },
   };
 
-  const pageTransition: any = {
-    type: 'tween',
-    ease: 'anticipate',
-    duration: 0.28,
+  const pageTransition = {
+    type: 'tween' as const,
+    ease: 'easeOut' as const,
+    duration: 0.2,
   };
 
   const justicePlayer = offline.players.find((p) => hasSpecialRole(p, 'justice'));
@@ -298,24 +299,23 @@ function AppContent() {
       <div className="bg-mesh" />
       <div className="bg-vignette" />
       <div className="bg-scanlines" />
-      <div className="blob-secondary" />
       <ToastHost />
       {phase !== GamePhase.WELCOME && <Header onHome={handleGoHome} showHome={true} />}
 
       {offline.error && (
-        <div className="mx-auto mt-2 px-4 py-2 rounded-xl bg-rose-500/20 border border-rose-400/50 text-rose-200 text-xs font-black z-30 flex items-center gap-3">
+        <div className="mx-auto mt-2 px-4 py-2 rounded-[10px] bg-[#963F46]/15 border border-[#963F46]/45 text-danger-text text-xs font-bold z-30 flex items-center gap-3">
           <span>{offline.error}</span>
-          <button onClick={() => offline.setError(null)} className="underline">
+          <button onClick={() => offline.setError(null)} className="underline font-bold">
             {t('ok')}
           </button>
         </div>
       )}
 
       {(offline.isLoading || onlineBusy) && (
-        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center">
-          <div className="bg-bg-surface border border-border-strong rounded-3xl px-8 py-6 text-center shadow-2xl">
-            <div className="w-10 h-10 border-4 border-sky-400 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
-            <p className="text-sm font-black text-text-main">{t('preparing')}</p>
+        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-bg-surface border border-border-strong rounded-[14px] px-8 py-6 text-center shadow-2xl">
+            <div className="w-9 h-9 border-[3px] border-[#B49A62] border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+            <p className="text-sm font-bold text-text-main">{t('preparing')}</p>
           </div>
         </div>
       )}
@@ -789,48 +789,50 @@ function AppContent() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-5"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-xs p-5"
           >
             <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              className="w-full max-w-sm bg-slate-900 border border-emerald-400/40 rounded-[2.25rem] p-6 text-center shadow-2xl"
+              initial={{ scale: 0.96, opacity: 0, y: 8 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.97, opacity: 0, y: 6 }}
+              className="w-full max-w-sm"
             >
-              <div className="w-20 h-20 rounded-full bg-white p-1.5 mx-auto mb-3 overflow-hidden shadow-lg">
-                <img
-                  src={getRoleAsset('justice')}
-                  alt={getRoleTitle('justice', currentLanguage)}
-                  referrerPolicy="no-referrer"
-                  className="w-full h-full object-contain"
-                />
-              </div>
-              <h3 className="text-xl font-black text-emerald-300 mb-1">
-                {getRoleTitle('justice', currentLanguage)} ({justicePlayer.name})
-              </h3>
-              <p className="text-xs font-bold text-slate-300 mb-5">
-                {currentLanguage === 'ar'
-                  ? 'حدث تعادل في الأصوات! اختر من سيتم إقصاؤه من بين المتعادلين:'
-                  : 'Tie vote! Choose which tied player gets eliminated:'}
-              </p>
-              <div className="grid grid-cols-2 gap-3">
-                {offline.pendingTieCandidates.map((candId) => {
-                  const cand = offline.players.find((p) => p.id === candId);
-                  if (!cand) return null;
-                  return (
-                    <button
-                      key={cand.id}
-                      onClick={() => offline.resolveTieWithJustice(cand.id)}
-                      className="p-3 rounded-2xl bg-white/5 hover:bg-emerald-500/20 border border-white/15 hover:border-emerald-400 flex flex-col items-center gap-2 transition-all"
-                    >
-                      <Avatar avatar={cand.avatar} name={cand.name} size={56} />
-                      <span className="text-sm font-black text-white truncate max-w-full">
-                        {cand.name}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
+              <ModalShell maxWidthClass="max-w-sm" className="p-6 text-center border-[#3E7B67]/45">
+                <div className="w-20 h-20 rounded-[12px] bg-bg-card border border-[#3E7B67]/40 p-1.5 mx-auto mb-3 overflow-hidden">
+                  <img
+                    src={getRoleAsset('justice')}
+                    alt={getRoleTitle('justice', currentLanguage)}
+                    referrerPolicy="no-referrer"
+                    className="w-full h-full object-cover rounded-[8px]"
+                  />
+                </div>
+                <h3 className="text-lg font-extrabold text-emerald-text mb-1">
+                  {getRoleTitle('justice', currentLanguage)} ({justicePlayer.name})
+                </h3>
+                <p className="text-xs font-medium text-text-muted mb-5 leading-relaxed">
+                  {currentLanguage === 'ar'
+                    ? 'حدث تعادل في الأصوات! اختر من سيتم إقصاؤه من بين المتعادلين:'
+                    : 'Tie vote! Choose which tied player gets eliminated:'}
+                </p>
+                <div className="grid grid-cols-2 gap-2.5">
+                  {offline.pendingTieCandidates.map((candId) => {
+                    const cand = offline.players.find((p) => p.id === candId);
+                    if (!cand) return null;
+                    return (
+                      <button
+                        key={cand.id}
+                        onClick={() => offline.resolveTieWithJustice(cand.id)}
+                        className="p-3 rounded-[10px] bg-bg-card hover:bg-[#3E7B67]/15 border border-border hover:border-[#3E7B67]/50 flex flex-col items-center gap-2 transition-colors min-h-[44px]"
+                      >
+                        <Avatar avatar={cand.avatar} name={cand.name} size={52} />
+                        <span className="text-sm font-bold text-text-main truncate max-w-full">
+                          {cand.name}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </ModalShell>
             </motion.div>
           </motion.div>
         )}
@@ -843,46 +845,48 @@ function AppContent() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-5"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-xs p-5"
           >
             <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              className="w-full max-w-sm bg-slate-900 border border-rose-400/50 rounded-[2.25rem] p-6 text-center shadow-2xl"
+              initial={{ scale: 0.96, opacity: 0, y: 8 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.97, opacity: 0, y: 6 }}
+              className="w-full max-w-sm"
             >
-              <div className="w-20 h-20 rounded-full bg-white p-1.5 mx-auto mb-3 overflow-hidden shadow-lg">
-                <img
-                  src={getRoleAsset('boomerang')}
-                  alt={getRoleTitle('boomerang', currentLanguage)}
-                  referrerPolicy="no-referrer"
-                  className="w-full h-full object-contain"
-                />
-              </div>
-              <h3 className="text-xl font-black text-rose-300 mb-1">
-                {getRoleTitle('boomerang', currentLanguage)} ({boomerangPlayer.name})
-              </h3>
-              <p className="text-xs font-bold text-slate-300 mb-5">
-                {currentLanguage === 'ar'
-                  ? 'ارتد التصويت! اختر أحد المصوتين ضدك ليواجه الإقصاء بدلاً منك:'
-                  : 'Counter-bounce activated! Pick an accuser to take the elimination instead:'}
-              </p>
-              <div className="grid grid-cols-3 gap-2.5 max-h-64 overflow-y-auto">
-                {offline.players
-                  .filter((p) => !p.isEliminated && p.id !== boomerangPlayer.id)
-                  .map((target) => (
-                    <button
-                      key={target.id}
-                      onClick={() => offline.handleBoomerangTargetPick(target.id)}
-                      className="p-2.5 rounded-2xl bg-white/5 hover:bg-rose-500/20 border border-white/15 hover:border-rose-400 flex flex-col items-center gap-1.5 transition-all"
-                    >
-                      <Avatar avatar={target.avatar} name={target.name} size={46} />
-                      <span className="text-xs font-black text-white truncate max-w-full">
-                        {target.name}
-                      </span>
-                    </button>
-                  ))}
-              </div>
+              <ModalShell maxWidthClass="max-w-sm" className="p-6 text-center border-[#963F46]/45">
+                <div className="w-20 h-20 rounded-[12px] bg-bg-card border border-[#963F46]/40 p-1.5 mx-auto mb-3 overflow-hidden">
+                  <img
+                    src={getRoleAsset('boomerang')}
+                    alt={getRoleTitle('boomerang', currentLanguage)}
+                    referrerPolicy="no-referrer"
+                    className="w-full h-full object-cover rounded-[8px]"
+                  />
+                </div>
+                <h3 className="text-lg font-extrabold text-danger-text mb-1">
+                  {getRoleTitle('boomerang', currentLanguage)} ({boomerangPlayer.name})
+                </h3>
+                <p className="text-xs font-medium text-text-muted mb-5 leading-relaxed">
+                  {currentLanguage === 'ar'
+                    ? 'ارتد التصويت! اختر أحد المصوتين ضدك ليواجه الإقصاء بدلاً منك:'
+                    : 'Counter-bounce activated! Pick an accuser to take the elimination instead:'}
+                </p>
+                <div className="grid grid-cols-3 gap-2.5 max-h-64 overflow-y-auto">
+                  {offline.players
+                    .filter((p) => !p.isEliminated && p.id !== boomerangPlayer.id)
+                    .map((target) => (
+                      <button
+                        key={target.id}
+                        onClick={() => offline.handleBoomerangTargetPick(target.id)}
+                        className="p-2.5 rounded-[10px] bg-bg-card hover:bg-[#963F46]/15 border border-border hover:border-[#963F46]/50 flex flex-col items-center gap-1.5 transition-colors min-h-[44px]"
+                      >
+                        <Avatar avatar={target.avatar} name={target.name} size={46} />
+                        <span className="text-xs font-bold text-text-main truncate max-w-full">
+                          {target.name}
+                        </span>
+                      </button>
+                    ))}
+                </div>
+              </ModalShell>
             </motion.div>
           </motion.div>
         )}
@@ -895,46 +899,48 @@ function AppContent() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-5"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-xs p-5"
           >
             <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              className="w-full max-w-sm bg-slate-900 border border-orange-400/50 rounded-[2.25rem] p-6 text-center shadow-2xl"
+              initial={{ scale: 0.96, opacity: 0, y: 8 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.97, opacity: 0, y: 6 }}
+              className="w-full max-w-sm"
             >
-              <div className="w-20 h-20 rounded-full bg-white p-1.5 mx-auto mb-3 overflow-hidden shadow-lg">
-                <img
-                  src={getRoleAsset('avenger')}
-                  alt={getRoleTitle('avenger', currentLanguage)}
-                  referrerPolicy="no-referrer"
-                  className="w-full h-full object-contain"
-                />
-              </div>
-              <h3 className="text-xl font-black text-orange-300 mb-1">
-                {getRoleTitle('avenger', currentLanguage)} ({avengerPlayer.name})
-              </h3>
-              <p className="text-xs font-bold text-slate-300 mb-5">
-                {currentLanguage === 'ar'
-                  ? 'انتقم قبل مغادرتك! اختر لاعباً ليخرج معك الآن:'
-                  : 'Take your revenge! Pick one player to eliminate with you:'}
-              </p>
-              <div className="grid grid-cols-3 gap-2.5 max-h-64 overflow-y-auto">
-                {offline.players
-                  .filter((p) => !p.isEliminated)
-                  .map((target) => (
-                    <button
-                      key={target.id}
-                      onClick={() => offline.handleAvengerTargetPick(target.id)}
-                      className="p-2.5 rounded-2xl bg-white/5 hover:bg-orange-500/20 border border-white/15 hover:border-orange-400 flex flex-col items-center gap-1.5 transition-all"
-                    >
-                      <Avatar avatar={target.avatar} name={target.name} size={46} />
-                      <span className="text-xs font-black text-white truncate max-w-full">
-                        {target.name}
-                      </span>
-                    </button>
-                  ))}
-              </div>
+              <ModalShell maxWidthClass="max-w-sm" className="p-6 text-center border-[#A45A44]/45">
+                <div className="w-20 h-20 rounded-[12px] bg-bg-card border border-[#A45A44]/40 p-1.5 mx-auto mb-3 overflow-hidden">
+                  <img
+                    src={getRoleAsset('avenger')}
+                    alt={getRoleTitle('avenger', currentLanguage)}
+                    referrerPolicy="no-referrer"
+                    className="w-full h-full object-cover rounded-[8px]"
+                  />
+                </div>
+                <h3 className="text-lg font-extrabold text-primary-text mb-1">
+                  {getRoleTitle('avenger', currentLanguage)} ({avengerPlayer.name})
+                </h3>
+                <p className="text-xs font-medium text-text-muted mb-5 leading-relaxed">
+                  {currentLanguage === 'ar'
+                    ? 'انتقم قبل مغادرتك! اختر لاعباً ليخرج معك الآن:'
+                    : 'Take your revenge! Pick one player to eliminate with you:'}
+                </p>
+                <div className="grid grid-cols-3 gap-2.5 max-h-64 overflow-y-auto">
+                  {offline.players
+                    .filter((p) => !p.isEliminated)
+                    .map((target) => (
+                      <button
+                        key={target.id}
+                        onClick={() => offline.handleAvengerTargetPick(target.id)}
+                        className="p-2.5 rounded-[10px] bg-bg-card hover:bg-[#A45A44]/15 border border-border hover:border-[#A45A44]/50 flex flex-col items-center gap-1.5 transition-colors min-h-[44px]"
+                      >
+                        <Avatar avatar={target.avatar} name={target.name} size={46} />
+                        <span className="text-xs font-bold text-text-main truncate max-w-full">
+                          {target.name}
+                        </span>
+                      </button>
+                    ))}
+                </div>
+              </ModalShell>
             </motion.div>
           </motion.div>
         )}
@@ -947,33 +953,33 @@ function AppContent() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute inset-0 z-50 flex items-center justify-center bg-bg-dark/80 backdrop-blur-sm p-6"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-xs p-6"
           >
             <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-bg-surface w-full max-w-sm rounded-2xl shadow-2xl p-6 text-center border border-border"
+              initial={{ scale: 0.96, opacity: 0, y: 8 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.97, opacity: 0, y: 6 }}
+              className="w-full max-w-sm"
             >
-              <h3 className="text-text-main font-bold text-lg mb-2 text-start">{t('alert')}</h3>
-              <p className="text-text-muted text-base font-bold mb-8 text-start">
-                {t('exitGameConfirmation')}
-              </p>
+              <ModalShell maxWidthClass="max-w-sm" className="p-6">
+                <h3 className="text-text-main font-bold text-lg mb-2 text-start">{t('alert')}</h3>
+                <p className="text-text-muted text-sm font-medium mb-6 text-start leading-relaxed">
+                  {t('exitGameConfirmation')}
+                </p>
 
-              <div className="flex gap-4">
-                <button
-                  onClick={confirmExit}
-                  className="flex-1 py-2.5 text-rose-400 font-bold hover:bg-rose-500/10 rounded-xl transition-colors"
-                >
-                  {t('leave')}
-                </button>
-                <button
-                  onClick={() => setShowExitConfirmation(false)}
-                  className="flex-1 py-2.5 text-text-main font-bold hover:bg-bg-card rounded-xl transition-colors"
-                >
-                  {t('stay')}
-                </button>
-              </div>
+                <div className="flex gap-3">
+                  <TacticalButton variant="danger" onClick={confirmExit} className="flex-1">
+                    {t('leave')}
+                  </TacticalButton>
+                  <TacticalButton
+                    variant="secondary"
+                    onClick={() => setShowExitConfirmation(false)}
+                    className="flex-1"
+                  >
+                    {t('stay')}
+                  </TacticalButton>
+                </div>
+              </ModalShell>
             </motion.div>
           </motion.div>
         )}
@@ -986,7 +992,9 @@ export default function App() {
   return (
     <ErrorBoundary>
       <AuthProvider>
-        <AppContent />
+        <MotionConfig reducedMotion="user">
+          <AppContent />
+        </MotionConfig>
       </AuthProvider>
     </ErrorBoundary>
   );
