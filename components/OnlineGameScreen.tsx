@@ -61,12 +61,14 @@ interface OnlineGameScreenProps {
   roomId: string;
   onBack: () => void;
   onReturnToLobby?: () => void;
+  onOpenCaseFile?: (reportId: string) => void;
 }
 
 export const OnlineGameScreen: React.FC<OnlineGameScreenProps> = ({
   roomId,
   onBack,
   onReturnToLobby,
+  onOpenCaseFile,
 }) => {
   const { user, profile } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
@@ -1025,6 +1027,12 @@ export const OnlineGameScreen: React.FC<OnlineGameScreenProps> = ({
               ?.id ?? null)
           : null;
 
+      const reportId: string =
+        gameState.caseFileReportId ||
+        (gameState.matchId
+          ? `${roomId}_${gameState.matchId}`.replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 128)
+          : '');
+
       return (
         <div className="relative h-full w-full">
           <ResultScreen
@@ -1042,6 +1050,7 @@ export const OnlineGameScreen: React.FC<OnlineGameScreenProps> = ({
             isHost={isHost}
             onBackToLobby={handleBackToLobbyFromResult}
             onLeaveRoom={() => setShowLeaveConfirm(true)}
+            onOpenCaseFile={onOpenCaseFile && reportId ? () => onOpenCaseFile(reportId) : undefined}
           />
         </div>
       );

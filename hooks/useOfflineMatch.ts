@@ -1,5 +1,8 @@
 import { useCallback, useRef, useState } from 'react';
 import {
+  CaseFileEvent,
+  CaseFileWinReason,
+  ClassifiedCaseFile,
   DescriptionEntry,
   GamePhase,
   GameSettings,
@@ -11,7 +14,9 @@ import { VoteCompletionMeta } from '../components/VotingScreen';
 import { getRandomWordPair } from '../services/geminiService';
 import {
   getScores,
+  getSettings,
   recordOfflineSessionMatch,
+  saveLocalCaseFile,
   updatePlayerScore,
 } from '../services/storageService';
 import { auth } from '../firebase';
@@ -25,6 +30,7 @@ import {
   tallyVotes,
 } from '../src/game/voteEngine';
 import { evaluateWinCondition, getPlayerRoundPoints } from '../src/game/winEngine';
+import { buildClassifiedCaseFile, CaseFileRoundInput } from '../src/game/caseFileEngine';
 
 interface UseOfflineMatchOptions {
   navigate: (nextPhase: GamePhase) => void;
@@ -61,7 +67,15 @@ export function useOfflineMatch({ navigate, t }: UseOfflineMatchOptions) {
     'impostor_guessed' | 'citizens_wrong_vote' | 'impostor_caught' | 'fool_won' | null
   >(null);
   const [currentRound, setCurrentRound] = useState<number>(1);
+  const [latestCaseFile, setLatestCaseFile] = useState<ClassifiedCaseFile | null>(null);
+
   const matchKeyRef = useRef<string>('');
+  const matchStartedAtMsRef = useRef<number>(0);
+  const descriptionsLogRef = useRef<DescriptionEntry[]>([]);
+  const roundRecordsRef = useRef<CaseFileRoundInput[]>([]);
+  const matchEventsRef = useRef<CaseFileEvent[]>([]);
+  const activeRoundVoteRef = useRef<CaseFileRoundInput | null>(null);
+  const pendingRoundElimsRef = useRef<string[]>([]);
 
   const [gameSettings, setGameSettings] = useState<GameSettings>({
     mrWhiteCount: 1,
@@ -73,6 +87,46 @@ export function useOfflineMatch({ navigate, t }: UseOfflineMatchOptions) {
     gameMode: 'expression',
     turnDurationSeconds: 45,
   });
+
+  const appendDescriptionEntry = useCallback(
+    (updater: DescriptionEntry[] | ((prev: DescriptionEntry[]) => DescriptionEntry[])) => {
+      setDescriptionsLog((prev) => {
+        const next = typeof updater === 'function' ? updater(prev) : updater;
+        descriptionsLogRef.current = next;
+        return next;
+      });
+    },
+    []
+  );
+
+  const commitActiveRound = useCallback((extraEliminatedIds: string[] = []) => {
+    const active = activeRoundVoteRef.current;
+    const combinedElims = Array.from(
+      new Set([...pendingRoundElimsRef.current, ...extraEliminatedIds])
+    );
+    if (active) {
+      roundRecordsRef.current = [
+        ...roundRecordsRef.current,
+        {
+          ...active,
+          eliminatedIds: Array.from(new Set([...(active.eliminatedIds || []), ...combinedElims])),
+        },
+      ];
+    } else if (combinedElims.length > 0) {
+      roundRecordsRef.current = [
+        ...roundRecordsRef.current,
+        {
+          roundNumber: roundRecordsRef.current.length + 1,
+          voteMode: 'group',
+          votesByPlayerId: {},
+          mostVotedId: combinedElims[0] || null,
+          eliminatedIds: combinedElims,
+        },
+      ];
+    }
+    activeRoundVoteRef.current = null;
+    pendingRoundElimsRef.current = [];
+  }, []);
 
   const resetPendingSpecialModals = useCallback(() => {
     setPendingTieCandidates(null);
@@ -168,8 +222,18 @@ export function useOfflineMatch({ navigate, t }: UseOfflineMatchOptions) {
       setPendingBoomerangId(null);
       setPendingVoteMeta(null);
       setDescriptionsLog([]);
+      descriptionsLogRef.current = [];
       setCurrentRound(1);
-      matchKeyRef.current = `offline_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+      setLatestCaseFile(null);
+
+      const nowMs = Date.now();
+      matchStartedAtMsRef.current = nowMs;
+      roundRecordsRef.current = [];
+      matchEventsRef.current = [];
+      activeRoundVoteRef.current = null;
+      pendingRoundElimsRef.current = [];
+      matchKeyRef.current = `offline_${nowMs}_${Math.random().toString(36).slice(2, 8)}`;
+
       navigate(GamePhase.REVEAL);
     },
     [navigate]
@@ -202,12 +266,17 @@ export function useOfflineMatch({ navigate, t }: UseOfflineMatchOptions) {
       winningMrWhiteId?: number | null
     ) => {
       const resolvedWinner: 'impostor' | 'citizens' = winner === 'fool' ? 'citizens' : winner;
-      const effectiveReason = reason ?? winReason;
+      const effectiveReason = (reason ?? winReason ?? (resolvedWinner === 'citizens' ? 'impostor_caught' : 'citizens_wrong_vote')) as CaseFileWinReason;
       setLastWinner(resolvedWinner);
       const sourcePlayers = playersOverride || players;
 
+      if (activeRoundVoteRef.current || pendingRoundElimsRef.current.length > 0) {
+        commitActiveRound();
+      }
+
       const outcomes: { name: string; role: string; specialRole?: string | null; won: boolean }[] =
         [];
+      const pointsByPlayerId = new Map<number, number>();
       const updatedPlayers = sourcePlayers.map((p) => {
         const pointsToAdd = getPlayerRoundPoints(
           p,
@@ -216,6 +285,7 @@ export function useOfflineMatch({ navigate, t }: UseOfflineMatchOptions) {
           effectiveReason,
           winningMrWhiteId
         );
+        pointsByPlayerId.set(p.id, pointsToAdd);
         outcomes.push({
           name: p.name,
           role: p.role,
@@ -231,28 +301,86 @@ export function useOfflineMatch({ navigate, t }: UseOfflineMatchOptions) {
       });
       setPlayers(updatedPlayers);
 
+      const nowMs = Date.now();
+      const key =
+        matchKeyRef.current || `offline_${nowMs}_${Math.random().toString(36).slice(2, 8)}`;
+      matchKeyRef.current = key;
+
       if (outcomes.length > 0) {
-        const key =
-          matchKeyRef.current || `offline_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-        matchKeyRef.current = key;
         recordOfflineSessionMatch({
           matchKey: key,
           uid: auth.currentUser?.uid || null,
           outcomes,
         });
       }
+
+      if (sourcePlayers.length > 0) {
+        const appLang = getSettings().language || 'ar';
+        const clues = descriptionsLogRef.current.map((entry, idx) => ({
+          id: `clue_${entry.round}_${entry.playerId}_${idx}`,
+          round: entry.round,
+          playerId: String(entry.playerId),
+          playerName: entry.playerName,
+          playerAvatar: entry.playerAvatar,
+          text: entry.text,
+          skipped: false,
+        }));
+
+        const caseFile = buildClassifiedCaseFile({
+          reportId: key,
+          mode: 'local',
+          matchId: key,
+          startedAtMs: matchStartedAtMsRef.current || nowMs,
+          endedAtMs: nowMs,
+          language: appLang,
+          category: gameSettings.category,
+          difficulty: gameSettings.difficulty,
+          gameMode: gameSettings.gameMode,
+          winner: resolvedWinner,
+          winReason: effectiveReason,
+          winningMrWhiteId:
+            winningMrWhiteId !== null && winningMrWhiteId !== undefined
+              ? String(winningMrWhiteId)
+              : null,
+          secretWord,
+          undercoverWord,
+          players: sourcePlayers.map((p) => {
+            const pts = pointsByPlayerId.get(p.id) || 0;
+            return {
+              playerId: String(p.id),
+              uid: p.uid,
+              name: p.name,
+              avatar: p.avatar,
+              role: p.role,
+              specialRole: p.specialRole ?? null,
+              isEliminated: Boolean(p.isEliminated),
+              pointsEarned: pts,
+              won: pts > 0,
+              foolBonusAwarded: Boolean(p.foolBonusAwarded),
+            };
+          }),
+          clues,
+          rounds: roundRecordsRef.current,
+          specialEvents: matchEventsRef.current,
+        });
+
+        saveLocalCaseFile(caseFile);
+        setLatestCaseFile(caseFile);
+      }
     },
-    [players, winReason]
+    [commitActiveRound, gameSettings.category, gameSettings.difficulty, gameSettings.gameMode, players, secretWord, undercoverWord, winReason]
   );
 
   const evaluateWinOrContinue = useCallback(
     (updatedPlayers: Player[]) => {
       const evaluation = evaluateWinCondition(updatedPlayers);
       if (evaluation.isOver && evaluation.winner && evaluation.winReason) {
+        commitActiveRound();
         setWinReason(evaluation.winReason);
         handleGameEnd(evaluation.winner, evaluation.winReason, undefined, updatedPlayers);
         navigate(GamePhase.RESULT);
       } else {
+        commitActiveRound();
         setCurrentRound((prev) => prev + 1);
         setVoteData({});
         setMostVotedPlayerId(null);
@@ -263,7 +391,7 @@ export function useOfflineMatch({ navigate, t }: UseOfflineMatchOptions) {
         navigate(GamePhase.PLAYING);
       }
     },
-    [handleGameEnd, navigate]
+    [commitActiveRound, handleGameEnd, navigate]
   );
 
   const eliminatePlayerAndCheckWin = useCallback(
@@ -272,6 +400,52 @@ export function useOfflineMatch({ navigate, t }: UseOfflineMatchOptions) {
       const earnedFoolBonus = checkFoolFirstExitBonus(players, eliminatedId);
       const partnerId = getLinkedLoverPartnerId(players, eliminatedId);
       const hasAvenger = hasSpecialRole(eliminatedPlayer, 'avenger');
+
+      if (eliminatedPlayer) {
+        matchEventsRef.current.push({
+          id: `ev_elim_r${currentRound}_${eliminatedId}`,
+          round: currentRound,
+          type: 'player_eliminated',
+          targetId: String(eliminatedId),
+          targetName: eliminatedPlayer.name,
+          outcome: eliminatedPlayer.role,
+          timestampMs: Date.now(),
+        });
+      }
+      if (earnedFoolBonus && eliminatedPlayer) {
+        matchEventsRef.current.push({
+          id: `ev_joy_r${currentRound}_${eliminatedId}`,
+          round: currentRound,
+          type: 'mr_joy_bonus',
+          actorId: String(eliminatedId),
+          actorName: eliminatedPlayer.name,
+          outcome: '+4',
+          timestampMs: Date.now(),
+        });
+      }
+      if (partnerId !== undefined && eliminatedPlayer) {
+        const partner = players.find((p) => p.id === partnerId && !p.isEliminated);
+        if (partner) {
+          matchEventsRef.current.push({
+            id: `ev_lover_r${currentRound}_${partnerId}`,
+            round: currentRound,
+            type: 'lovers_heartbreak',
+            actorId: String(eliminatedId),
+            actorName: eliminatedPlayer.name,
+            targetId: String(partnerId),
+            targetName: partner.name,
+            timestampMs: Date.now(),
+          });
+        }
+      }
+
+      const newlyEliminated = [
+        String(eliminatedId),
+        ...(partnerId !== undefined ? [String(partnerId)] : []),
+      ];
+      pendingRoundElimsRef.current = Array.from(
+        new Set([...pendingRoundElimsRef.current, ...newlyEliminated])
+      );
 
       const updatedPlayers = players.map((p) => {
         if (p.id === eliminatedId) {
@@ -305,14 +479,29 @@ export function useOfflineMatch({ navigate, t }: UseOfflineMatchOptions) {
 
       evaluateWinOrContinue(updatedPlayers);
     },
-    [players, evaluateWinOrContinue]
+    [currentRound, players, evaluateWinOrContinue]
   );
 
   const handleAvengerTargetPick = (targetId: number) => {
     playSound('dramatic');
+    const avengerPlayer = players.find((p) => p.id === pendingAvengerId);
     const targetPlayer = players.find((p) => p.id === targetId);
 
-    if (targetPlayer?.role === 'mrwhite' && relatedWords && relatedWords.length > 0) {
+    if (avengerPlayer && targetPlayer) {
+      matchEventsRef.current.push({
+        id: `ev_avenger_r${currentRound}_${targetId}`,
+        round: currentRound,
+        type: 'avenger_strike',
+        actorId: String(avengerPlayer.id),
+        actorName: avengerPlayer.name,
+        targetId: String(targetId),
+        targetName: targetPlayer.name,
+        timestampMs: Date.now(),
+      });
+    }
+
+    // Mr. White always receives their last-chance guess regardless of decoy word array presence
+    if (targetPlayer?.role === 'mrwhite') {
       const updatedAvengerOnly = players.map((p) =>
         p.id === pendingAvengerId
           ? { ...p, isEliminated: true, specialAbilityUsed: true }
@@ -326,6 +515,41 @@ export function useOfflineMatch({ navigate, t }: UseOfflineMatchOptions) {
     }
 
     const partnerId = getLinkedLoverPartnerId(players, targetId);
+    if (targetPlayer) {
+      matchEventsRef.current.push({
+        id: `ev_elim_av_r${currentRound}_${targetId}`,
+        round: currentRound,
+        type: 'player_eliminated',
+        targetId: String(targetId),
+        targetName: targetPlayer.name,
+        outcome: targetPlayer.role,
+        timestampMs: Date.now(),
+      });
+      if (partnerId !== undefined) {
+        const partner = players.find((p) => p.id === partnerId && !p.isEliminated);
+        if (partner) {
+          matchEventsRef.current.push({
+            id: `ev_lover_av_r${currentRound}_${partnerId}`,
+            round: currentRound,
+            type: 'lovers_heartbreak',
+            actorId: String(targetId),
+            actorName: targetPlayer.name,
+            targetId: String(partnerId),
+            targetName: partner.name,
+            timestampMs: Date.now(),
+          });
+        }
+      }
+    }
+
+    pendingRoundElimsRef.current = Array.from(
+      new Set([
+        ...pendingRoundElimsRef.current,
+        String(targetId),
+        ...(partnerId !== undefined ? [String(partnerId)] : []),
+      ])
+    );
+
     const updatedPlayers = players.map((p) => {
       if (
         p.id === targetId ||
@@ -345,25 +569,35 @@ export function useOfflineMatch({ navigate, t }: UseOfflineMatchOptions) {
   const finalizeVoteVictim = (target: Player, shieldedTargetId?: number | null) => {
     const shieldResult = checkShieldProtection(players, target.id, shieldedTargetId);
 
+    if (activeRoundVoteRef.current) {
+      activeRoundVoteRef.current.mostVotedId = String(target.id);
+    }
+
     if (shieldResult.shieldHolderId !== null) {
       const hasExplicitShield =
         shieldedTargetId !== null && shieldedTargetId !== undefined;
-      if (hasExplicitShield) {
+      if (hasExplicitShield || shieldResult.protected) {
         setPlayers((prev) =>
           prev.map((p) =>
             p.id === shieldResult.shieldHolderId ? { ...p, specialAbilityUsed: true } : p
           )
         );
-        if (shieldResult.protected) {
-          setBlockedBySpecial('protector');
-          setMostVotedPlayerId(target.id);
-          navigate(GamePhase.REVEAL_VOTE_RESULT);
-          return;
+      }
+      if (shieldResult.protected) {
+        const holder = players.find((p) => p.id === shieldResult.shieldHolderId);
+        if (activeRoundVoteRef.current) {
+          activeRoundVoteRef.current.wasSavedBySpecial = 'protector';
         }
-      } else if (shieldResult.protected) {
-        setPlayers((prev) =>
-          prev.map((p) => (p.id === target.id ? { ...p, specialAbilityUsed: true } : p))
-        );
+        matchEventsRef.current.push({
+          id: `ev_shield_r${currentRound}_${target.id}`,
+          round: currentRound,
+          type: 'shield_block',
+          actorId: String(shieldResult.shieldHolderId),
+          actorName: holder?.name,
+          targetId: String(target.id),
+          targetName: target.name,
+          timestampMs: Date.now(),
+        });
         setBlockedBySpecial('protector');
         setMostVotedPlayerId(target.id);
         navigate(GamePhase.REVEAL_VOTE_RESULT);
@@ -422,6 +656,19 @@ export function useOfflineMatch({ navigate, t }: UseOfflineMatchOptions) {
           const bouncedId = bouncePool[Math.floor(Math.random() * bouncePool.length)];
           const bouncedPlayer = players.find((p) => p.id === bouncedId);
           if (bouncedPlayer) {
+            if (activeRoundVoteRef.current) {
+              activeRoundVoteRef.current.bouncedFromName = votedPlayer.name;
+            }
+            matchEventsRef.current.push({
+              id: `ev_boom_r${currentRound}_${bouncedPlayer.id}`,
+              round: currentRound,
+              type: 'boomerang_bounce',
+              actorId: String(votedPlayer.id),
+              actorName: votedPlayer.name,
+              targetId: String(bouncedPlayer.id),
+              targetName: bouncedPlayer.name,
+              timestampMs: Date.now(),
+            });
             setBouncedFromName(votedPlayer.name);
             finalizeVoteVictim(bouncedPlayer, meta?.shieldedTargetId);
             return;
@@ -451,6 +698,19 @@ export function useOfflineMatch({ navigate, t }: UseOfflineMatchOptions) {
     if (!victim) return;
     playSound('dramatic');
     if (boomerangPlayer) {
+      if (activeRoundVoteRef.current) {
+        activeRoundVoteRef.current.bouncedFromName = boomerangPlayer.name;
+      }
+      matchEventsRef.current.push({
+        id: `ev_boom_r${currentRound}_${victim.id}`,
+        round: currentRound,
+        type: 'boomerang_bounce',
+        actorId: String(boomerangPlayer.id),
+        actorName: boomerangPlayer.name,
+        targetId: String(victim.id),
+        targetName: victim.name,
+        timestampMs: Date.now(),
+      });
       setBouncedFromName(boomerangPlayer.name);
     }
     finalizeVoteVictim(victim, savedMeta?.shieldedTargetId);
@@ -462,6 +722,43 @@ export function useOfflineMatch({ navigate, t }: UseOfflineMatchOptions) {
 
     const tally = tallyVotes(votes as Record<string, number>);
     if (tally.candidates.length === 0) return;
+
+    const isGroup = Boolean(meta?.isGroupVote);
+    const serializedVotes: Record<string, string> = {};
+    Object.entries(votes).forEach(([k, v]) => {
+      serializedVotes[String(k)] = String(v);
+    });
+
+    activeRoundVoteRef.current = {
+      roundNumber: currentRound,
+      voteMode: isGroup ? 'group' : 'secret',
+      votesByPlayerId: serializedVotes,
+      mostVotedId: null,
+      eliminatedIds: [],
+      wasSavedBySpecial: null,
+      bouncedFromName: null,
+      tieBroken: tally.isTie,
+      tieBrokenByJustice: false,
+      mrWhiteGuess: null,
+    };
+
+    if (!isGroup) {
+      players.forEach((p) => {
+        if (p.isEliminated && hasSpecialRole(p, 'ghost') && votes[p.id] !== undefined) {
+          const target = players.find((t) => t.id === votes[p.id]);
+          matchEventsRef.current.push({
+            id: `ev_ghost_r${currentRound}_${p.id}`,
+            round: currentRound,
+            type: 'ghost_vote',
+            actorId: String(p.id),
+            actorName: p.name,
+            targetId: String(votes[p.id]),
+            targetName: target?.name,
+            timestampMs: Date.now(),
+          });
+        }
+      });
+    }
 
     if (tally.isTie) {
       const justicePlayer = players.find((p) => hasSpecialRole(p, 'justice'));
@@ -483,6 +780,7 @@ export function useOfflineMatch({ navigate, t }: UseOfflineMatchOptions) {
     if (!votedPlayer) return;
 
     if (blockedBySpecial) {
+      commitActiveRound([]);
       setCurrentRound((prev) => prev + 1);
       setVoteData({});
       setMostVotedPlayerId(null);
@@ -501,8 +799,30 @@ export function useOfflineMatch({ navigate, t }: UseOfflineMatchOptions) {
     }
   };
 
-  const handleImpostorGuess = (isCorrect: boolean) => {
+  const handleImpostorGuess = (isCorrect: boolean, guessedWord?: string) => {
+    const guesser = players.find((p) => p.id === mostVotedPlayerId);
+    if (guesser) {
+      if (activeRoundVoteRef.current) {
+        activeRoundVoteRef.current.mrWhiteGuess = {
+          playerId: String(guesser.id),
+          playerName: guesser.name,
+          guess: guessedWord,
+          isCorrect,
+        };
+      }
+      matchEventsRef.current.push({
+        id: `ev_mw_guess_r${currentRound}_${guesser.id}`,
+        round: currentRound,
+        type: 'mr_white_guess',
+        actorId: String(guesser.id),
+        actorName: guesser.name,
+        outcome: isCorrect ? 'correct' : 'wrong',
+        timestampMs: Date.now(),
+      });
+    }
+
     if (isCorrect) {
+      commitActiveRound([]);
       setWinReason('impostor_guessed');
       handleGameEnd('impostor', 'impostor_guessed', undefined, undefined, mostVotedPlayerId);
       navigate(GamePhase.RESULT);
@@ -531,6 +851,21 @@ export function useOfflineMatch({ navigate, t }: UseOfflineMatchOptions) {
   const resolveTieWithJustice = (candId: number) => {
     playSound('vote');
     const savedMeta = pendingVoteMeta;
+    const justicePlayer = players.find((p) => hasSpecialRole(p, 'justice'));
+    const chosenTarget = players.find((p) => p.id === candId);
+    if (activeRoundVoteRef.current) {
+      activeRoundVoteRef.current.tieBrokenByJustice = true;
+    }
+    matchEventsRef.current.push({
+      id: `ev_justice_r${currentRound}_${candId}`,
+      round: currentRound,
+      type: 'justice_tiebreak',
+      actorId: justicePlayer ? String(justicePlayer.id) : undefined,
+      actorName: justicePlayer?.name,
+      targetId: String(candId),
+      targetName: chosenTarget?.name,
+      timestampMs: Date.now(),
+    });
     setPendingTieCandidates(null);
     resolveVoteTarget(candId, voteData, savedMeta || undefined);
   };
@@ -558,10 +893,11 @@ export function useOfflineMatch({ navigate, t }: UseOfflineMatchOptions) {
     pendingAvengerId,
     pendingBoomerangId,
     descriptionsLog,
-    setDescriptionsLog,
+    setDescriptionsLog: appendDescriptionEntry,
     lastWinner,
     winReason,
     currentRound,
+    latestCaseFile,
     gameSettings,
     setPlayerRole,
     handleGameSettingsConfirmed,

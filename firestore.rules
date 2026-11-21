@@ -289,5 +289,14 @@ service cloud.firestore {
     match /rateLimits/{limitId} {
       allow read, write: if false;
     }
+
+    // 9. Post-Match Classified Case Files (Server-written on RESULT; participant-gated reads)
+    match /matchReports/{reportId} {
+      allow get: if isSignedIn() && isValidId(reportId) && (
+        (existing().participantIds is list && request.auth.uid in existing().participantIds) || isAdmin()
+      );
+      allow list: if isSignedIn() && request.auth.uid in existing().participantIds;
+      allow create, update, delete: if false;
+    }
   }
 }

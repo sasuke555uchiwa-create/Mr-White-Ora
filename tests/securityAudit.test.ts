@@ -15,9 +15,14 @@ import {
   executeReturnToLobby,
   executeStartRound,
   executeStartVoting,
+  executeSubmitClue,
   executeSubmitMrWhiteGuess,
   executeSubmitVote,
 } from '../functions/src/gameHandlers';
+import {
+  applyMatchSettlementWrites,
+  readPlayerProfileDocs,
+} from '../functions/src/matchSettlement';
 import {
   executeCreateRoom,
   executeJoinRoom,
@@ -1354,5 +1359,299 @@ describe('P0 & P1 Security Audit Regression Suite', () => {
     for (const fnName of calledNames) {
       expect(indexSrc).toMatch(new RegExp(`\\b${fnName}\\b`));
     }
+  });
+
+  it('21. Online match writes /matchReports/{reportId} only on RESULT, preserves multi-round ballots & >80 clues, and stays idempotent', async () => {
+    const db = new InMemoryFirestore();
+    let currentNow = 1_710_000_000_000;
+    const deps = { db, serverTimestamp: () => 'SERVER_TS', now: () => currentNow };
+
+    const uids = ['p1', 'p2', 'p3', 'p4', 'p5'];
+    for (const u of uids) {
+      db.setRaw(`users/${u}`, {
+        uid: u,
+        displayName: `Agent_${u}`,
+        photoURL: '',
+        xp: 100,
+        level: 1,
+        stats: { wins: 0, played: 0, hosted: 0, currentStreak: 0, longestStreak: 0, roleStats: {} },
+      });
+      db.setRaw(`publicProfiles/${u}`, {
+        uid: u,
+        displayName: `Agent_${u}`,
+        photoURL: '',
+        xp: 100,
+        level: 1,
+        stats: { wins: 0, played: 0, hosted: 0, currentStreak: 0, longestStreak: 0, roleStats: {} },
+      });
+    }
+
+    db.setRaw('rooms/r_cf1', {
+      id: 'r_cf1',
+      code: 'CF100',
+      hostId: 'p1',
+      status: 'waiting',
+      language: 'en',
+      category: 'standard',
+      difficulty: 'easy',
+      turnDurationSeconds: 45,
+      players: uids.map((u) => ({
+        uid: u,
+        name: `Agent_${u}`,
+        avatar: '',
+        isReady: true,
+        isEliminated: false,
+        score: 0,
+      })),
+      playerIds: [...uids],
+      gameState: null,
+    });
+
+    await executeBeginMatch(deps, 'p1', { roomId: 'r_cf1' });
+    await executeStartRound(deps, 'p1', { roomId: 'r_cf1' });
+    for (const u of uids) {
+      await executeMarkRevealReady(deps, u, { roomId: 'r_cf1' });
+    }
+
+    const roomAfterReveal = db.getRaw('rooms/r_cf1')!;
+    const privAfterReveal = db.getRaw('rooms/r_cf1/privateState/current')!;
+    const matchId = roomAfterReveal.gameState.matchId as string;
+    const expectedReportId = `r_cf1_${matchId}`;
+
+    // No match report may exist before RESULT
+    expect(db.getRaw(`matchReports/${expectedReportId}`)).toBeUndefined();
+
+    // Seed 82 historical clues on both public (sliced to 80) and privateState.cluesHistory
+    // before running real Round 1 & Round 2 submitClue calls, verifying >80 preservation.
+    const preClues = Array.from({ length: 82 }, (_, idx) => ({
+      id: `seed_c_${idx + 1}`,
+      uid: uids[idx % uids.length],
+      name: `Agent_${uids[idx % uids.length]}`,
+      avatar: '',
+      text: `historical clue ${idx + 1}`,
+      round: 1,
+    }));
+    roomAfterReveal.gameState.clues = preClues.slice(-80);
+    privAfterReveal.cluesHistory = [...preClues];
+    db.setRaw('rooms/r_cf1', roomAfterReveal);
+    db.setRaw('rooms/r_cf1/privateState/current', privAfterReveal);
+
+    // Force deterministic roles so Round 1 eliminates a Citizen and Round 2 eliminates Mr. White
+    privAfterReveal.rolesByUid = {
+      p1: 'citizen',
+      p2: 'citizen',
+      p3: 'citizen',
+      p4: 'citizen',
+      p5: 'mrwhite',
+    };
+    privAfterReveal.impostorIds = ['p5'];
+    privAfterReveal.undercoverIds = [];
+    db.setRaw('rooms/r_cf1/privateState/current', privAfterReveal);
+
+    // Round 1: submit real clue for every turn in turnOrder, then start voting and vote out p4 (citizen)
+    for (const turnUid of roomAfterReveal.gameState.turnOrder as string[]) {
+      await executeSubmitClue(deps, turnUid, {
+        roomId: 'r_cf1',
+        text: turnUid === roomAfterReveal.gameState.turnOrder[0] ? 'R1 verified clue' : `R1 clue ${turnUid}`,
+      });
+    }
+
+    await executeStartVoting(deps, 'p1', { roomId: 'r_cf1' });
+    await executeSubmitVote(deps, 'p1', { roomId: 'r_cf1', suspectUid: 'p4' });
+    await executeSubmitVote(deps, 'p2', { roomId: 'r_cf1', suspectUid: 'p4' });
+    await executeSubmitVote(deps, 'p3', { roomId: 'r_cf1', suspectUid: 'p4' });
+    currentNow += FORCE_RESOLVE_MIN_ELAPSED_MS + 1_000;
+    await executeResolveVotes(deps, 'p1', { roomId: 'r_cf1' });
+    expect(db.getRaw(`matchReports/${expectedReportId}`)).toBeUndefined();
+
+    await executeProceedAfterVoteReveal(deps, 'p1', { roomId: 'r_cf1' });
+    const roomR2 = db.getRaw('rooms/r_cf1')!;
+    expect(roomR2.gameState.phase).toBe('PLAYING');
+    expect(roomR2.gameState.round).toBe(2);
+    expect(db.getRaw(`matchReports/${expectedReportId}`)).toBeUndefined();
+
+    // Round 2: submit real clues for all remaining alive players, then vote out p5 (mrwhite) and miss guess -> RESULT
+    currentNow += 5_000;
+    for (const turnUid of roomR2.gameState.turnOrder as string[]) {
+      await executeSubmitClue(deps, turnUid, {
+        roomId: 'r_cf1',
+        text: turnUid === roomR2.gameState.turnOrder[0] ? 'R2 verified clue' : `R2 clue ${turnUid}`,
+      });
+    }
+    await executeStartVoting(deps, 'p1', { roomId: 'r_cf1' });
+
+    await executeSubmitVote(deps, 'p1', { roomId: 'r_cf1', suspectUid: 'p5' });
+    await executeSubmitVote(deps, 'p2', { roomId: 'r_cf1', suspectUid: 'p5' });
+    await executeSubmitVote(deps, 'p3', { roomId: 'r_cf1', suspectUid: 'p5' });
+    currentNow += FORCE_RESOLVE_MIN_ELAPSED_MS + 1_000;
+    await executeResolveVotes(deps, 'p1', { roomId: 'r_cf1' });
+    await executeProceedAfterVoteReveal(deps, 'p1', { roomId: 'r_cf1' });
+
+    expect(db.getRaw('rooms/r_cf1')!.gameState.phase).toBe('IMPOSTOR_GUESS');
+    expect(db.getRaw(`matchReports/${expectedReportId}`)).toBeUndefined();
+
+    currentNow += 10_000;
+    await executeSubmitMrWhiteGuess(deps, 'p5', {
+      roomId: 'r_cf1',
+      guess: '__definitely_wrong_secret_guess__',
+    });
+
+    const settledRoom = db.getRaw('rooms/r_cf1')!;
+    expect(settledRoom.gameState.phase).toBe('RESULT');
+    expect(settledRoom.gameState.caseFileReportId).toBe(expectedReportId);
+
+    const report = db.getRaw(`matchReports/${expectedReportId}`)!;
+    expect(report).toBeDefined();
+    expect(report.mode).toBe('online');
+    expect(report.reportId).toBe(expectedReportId);
+    expect(report.operationCode).toMatch(/^OP-\d{4}$/);
+    expect(report.winner).toBe('citizens');
+    expect(report.participantIds).toEqual(expect.arrayContaining(uids));
+    expect(report.roundCount).toBe(2);
+    expect(report.rounds.length).toBe(2);
+
+    // Public gameState.clues is capped at 80, while privateState + matchReport preserve all 91 clues (82 seeded + 5 R1 + 4 R2)
+    expect(settledRoom.gameState.clues.length).toBe(80);
+    const totalReportClues =
+      report.rounds[0].clues.length + report.rounds[1].clues.length;
+    expect(totalReportClues).toBe(91);
+    expect(report.rounds[0].clues.some((c: any) => c.text === 'R1 verified clue')).toBe(true);
+    expect(report.rounds[1].clues.some((c: any) => c.text === 'R2 verified clue')).toBe(true);
+
+    // Verify Mr. White guess record + GHOST_PROTOCOL not_applicable in Online Classic
+    expect(report.rounds[1].mrWhiteGuess?.guess).toBe('__definitely_wrong_secret_guess__');
+    expect(report.rounds[1].mrWhiteGuess?.isCorrect).toBe(false);
+    const ghostAward = report.awards.find((a: any) => a.awardId === 'GHOST_PROTOCOL');
+    expect(ghostAward?.status).toBe('not_applicable');
+
+    // Idempotency check: re-running applyMatchSettlementWrites on same matchId does not duplicate XP or overwrite report
+    const p1XpBefore = db.getRaw('users/p1')!.xp;
+    await db.runTransaction(async (tx) => {
+      const roomSnap = await tx.get(db.collection('rooms').doc('r_cf1'));
+      const privSnap = await tx.get(db.collection('rooms').doc('r_cf1').collection('privateState').doc('current'));
+      const rData = roomSnap.data()!;
+      const pState = privSnap.data()! as any;
+      const profMap = await readPlayerProfileDocs(
+        db,
+        tx,
+        rData.players.map((p: any) => p.uid)
+      );
+      applyMatchSettlementWrites({
+        db,
+        serverTimestamp: () => 'SERVER_TS',
+        tx,
+        roomRef: db.collection('rooms').doc('r_cf1'),
+        roomData: rData,
+        privateStateRef: db.collection('rooms').doc('r_cf1').collection('privateState').doc('current'),
+        privateState: pState,
+        players: rData.players,
+        profileMap: profMap,
+        winner: 'citizens',
+        winReason: 'impostor_caught',
+        endedAtMs: currentNow + 5000,
+      });
+    });
+    expect(db.getRaw('users/p1')!.xp).toBe(p1XpBefore);
+    expect(db.getRaw(`matchReports/${expectedReportId}`)!.endedAtMs).toBe(currentNow);
+  });
+
+  it('22. Mid-match player kick preserves departed player dossier, participantIds access, and player_departed event in matchReports', async () => {
+    const db = new InMemoryFirestore();
+    const nowMs = 1_710_100_000_000;
+    const deps = { db, serverTimestamp: () => 'SERVER_TS', now: () => nowMs };
+
+    const uids = ['p1', 'p2', 'p3', 'p4'];
+    for (const u of uids) {
+      db.setRaw(`users/${u}`, {
+        uid: u,
+        displayName: `Op_${u}`,
+        photoURL: '',
+        xp: 50,
+        level: 1,
+        stats: { wins: 0, played: 0, hosted: 0, currentStreak: 0, longestStreak: 0, roleStats: {} },
+      });
+      db.setRaw(`publicProfiles/${u}`, {
+        uid: u,
+        displayName: `Op_${u}`,
+        photoURL: '',
+        xp: 50,
+        level: 1,
+        stats: { wins: 0, played: 0, hosted: 0, currentStreak: 0, longestStreak: 0, roleStats: {} },
+      });
+    }
+
+    db.setRaw('rooms/r_cf_kick', {
+      id: 'r_cf_kick',
+      code: 'CFK01',
+      hostId: 'p1',
+      status: 'playing',
+      language: 'en',
+      category: 'animals',
+      difficulty: 'easy',
+      players: uids.map((u) => ({
+        uid: u,
+        name: `Op_${u}`,
+        avatar: '',
+        isReady: true,
+        isEliminated: false,
+        score: 0,
+      })),
+      playerIds: [...uids],
+      gameState: {
+        phase: 'VOTING',
+        matchId: 'm_kick_1',
+        round: 1,
+        category: 'animals',
+        difficulty: 'easy',
+        turnOrder: [...uids],
+        currentTurnIndex: 0,
+        turnsCompleted: true,
+        clues: [],
+        votedUids: [],
+        votingStartedAt: nowMs - 20_000,
+      },
+    });
+    db.setRaw('rooms/r_cf_kick/privateState/current', {
+      matchId: 'm_kick_1',
+      round: 1,
+      startedAtMs: nowMs - 60_000,
+      civilianWord: 'Lion',
+      undercoverWord: 'Tiger',
+      decoys: [],
+      impostorIds: [],
+      undercoverIds: ['p4'],
+      rolesByUid: { p1: 'citizen', p2: 'citizen', p3: 'citizen', p4: 'undercover' },
+      rosterByUid: {
+        p1: { name: 'Op_p1', avatar: '' },
+        p2: { name: 'Op_p2', avatar: '' },
+        p3: { name: 'Op_p3', avatar: '' },
+        p4: { name: 'Op_p4', avatar: '' },
+      },
+      votesByUid: {},
+      cluesHistory: [],
+      roundHistory: [],
+      matchEvents: [],
+      settledMatches: [],
+    });
+
+    // Kick citizen p3 mid-match
+    await executeKickPlayer(deps, 'p1', { roomId: 'r_cf_kick', targetUid: 'p3' });
+    expect(db.getRaw('rooms/r_cf_kick')!.gameState.phase).toBe('VOTING');
+
+    // Remaining citizens vote out undercover p4 -> resolve votes -> proceed -> triggers settlement & matchReport
+    await executeSubmitVote(deps, 'p1', { roomId: 'r_cf_kick', suspectUid: 'p4' });
+    await executeSubmitVote(deps, 'p2', { roomId: 'r_cf_kick', suspectUid: 'p4' });
+    await executeResolveVotes(deps, 'p1', { roomId: 'r_cf_kick' });
+    await executeProceedAfterVoteReveal(deps, 'p1', { roomId: 'r_cf_kick' });
+
+    const report = db.getRaw('matchReports/r_cf_kick_m_kick_1')!;
+    expect(report).toBeDefined();
+    expect(report.participantIds).toContain('p3');
+    const kickedDossier = report.players.find((p: any) => p.uid === 'p3');
+    expect(kickedDossier).toBeDefined();
+    expect(kickedDossier.survived).toBe(false);
+    expect(
+      report.specialEvents.some((ev: any) => ev.type === 'player_departed' && ev.targetId === 'p3')
+    ).toBe(true);
   });
 });

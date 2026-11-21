@@ -123,6 +123,20 @@ describe('Firestore Security Rules', () => {
         count: 1,
         expiresAt: Date.now() + 60_000,
       });
+      await setDoc(doc(db, 'matchReports', 'room_private_match_1'), {
+        schemaVersion: 1,
+        reportId: 'room_private_match_1',
+        operationCode: 'OP-4210',
+        mode: 'online',
+        roomId: 'room_private',
+        matchId: 'match_1',
+        endedAtMs: Date.now(),
+        winner: 'citizens',
+        participantIds: ['alice', 'bob'],
+        players: [],
+        rounds: [],
+        awards: [],
+      });
     });
   });
 
@@ -369,5 +383,43 @@ describe('Firestore Security Rules', () => {
         count: 0,
       })
     );
+  });
+
+  it('ALLOWS matchReports participant get & filtered list, ALLOWS admin get, and DENIES outsiders, unauth, and client writes', async () => {
+    const charlieDb = testEnv
+      .authenticatedContext('charlie', { email: 'charlie@example.com', email_verified: true })
+      .firestore();
+    const unauthDb = testEnv.unauthenticatedContext().firestore();
+
+    await assertSucceeds(getDoc(doc(aliceDb(), 'matchReports', 'room_private_match_1')));
+    await assertSucceeds(
+      getDocs(
+        query(
+          collection(bobDb(), 'matchReports'),
+          where('participantIds', 'array-contains', 'bob'),
+          orderBy('endedAtMs', 'desc')
+        )
+      )
+    );
+
+    await assertFails(getDoc(doc(charlieDb, 'matchReports', 'room_private_match_1')));
+    await assertFails(getDoc(doc(unauthDb, 'matchReports', 'room_private_match_1')));
+    await assertFails(getDocs(collection(aliceDb(), 'matchReports')));
+    await assertFails(
+      setDoc(doc(aliceDb(), 'matchReports', 'forged_report'), {
+        reportId: 'forged_report',
+        participantIds: ['alice'],
+      })
+    );
+    await assertFails(
+      updateDoc(doc(aliceDb(), 'matchReports', 'room_private_match_1'), {
+        winner: 'impostor',
+      })
+    );
+
+    await testEnv.withSecurityRulesDisabled(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), 'admins', 'charlie'), { active: true });
+    });
+    await assertSucceeds(getDoc(doc(charlieDb, 'matchReports', 'room_private_match_1')));
   });
 });

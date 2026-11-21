@@ -2,7 +2,7 @@ import React from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { signInWithGoogle, signInWithGoogleRedirect, handleRedirectResult, logOut } from '../firebase';
 import { motion } from 'framer-motion';
-import { ArrowRight, Edit2, Award, Flame, CheckCircle, Circle, Image as ImageIcon, RefreshCw, AlertCircle } from 'lucide-react';
+import { Archive, ArrowRight, Edit2, Award, Flame, CheckCircle, Circle, Image as ImageIcon, RefreshCw, AlertCircle } from 'lucide-react';
 
 import { doc, serverTimestamp, writeBatch } from 'firebase/firestore';
 import { db } from '../firebase';
@@ -26,9 +26,10 @@ import {
 
 interface ProfileScreenProps {
   onBack: () => void;
+  onOpenArchive?: () => void;
 }
 
-export const ProfileScreen: React.FC<ProfileScreenProps> = ({ onBack }) => {
+export const ProfileScreen: React.FC<ProfileScreenProps> = ({ onBack, onOpenArchive }) => {
   const { user, profile, loading } = useAuth();
   const [isSigningIn, setIsSigningIn] = React.useState(false);
   const [authError, setAuthError] = React.useState<string | null>(null);
@@ -226,9 +227,18 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ onBack }) => {
             </button>
           )}
         </div>
+        {onOpenArchive && (
+          <button
+            onClick={onOpenArchive}
+            className="mt-4 px-5 py-2.5 rounded-2xl bg-sky-500/15 hover:bg-sky-500/25 border border-sky-400/35 text-sky-300 font-black text-sm flex items-center gap-2 transition-colors"
+          >
+            <Archive size={16} />
+            <span>{getUITranslation(lang, 'operationArchive')}</span>
+          </button>
+        )}
         <button
           onClick={onBack}
-          className="mt-6 text-text-muted hover:text-white transition-colors"
+          className="mt-4 text-text-muted hover:text-white transition-colors"
         >
           {getUITranslation(lang, 'backToHome')}
         </button>
@@ -247,10 +257,19 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ onBack }) => {
       dir={isRTL ? 'rtl' : 'ltr'}
     >
       {/* Header */}
-      <div className={`flex justify-between items-center mb-8 ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
-        <button onClick={onBack} className="p-3 card-modern">
+      <div className={`flex justify-between items-center mb-8 gap-3 ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
+        <button onClick={onBack} className="p-3 card-modern min-h-[44px] min-w-[44px] flex items-center justify-center">
           <ArrowRight className={`w-6 h-6 ${isRTL ? '' : 'rotate-180'}`} />
         </button>
+        {onOpenArchive && (
+          <button
+            onClick={onOpenArchive}
+            className="min-h-[44px] px-4 py-2 rounded-2xl bg-sky-500/15 hover:bg-sky-500/25 border border-sky-400/35 text-sky-200 font-black text-xs sm:text-sm flex items-center gap-2 transition-colors"
+          >
+            <Archive size={16} />
+            <span>{getUITranslation(lang, 'operationArchive')}</span>
+          </button>
+        )}
       </div>
 
       {/* Avatar & Name */}

@@ -1,17 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import { getScores, getSettings, getInventoryMap } from '../services/storageService';
 import { SHOP_ITEMS } from '../data/shopItems';
-import { Medal, TrendingDown, ArrowLeft, Play } from 'lucide-react';
+import { Medal, TrendingDown, ArrowLeft, Play, Archive } from 'lucide-react';
 import { getUITranslation } from '../translations';
 
 interface ScoreboardScreenProps {
   onBack: () => void;
   onNextRound?: () => void;
+  onOpenArchive?: () => void;
 }
 
 export const ScoreboardScreen: React.FC<ScoreboardScreenProps> = ({
   onBack,
   onNextRound,
+  onOpenArchive,
 }) => {
   const [scores, setScores] = useState<Record<string, number>>({});
   const settings = getSettings();
@@ -127,6 +129,15 @@ export const ScoreboardScreen: React.FC<ScoreboardScreenProps> = ({
         </div>
 
         <div className="mt-4 flex flex-col gap-2.5">
+          {onOpenArchive && (
+            <button
+              onClick={onOpenArchive}
+              className="w-full min-h-[48px] py-3 rounded-2xl bg-sky-500/15 hover:bg-sky-500/25 border border-sky-400/35 text-sky-200 font-black flex items-center justify-center gap-2 text-sm transition-colors"
+            >
+              <Archive size={17} />
+              <span>{t('operationArchive')}</span>
+            </button>
+          )}
           {onNextRound && (
             <button
               onClick={onNextRound}

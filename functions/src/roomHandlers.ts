@@ -99,7 +99,7 @@ async function resolveCallerPlayerInfo(
   const rawAvatar =
     (typeof src.photoURL === 'string' && src.photoURL) ||
     (typeof authToken?.picture === 'string' && authToken.picture) ||
-    `https://api.dicebear.com/7.x/avataaars/svg?seed=${uid}`;
+    '';
   return {
     name: rawName.slice(0, 40),
     avatar: rawAvatar.slice(0, 2097152),
@@ -215,10 +215,37 @@ function applyMemberRemovalInTx(params: {
     return { shouldDeleteRoom: false };
   }
 
+  const nowMs = getCurrentTime(deps);
+  const removedPlayer = players.find((p) => p.uid === targetUid);
+  const roundNum = Number(data.gameState?.round || privateState.round || 1);
+  const departedName =
+    removedPlayer?.name || privateState.rosterByUid?.[targetUid]?.name || targetUid;
+  const nextRosterByUid = {
+    ...(privateState.rosterByUid || {}),
+    ...(removedPlayer
+      ? { [targetUid]: { name: removedPlayer.name, avatar: removedPlayer.avatar || '' } }
+      : {}),
+  };
+  const nextMatchEvents = [
+    ...(privateState.matchEvents || []),
+    {
+      id: `depart-r${roundNum}-${targetUid}-${nowMs}`,
+      round: roundNum,
+      type: 'player_departed' as const,
+      actorId: targetUid,
+      actorName: departedName,
+      targetId: targetUid,
+      targetName: departedName,
+      outcome: addToKicked ? 'kicked' : 'left',
+      timestampMs: nowMs,
+    },
+  ];
   const cleanedVotesByUid = cleanVotesForRemovedPlayer(privateState.votesByUid, targetUid);
   const cleanedPrivateState: PrivateGameStateDoc = {
     ...privateState,
+    rosterByUid: nextRosterByUid,
     votesByUid: cleanedVotesByUid,
+    matchEvents: nextMatchEvents,
   };
 
   const winCheck = evaluateOnlineWin(remainingPlayers, cleanedPrivateState.rolesByUid);
@@ -235,13 +262,13 @@ function applyMemberRemovalInTx(params: {
       profileMap,
       winner: winCheck.winner,
       winReason: winCheck.winReason,
+      endedAtMs: nowMs,
       extraRoomUpdates: extraUpdates,
     });
     return { shouldDeleteRoom: false };
   }
 
   const gameState = { ...(data.gameState || {}) };
-  const nowMs = getCurrentTime(deps);
   const turnDuration = Number(data.turnDurationSeconds || 45);
   const alivePlayers = remainingPlayers.filter((p) => !p.isEliminated);
   const aliveSet = new Set(alivePlayers.map((p) => p.uid));
@@ -381,13 +408,15 @@ function applyMemberRemovalInTx(params: {
   gameState.mrWhiteCount = isEasy ? aliveMrWhiteCount : null;
   gameState.undercoverCount = isEasy ? aliveUndercoverCount : null;
 
-  if (shouldUpdatePrivateStateVotes) {
-    tx.update(privateStateRef, {
-      votesByUid: privateStateRoundPatch !== undefined ? {} : cleanedVotesByUid,
-      ...(privateStateRoundPatch !== undefined ? { round: privateStateRoundPatch } : {}),
-      updatedAt: deps.serverTimestamp(),
-    });
-  }
+  tx.update(privateStateRef, {
+    rosterByUid: nextRosterByUid,
+    matchEvents: nextMatchEvents,
+    ...(shouldUpdatePrivateStateVotes
+      ? { votesByUid: privateStateRoundPatch !== undefined ? {} : cleanedVotesByUid }
+      : {}),
+    ...(privateStateRoundPatch !== undefined ? { round: privateStateRoundPatch } : {}),
+    updatedAt: deps.serverTimestamp(),
+  });
 
   tx.update(roomRef, {
     ...extraUpdates,

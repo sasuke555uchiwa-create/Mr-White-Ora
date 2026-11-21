@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Key, Trophy, Check, Heart } from 'lucide-react';
+import { Key, Trophy, Check, Heart, FileText } from 'lucide-react';
 import { Avatar } from './Avatar';
 import { Player } from '../types';
 import { playSound } from '../services/soundService';
@@ -24,6 +24,7 @@ interface ResultScreenProps {
   isHost?: boolean;
   onBackToLobby?: () => void;
   onLeaveRoom?: () => void;
+  onOpenCaseFile?: () => void;
 }
 
 const SPARKLE_POSITIONS = [
@@ -52,6 +53,7 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({
   isHost = true,
   onBackToLobby,
   onLeaveRoom,
+  onOpenCaseFile,
 }) => {
   const [winnerSelected, setWinnerSelected] = useState<boolean>(!!roundWinner);
   const [showWinOverlay, setShowWinOverlay] = useState<boolean>(!!roundWinner);
@@ -336,21 +338,47 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({
       </div>
 
       {winnerSelected && !isOnline && (
-        <motion.button
-          whileHover={{ scale: 1.03 }}
-          whileTap={{ scale: 0.97 }}
-          onClick={() => {
-            playSound('click');
-            onNext();
-          }}
-          className="btn-modern w-full max-w-md py-4 rounded-[2rem] text-lg font-black mt-auto text-white"
-        >
-          <span className="tracking-wide">{t('next')}</span>
-        </motion.button>
+        <div className="w-full max-w-md mt-auto space-y-2.5">
+          {onOpenCaseFile && (
+            <button
+              onClick={() => {
+                playSound('click');
+                onOpenCaseFile();
+              }}
+              className="w-full min-h-[48px] py-3.5 px-4 rounded-2xl bg-sky-500/15 hover:bg-sky-500/25 border border-sky-400/45 text-sky-200 font-black text-sm flex items-center justify-center gap-2 transition-colors"
+            >
+              <FileText size={17} />
+              <span>{t('viewClassifiedCaseFile')}</span>
+            </button>
+          )}
+          <motion.button
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.97 }}
+            onClick={() => {
+              playSound('click');
+              onNext();
+            }}
+            className="btn-modern w-full py-4 rounded-[2rem] text-lg font-black text-white"
+          >
+            <span className="tracking-wide">{t('next')}</span>
+          </motion.button>
+        </div>
       )}
 
       {winnerSelected && isOnline && (
         <div className="w-full max-w-md mt-auto space-y-2.5">
+          {onOpenCaseFile && (
+            <button
+              onClick={() => {
+                playSound('click');
+                onOpenCaseFile();
+              }}
+              className="w-full min-h-[48px] py-3.5 px-4 rounded-2xl bg-sky-500/15 hover:bg-sky-500/25 border border-sky-400/45 text-sky-200 font-black text-sm flex items-center justify-center gap-2 transition-colors"
+            >
+              <FileText size={17} />
+              <span>{t('viewClassifiedCaseFile')}</span>
+            </button>
+          )}
           {isHost ? (
             <div className="flex flex-col gap-2.5">
               <button

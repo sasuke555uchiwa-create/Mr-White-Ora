@@ -7,6 +7,8 @@ const HIDDEN_WORDS_KEY = 'chkoun_barra_hidden_words';
 const CUSTOM_WORDS_KEY = 'chkoun_barra_custom_words';
 const CUSTOM_CATEGORIES_KEY = 'chkoun_barra_custom_categories';
 const INVENTORY_KEY = 'chkoun_barra_inventory';
+const CASE_FILES_KEY = 'chkoun_barra_case_files_v1';
+const MAX_LOCAL_CASE_FILES = 40;
 
 const ALLOWED_THEMES = ['dark', 'gray', 'light', 'system'] as const;
 const ALLOWED_BUTTON_COLORS = ['default', 'blue', 'green', 'red', 'purple', 'orange'] as const;
@@ -205,6 +207,7 @@ export const clearAllData = () => {
   localStorage.removeItem(CUSTOM_WORDS_KEY);
   localStorage.removeItem(CUSTOM_CATEGORIES_KEY);
   localStorage.removeItem(INVENTORY_KEY);
+  localStorage.removeItem(CASE_FILES_KEY);
 };
 
 export const getSettings = (): AppSettings => {
@@ -634,4 +637,46 @@ export const clearLocalSessionStats = (uid?: string | null): SessionStatsSnapsho
   }
   safeWriteJson(SESSION_STATS_KEY, store);
   return getSessionStats(uid);
+};
+
+// --- Classified Case Files Local Archive ---
+
+import type { ClassifiedCaseFile } from '../types';
+
+export const getLocalCaseFiles = (): ClassifiedCaseFile[] => {
+  const parsed = safeReadJson<unknown>(CASE_FILES_KEY, []);
+  if (!Array.isArray(parsed)) return [];
+  return parsed
+    .filter((item): item is ClassifiedCaseFile => {
+      if (!item || typeof item !== 'object') return false;
+      const rec = item as Record<string, unknown>;
+      return (
+        typeof rec.reportId === 'string' &&
+        typeof rec.endedAtMs === 'number' &&
+        Array.isArray(rec.players) &&
+        Array.isArray(rec.rounds)
+      );
+    })
+    .sort((a, b) => b.endedAtMs - a.endedAtMs);
+};
+
+export const getLocalCaseFileById = (reportId: string): ClassifiedCaseFile | null => {
+  if (!reportId) return null;
+  return getLocalCaseFiles().find((f) => f.reportId === reportId) || null;
+};
+
+export const saveLocalCaseFile = (report: ClassifiedCaseFile): ClassifiedCaseFile[] => {
+  if (!report || !report.reportId) return getLocalCaseFiles();
+  const existing = getLocalCaseFiles().filter((f) => f.reportId !== report.reportId);
+  const next = [report, ...existing]
+    .sort((a, b) => b.endedAtMs - a.endedAtMs)
+    .slice(0, MAX_LOCAL_CASE_FILES);
+  safeWriteJson(CASE_FILES_KEY, next);
+  return next;
+};
+
+export const deleteLocalCaseFile = (reportId: string): ClassifiedCaseFile[] => {
+  const next = getLocalCaseFiles().filter((f) => f.reportId !== reportId);
+  safeWriteJson(CASE_FILES_KEY, next);
+  return next;
 };

@@ -175,6 +175,50 @@
         "expiresAt": { "type": "string", "format": "date-time" }
       },
       "required": ["uid", "action", "windowStart", "count", "expiresAt"]
+    },
+    "MatchReport": {
+      "title": "MatchReport",
+      "description": "Server-generated post-match Classified Case File archive, written atomically upon match RESULT and readable solely by match participants.",
+      "type": "object",
+      "properties": {
+        "schemaVersion": { "type": "number" },
+        "reportId": { "type": "string", "maxLength": 128 },
+        "operationCode": { "type": "string", "maxLength": 32 },
+        "mode": { "type": "string", "enum": ["online"] },
+        "roomId": { "type": "string", "maxLength": 128 },
+        "matchId": { "type": "string", "maxLength": 128 },
+        "startedAtMs": { "type": "number" },
+        "endedAtMs": { "type": "number" },
+        "durationSeconds": { "type": "number" },
+        "language": { "type": "string", "maxLength": 10 },
+        "category": { "type": "string", "maxLength": 32 },
+        "difficulty": { "type": "string", "enum": ["easy", "hard"] },
+        "winner": { "type": "string", "enum": ["citizens", "impostor"] },
+        "winningFaction": { "type": "string" },
+        "winReason": { "type": "string" },
+        "secretWord": { "type": "string", "maxLength": 120 },
+        "undercoverWord": { "type": "string", "maxLength": 120 },
+        "participantIds": { "type": "array" },
+        "players": { "type": "array" },
+        "rounds": { "type": "array" },
+        "specialEvents": { "type": "array" },
+        "turningPoints": { "type": "array" },
+        "awards": { "type": "array" }
+      },
+      "required": [
+        "schemaVersion",
+        "reportId",
+        "operationCode",
+        "mode",
+        "roomId",
+        "matchId",
+        "endedAtMs",
+        "winner",
+        "participantIds",
+        "players",
+        "rounds",
+        "awards"
+      ]
     }
   },
   "firestore": {
@@ -221,6 +265,10 @@
     "/rateLimits/{limitId}": {
       "schema": { "$ref": "#/entities/RateLimitBucket" },
       "description": "Server-only Cloud Functions abuse prevention rate limit buckets."
+    },
+    "/matchReports/{reportId}": {
+      "schema": { "$ref": "#/entities/MatchReport" },
+      "description": "Server-only generated post-match Classified Case File readable by match participants."
     }
   }
 }

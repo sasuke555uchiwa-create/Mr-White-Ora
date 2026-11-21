@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.readPlayerProfileDocs = readPlayerProfileDocs;
 exports.applyMatchSettlementWrites = applyMatchSettlementWrites;
 const gameLogic_1 = require("./gameLogic");
+const caseFileBuilder_1 = require("./caseFileBuilder");
 async function readPlayerProfileDocs(db, tx, uids) {
     const uniqueUids = Array.from(new Set(uids));
     const refs = uniqueUids.flatMap((uid) => [
@@ -24,26 +25,31 @@ async function readPlayerProfileDocs(db, tx, uids) {
     return result;
 }
 function applyMatchSettlementWrites(params) {
-    const { db, serverTimestamp, tx, roomRef, roomData, privateStateRef, privateState, players, profileMap, winner, winReason, winningMrWhiteUid = null, extraRoomUpdates = {}, } = params;
+    const { db, serverTimestamp, tx, roomRef, roomData, privateStateRef, privateState, players, profileMap, winner, winReason, winningMrWhiteUid = null, endedAtMs = Date.now(), extraRoomUpdates = {}, } = params;
     const alreadySettled = Array.isArray(privateState.settledMatches)
         ? privateState.settledMatches.includes(privateState.matchId)
         : false;
+    const rewardsByUid = {};
     const updatedPlayers = players.map((p) => {
         const role = privateState.rolesByUid[p.uid] || 'citizen';
+        const reward = (0, gameLogic_1.computePlayerOnlineReward)(p.uid, players, privateState.rolesByUid, privateState.votesByUid || {}, winner, winReason, winningMrWhiteUid);
+        rewardsByUid[p.uid] = reward;
         if (alreadySettled) {
             return { ...p, revealedRole: role };
         }
-        const { xpDelta } = (0, gameLogic_1.computePlayerOnlineReward)(p.uid, players, privateState.rolesByUid, privateState.votesByUid || {}, winner, winReason, winningMrWhiteUid);
         return {
             ...p,
-            score: (p.score || 0) + xpDelta,
+            score: (p.score || 0) + reward.xpDelta,
             revealedRole: role,
         };
     });
+    const roomId = roomData.id || roomRef.id || 'room';
+    const matchId = privateState.matchId || `match_${endedAtMs}`;
+    const reportId = `${roomId}_${matchId}`.replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 128);
     const winnersByUid = {};
     if (!alreadySettled) {
         for (const p of players) {
-            const { xpDelta, isWinner } = (0, gameLogic_1.computePlayerOnlineReward)(p.uid, players, privateState.rolesByUid, privateState.votesByUid || {}, winner, winReason, winningMrWhiteUid);
+            const { xpDelta, isWinner } = rewardsByUid[p.uid];
             winnersByUid[p.uid] = isWinner;
             const entry = profileMap.get(p.uid);
             if (!entry)
@@ -110,14 +116,51 @@ function applyMatchSettlementWrites(params) {
         const nextSettled = [...(privateState.settledMatches || []), privateState.matchId].slice(-20);
         tx.update(privateStateRef, {
             votesByUid: privateState.votesByUid || {},
+            roundHistory: privateState.roundHistory || [],
+            cluesHistory: privateState.cluesHistory || [],
+            matchEvents: privateState.matchEvents || [],
             settledMatches: nextSettled,
             updatedAt: serverTimestamp(),
         });
+        const cluesSource = Array.isArray(privateState.cluesHistory) && privateState.cluesHistory.length > 0
+            ? privateState.cluesHistory
+            : Array.isArray(roomData.gameState?.clues)
+                ? roomData.gameState.clues
+                : [];
+        const winningFaction = (0, gameLogic_1.resolveOnlineWinningFaction)(updatedPlayers, privateState.rolesByUid, winner, winReason);
+        const caseFile = (0, caseFileBuilder_1.buildOnlineClassifiedCaseFile)({
+            reportId,
+            roomId,
+            matchId,
+            startedAtMs: privateState.startedAtMs || endedAtMs,
+            endedAtMs,
+            language: typeof roomData.language === 'string' ? roomData.language : 'ar',
+            category: typeof roomData.gameState?.category === 'string'
+                ? roomData.gameState.category
+                : typeof roomData.category === 'string'
+                    ? roomData.category
+                    : 'standard',
+            difficulty: (roomData.gameState?.difficulty || roomData.difficulty) === 'hard' ? 'hard' : 'easy',
+            winner,
+            winningFaction,
+            winReason,
+            winningMrWhiteUid,
+            civilianWord: privateState.civilianWord,
+            undercoverWord: privateState.undercoverWord,
+            rolesByUid: privateState.rolesByUid,
+            rosterByUid: privateState.rosterByUid || {},
+            players: updatedPlayers,
+            rewardsByUid,
+            clues: cluesSource,
+            rounds: privateState.roundHistory || [],
+            events: privateState.matchEvents || [],
+        });
+        const reportRef = db.collection('matchReports').doc(reportId);
+        tx.set(reportRef, caseFile);
     }
     else {
         for (const p of players) {
-            const { isWinner } = (0, gameLogic_1.computePlayerOnlineReward)(p.uid, players, privateState.rolesByUid, privateState.votesByUid || {}, winner, winReason, winningMrWhiteUid);
-            winnersByUid[p.uid] = isWinner;
+            winnersByUid[p.uid] = rewardsByUid[p.uid].isWinner;
         }
     }
     const publicGameState = {
@@ -126,6 +169,7 @@ function applyMatchSettlementWrites(params) {
         winner,
         winReason,
         winningMrWhiteUid,
+        caseFileReportId: reportId,
         turnEndsAt: null,
         guesserUid: null,
         revealedResult: {

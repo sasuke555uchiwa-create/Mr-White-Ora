@@ -13,7 +13,7 @@ interface ImpostorGuessScreenProps {
   secretWord?: string;
   undercoverWord?: string;
   relatedWords?: string[];
-  onGuess: (isCorrect: boolean) => void;
+  onGuess: (isCorrect: boolean, guessedWord?: string) => void;
   onSubmitGuessText?: (guess: string) => Promise<{ isCorrect: boolean }>;
 }
 
@@ -75,7 +75,7 @@ export const ImpostorGuessScreen: React.FC<ImpostorGuessScreenProps> = ({
 
   const handleProceed = () => {
     playSound('click');
-    onGuess(isCorrect);
+    onGuess(isCorrect, guess.trim() || undefined);
   };
 
   return (

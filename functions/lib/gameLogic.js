@@ -115,7 +115,7 @@ function computePlayerOnlineReward(uid, players, rolesByUid, votesByUid, winner,
     const player = players.find((p) => p.uid === uid);
     const role = rolesByUid[uid];
     if (!player || !role)
-        return { xpDelta: 0, isWinner: false };
+        return { xpDelta: 0, isWinner: false, roundPoints: 0 };
     const faction = resolveOnlineWinningFaction(players, rolesByUid, winner, winReason);
     let roundPoints = 0;
     if (faction === 'citizens') {
@@ -149,6 +149,6 @@ function computePlayerOnlineReward(uid, players, rolesByUid, votesByUid, winner,
             xpDelta += 20;
         }
     }
-    return { xpDelta, isWinner: roundPoints > 0 };
+    return { xpDelta, isWinner: roundPoints > 0, roundPoints };
 }
 //# sourceMappingURL=gameLogic.js.map

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { GamePhase } from './types';
+import { ClassifiedCaseFile, GamePhase } from './types';
 import { WelcomeScreen } from './components/WelcomeScreen';
 import { PlayerSetup } from './components/PlayerSetup';
 import { GameRound } from './components/GameRound';
@@ -9,6 +9,8 @@ import { DiscussionPhase } from './components/DiscussionPhase';
 import { VotingScreen } from './components/VotingScreen';
 import { RevealVoteResult } from './components/RevealVoteResult';
 import { ResultScreen } from './components/ResultScreen';
+import { CaseFileScreen } from './components/CaseFileScreen';
+import { OperationArchiveScreen } from './components/OperationArchiveScreen';
 import { ScoreboardScreen } from './components/ScoreboardScreen';
 import { SettingsScreen } from './components/SettingsScreen';
 import { RulesScreen } from './components/RulesScreen';
@@ -56,6 +58,12 @@ function AppContent() {
   const [currentRoomId, setCurrentRoomId] = useState<string | null>(null);
   const [showExitConfirmation, setShowExitConfirmation] = useState(false);
   const [onlineBusy, setOnlineBusy] = useState(false);
+  const [activeCaseFile, setActiveCaseFile] = useState<ClassifiedCaseFile | null>(null);
+  const [activeCaseFileReportId, setActiveCaseFileReportId] = useState<string | null>(null);
+  const [activeCaseFileModeHint, setActiveCaseFileModeHint] = useState<'local' | 'online' | undefined>(
+    undefined
+  );
+  const [caseFileReturnPhase, setCaseFileReturnPhase] = useState<GamePhase>(GamePhase.WELCOME);
 
   const [currentTheme, setCurrentTheme] = useState<'dark' | 'gray' | 'light' | 'system'>(
     getSettings().theme || 'dark'
@@ -70,6 +78,22 @@ function AppContent() {
     setPhase(newPhase);
     window.history.pushState({ phase: newPhase }, '');
   }, []);
+
+  const openCaseFileView = useCallback(
+    (opts: {
+      caseFile?: ClassifiedCaseFile | null;
+      reportId?: string | null;
+      modeHint?: 'local' | 'online';
+      returnPhase: GamePhase;
+    }) => {
+      setActiveCaseFile(opts.caseFile ?? null);
+      setActiveCaseFileReportId(opts.reportId ?? opts.caseFile?.reportId ?? null);
+      setActiveCaseFileModeHint(opts.modeHint ?? opts.caseFile?.mode);
+      setCaseFileReturnPhase(opts.returnPhase);
+      navigate(GamePhase.CASE_FILE);
+    },
+    [navigate]
+  );
 
   const offline = useOfflineMatch({ navigate, t });
 
@@ -362,7 +386,13 @@ function AppContent() {
               transition={pageTransition}
               className="w-full h-full"
             >
-              <ProfileScreen onBack={handleGoHome} />
+              <ProfileScreen
+                onBack={handleGoHome}
+                onOpenArchive={() => {
+                  setCaseFileReturnPhase(GamePhase.PROFILE);
+                  navigate(GamePhase.OPERATION_ARCHIVE);
+                }}
+              />
             </motion.div>
           )}
 
@@ -417,6 +447,13 @@ function AppContent() {
                 roomId={currentRoomId}
                 onBack={handleLeaveOnlineToRooms}
                 onReturnToLobby={() => navigate(GamePhase.ONLINE_LOBBY)}
+                onOpenCaseFile={(reportId) =>
+                  openCaseFileView({
+                    reportId,
+                    modeHint: 'online',
+                    returnPhase: GamePhase.ONLINE_GAME,
+                  })
+                }
               />
             </motion.div>
           )}
@@ -627,6 +664,64 @@ function AppContent() {
                 winningMrWhiteId={
                   offline.winReason === 'impostor_guessed' ? offline.mostVotedPlayerId : null
                 }
+                onOpenCaseFile={
+                  offline.latestCaseFile
+                    ? () =>
+                        openCaseFileView({
+                          caseFile: offline.latestCaseFile,
+                          modeHint: 'local',
+                          returnPhase: GamePhase.RESULT,
+                        })
+                    : undefined
+                }
+              />
+            </motion.div>
+          )}
+
+          {phase === GamePhase.CASE_FILE && (
+            <motion.div
+              key="case_file"
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              variants={pageVariants}
+              transition={pageTransition}
+              className="w-full h-full"
+            >
+              <CaseFileScreen
+                caseFile={activeCaseFile}
+                reportId={activeCaseFileReportId}
+                modeHint={activeCaseFileModeHint}
+                onBack={() => navigate(caseFileReturnPhase)}
+              />
+            </motion.div>
+          )}
+
+          {phase === GamePhase.OPERATION_ARCHIVE && (
+            <motion.div
+              key="operation_archive"
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              variants={pageVariants}
+              transition={pageTransition}
+              className="w-full h-full"
+            >
+              <OperationArchiveScreen
+                onBack={() =>
+                  navigate(
+                    caseFileReturnPhase === GamePhase.OPERATION_ARCHIVE
+                      ? GamePhase.WELCOME
+                      : caseFileReturnPhase
+                  )
+                }
+                onOpenCaseFile={(cf) =>
+                  openCaseFileView({
+                    caseFile: cf,
+                    modeHint: cf.mode,
+                    returnPhase: GamePhase.OPERATION_ARCHIVE,
+                  })
+                }
               />
             </motion.div>
           )}
@@ -644,6 +739,10 @@ function AppContent() {
               <ScoreboardScreen
                 onBack={handleGoHome}
                 onNextRound={offline.tempPlayers.length > 0 ? offline.handlePlayAgain : undefined}
+                onOpenArchive={() => {
+                  setCaseFileReturnPhase(GamePhase.SCOREBOARD);
+                  navigate(GamePhase.OPERATION_ARCHIVE);
+                }}
               />
             </motion.div>
           )}

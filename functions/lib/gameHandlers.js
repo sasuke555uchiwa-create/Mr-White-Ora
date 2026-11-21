@@ -161,16 +161,22 @@ async function executeStartRound(deps, uid, dataIn) {
         const prevSettled = prevPrivateSnap.exists
             ? prevPrivateSnap.data()?.settledMatches || []
             : [];
+        const rosterByUid = Object.fromEntries(players.map((p) => [p.uid, { name: p.name, avatar: p.avatar || '' }]));
         const privateState = {
             matchId,
             round: 1,
+            startedAtMs: nowMs,
             civilianWord,
             undercoverWord,
             decoys,
             impostorIds,
             undercoverIds,
             rolesByUid,
+            rosterByUid,
             votesByUid: {},
+            cluesHistory: [],
+            roundHistory: [],
+            matchEvents: [],
             settledMatches: prevSettled,
         };
         const nextRateDoc = (0, rateLimit_1.evaluateRateLimitInTx)(rateDeps, uid, rateLimit_1.RATE_LIMITS.startRound, rateSnap.exists, rateSnap.exists ? rateSnap.data() : undefined, nowMs);
@@ -330,10 +336,15 @@ async function executeSubmitClue(deps, uid, dataIn) {
     const rateDeps = getRateDeps(deps);
     (0, rateLimit_1.assertNotRateLimitBlocked)(rateDeps, uid, rateLimit_1.RATE_LIMITS.submitClue);
     const roomRef = deps.db.collection('rooms').doc(roomId);
+    const privateStateRef = roomRef.collection('privateState').doc('current');
     const rateLimitRef = (0, rateLimit_1.getRateLimitDocRef)(deps.db, uid, rateLimit_1.RATE_LIMITS.submitClue);
     const nowMs = getCurrentTime(deps);
     await deps.db.runTransaction(async (tx) => {
-        const [snap, rateSnap] = await Promise.all([tx.get(roomRef), tx.get(rateLimitRef)]);
+        const [snap, privateSnap, rateSnap] = await Promise.all([
+            tx.get(roomRef),
+            tx.get(privateStateRef),
+            tx.get(rateLimitRef),
+        ]);
         if (!snap.exists)
             throw new errors_1.FunctionActionError('not-found', 'Room not found.');
         const data = snap.data();
@@ -369,6 +380,15 @@ async function executeSubmitClue(deps, uid, dataIn) {
         };
         const nextGameState = buildNextTurnPatch(gameState, players, Number(data.turnDurationSeconds || 45), nowMs, clue);
         tx.set(rateLimitRef, nextRateDoc);
+        if (privateSnap.exists) {
+            const prevClues = Array.isArray(privateSnap.data()?.cluesHistory)
+                ? privateSnap.data().cluesHistory
+                : [];
+            tx.update(privateStateRef, {
+                cluesHistory: [...prevClues, clue],
+                updatedAt: deps.serverTimestamp(),
+            });
+        }
         tx.update(roomRef, {
             gameState: nextGameState,
             updatedAt: deps.serverTimestamp(),
@@ -389,10 +409,15 @@ async function executeAdvanceTurn(deps, uid, dataIn) {
     const rateDeps = getRateDeps(deps);
     (0, rateLimit_1.assertNotRateLimitBlocked)(rateDeps, uid, rateLimit_1.RATE_LIMITS.advanceTurn);
     const roomRef = deps.db.collection('rooms').doc(roomId);
+    const privateStateRef = roomRef.collection('privateState').doc('current');
     const rateLimitRef = (0, rateLimit_1.getRateLimitDocRef)(deps.db, uid, rateLimit_1.RATE_LIMITS.advanceTurn);
     const nowMs = getCurrentTime(deps);
     await deps.db.runTransaction(async (tx) => {
-        const [snap, rateSnap] = await Promise.all([tx.get(roomRef), tx.get(rateLimitRef)]);
+        const [snap, privateSnap, rateSnap] = await Promise.all([
+            tx.get(roomRef),
+            tx.get(privateStateRef),
+            tx.get(rateLimitRef),
+        ]);
         if (!snap.exists) {
             throw new errors_1.FunctionActionError('not-found', 'Room not found.');
         }
@@ -449,6 +474,15 @@ async function executeAdvanceTurn(deps, uid, dataIn) {
             : undefined;
         const nextGameState = buildNextTurnPatch(gameState, players, Number(data.turnDurationSeconds || 45), nowMs, extraClue);
         tx.set(rateLimitRef, nextRateDoc);
+        if (extraClue && privateSnap.exists) {
+            const prevClues = Array.isArray(privateSnap.data()?.cluesHistory)
+                ? privateSnap.data().cluesHistory
+                : [];
+            tx.update(privateStateRef, {
+                cluesHistory: [...prevClues, extraClue],
+                updatedAt: deps.serverTimestamp(),
+            });
+        }
         tx.update(roomRef, {
             gameState: nextGameState,
             updatedAt: deps.serverTimestamp(),
@@ -716,6 +750,39 @@ async function executeProceedAfterVoteReveal(deps, uid, dataIn) {
         const profileMap = await (0, matchSettlement_1.readPlayerProfileDocs)(deps.db, tx, updatedPlayers.map((p) => p.uid));
         const nextRateDoc = (0, rateLimit_1.evaluateRateLimitInTx)(rateDeps, uid, rateLimit_1.RATE_LIMITS.proceedAfterVoteReveal, rateSnap.exists, rateSnap.exists ? rateSnap.data() : undefined, nowMs);
         tx.set(rateLimitRef, nextRateDoc);
+        const roundNum = Number(gameState.round || privateState.round || 1);
+        const roundRecord = {
+            round: roundNum,
+            votesByUid: { ...(privateState.votesByUid || {}) },
+            mostVotedUid: targetUid,
+            votersForEliminated: Array.isArray(gameState.votersForEliminated)
+                ? gameState.votersForEliminated
+                : [],
+            tieBroken: Boolean(gameState.tieBroken),
+            eliminatedUid: targetUid,
+            eliminatedRole: targetRole,
+            mrWhiteGuess: null,
+        };
+        const nextRoundHistory = [...(privateState.roundHistory || []), roundRecord];
+        const nextMatchEvents = [
+            ...(privateState.matchEvents || []),
+            {
+                id: `elim-r${roundNum}-${targetUid}`,
+                round: roundNum,
+                type: 'player_eliminated',
+                actorId: targetUid,
+                actorName: targetPlayer.name,
+                targetId: targetUid,
+                targetName: targetPlayer.name,
+                outcome: targetRole,
+                timestampMs: nowMs,
+            },
+        ];
+        const nextPrivateState = {
+            ...privateState,
+            roundHistory: nextRoundHistory,
+            matchEvents: nextMatchEvents,
+        };
         const winCheck = (0, gameLogic_1.evaluateOnlineWin)(updatedPlayers, privateState.rolesByUid);
         if (winCheck.isOver && winCheck.winner && winCheck.winReason) {
             (0, matchSettlement_1.applyMatchSettlementWrites)({
@@ -725,11 +792,12 @@ async function executeProceedAfterVoteReveal(deps, uid, dataIn) {
                 roomRef,
                 roomData: data,
                 privateStateRef,
-                privateState,
+                privateState: nextPrivateState,
                 players: updatedPlayers,
                 profileMap,
                 winner: winCheck.winner,
                 winReason: winCheck.winReason,
+                endedAtMs: nowMs,
             });
             return;
         }
@@ -748,6 +816,8 @@ async function executeProceedAfterVoteReveal(deps, uid, dataIn) {
         tx.update(privateStateRef, {
             round: nextRound,
             votesByUid: {},
+            roundHistory: nextRoundHistory,
+            matchEvents: nextMatchEvents,
             updatedAt: deps.serverTimestamp(),
         });
         tx.update(roomRef, {
@@ -821,6 +891,60 @@ async function executeSubmitMrWhiteGuess(deps, uid, dataIn) {
         const profileMap = await (0, matchSettlement_1.readPlayerProfileDocs)(deps.db, tx, players.map((p) => p.uid));
         const nextRateDoc = (0, rateLimit_1.evaluateRateLimitInTx)(rateDeps, uid, rateLimit_1.RATE_LIMITS.submitMrWhiteGuess, rateSnap.exists, rateSnap.exists ? rateSnap.data() : undefined, nowMs);
         tx.set(rateLimitRef, nextRateDoc);
+        const guesserPlayer = players.find((p) => p.uid === guesserUid);
+        const guesserName = guesserPlayer?.name || privateState.rosterByUid?.[guesserUid]?.name || guesserUid;
+        const roundNum = Number(gameState.round || privateState.round || 1);
+        const roundRecord = {
+            round: roundNum,
+            votesByUid: { ...(privateState.votesByUid || {}) },
+            mostVotedUid: guesserUid,
+            votersForEliminated: Array.isArray(gameState.votersForEliminated)
+                ? gameState.votersForEliminated
+                : [],
+            tieBroken: Boolean(gameState.tieBroken),
+            eliminatedUid: isCorrect ? null : guesserUid,
+            eliminatedRole: isCorrect ? null : 'mrwhite',
+            mrWhiteGuess: {
+                uid: guesserUid,
+                name: guesserName,
+                ...(forceEliminateMissing ? {} : { guess }),
+                isCorrect,
+                forcedMissing: forceEliminateMissing,
+            },
+        };
+        const nextRoundHistory = [...(privateState.roundHistory || []), roundRecord];
+        const nextMatchEvents = [
+            ...(privateState.matchEvents || []),
+            {
+                id: `mw-guess-r${roundNum}-${guesserUid}`,
+                round: roundNum,
+                type: 'mr_white_guess',
+                actorId: guesserUid,
+                actorName: guesserName,
+                outcome: isCorrect ? 'correct' : forceEliminateMissing ? 'forced_missing' : 'incorrect',
+                timestampMs: nowMs,
+            },
+            ...(!isCorrect
+                ? [
+                    {
+                        id: `elim-r${roundNum}-${guesserUid}`,
+                        round: roundNum,
+                        type: 'player_eliminated',
+                        actorId: guesserUid,
+                        actorName: guesserName,
+                        targetId: guesserUid,
+                        targetName: guesserName,
+                        outcome: 'mrwhite',
+                        timestampMs: nowMs,
+                    },
+                ]
+                : []),
+        ];
+        const nextPrivateState = {
+            ...privateState,
+            roundHistory: nextRoundHistory,
+            matchEvents: nextMatchEvents,
+        };
         if (isCorrect) {
             (0, matchSettlement_1.applyMatchSettlementWrites)({
                 db: deps.db,
@@ -829,12 +953,13 @@ async function executeSubmitMrWhiteGuess(deps, uid, dataIn) {
                 roomRef,
                 roomData: data,
                 privateStateRef,
-                privateState,
+                privateState: nextPrivateState,
                 players,
                 profileMap,
                 winner: 'impostor',
                 winReason: 'impostor_guessed',
                 winningMrWhiteUid: guesserUid,
+                endedAtMs: nowMs,
             });
             return { isCorrect: true };
         }
@@ -850,11 +975,12 @@ async function executeSubmitMrWhiteGuess(deps, uid, dataIn) {
                 roomRef,
                 roomData: data,
                 privateStateRef,
-                privateState,
+                privateState: nextPrivateState,
                 players: updatedPlayers,
                 profileMap,
                 winner: winCheck.winner,
                 winReason: winCheck.winReason,
+                endedAtMs: nowMs,
             });
             return { isCorrect: false };
         }
@@ -873,6 +999,8 @@ async function executeSubmitMrWhiteGuess(deps, uid, dataIn) {
         tx.update(privateStateRef, {
             round: nextRound,
             votesByUid: {},
+            roundHistory: nextRoundHistory,
+            matchEvents: nextMatchEvents,
             updatedAt: deps.serverTimestamp(),
         });
         tx.update(roomRef, {
@@ -942,13 +1070,18 @@ async function executeReturnToLobby(deps, uid, dataIn) {
             tx.set(privateStateRef, {
                 matchId: '',
                 round: 0,
+                startedAtMs: 0,
                 civilianWord: '',
                 undercoverWord: '',
                 decoys: [],
                 impostorIds: [],
                 undercoverIds: [],
                 rolesByUid: {},
+                rosterByUid: {},
                 votesByUid: {},
+                cluesHistory: [],
+                roundHistory: [],
+                matchEvents: [],
                 settledMatches: prevSettled,
                 updatedAt: deps.serverTimestamp(),
             });
@@ -1010,13 +1143,18 @@ async function executeNextMatch(deps, uid, dataIn) {
             tx.set(privateStateRef, {
                 matchId: '',
                 round: 0,
+                startedAtMs: 0,
                 civilianWord: '',
                 undercoverWord: '',
                 decoys: [],
                 impostorIds: [],
                 undercoverIds: [],
                 rolesByUid: {},
+                rosterByUid: {},
                 votesByUid: {},
+                cluesHistory: [],
+                roundHistory: [],
+                matchEvents: [],
                 settledMatches: prevSettled,
                 updatedAt: deps.serverTimestamp(),
             });

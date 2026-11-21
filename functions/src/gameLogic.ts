@@ -143,10 +143,10 @@ export function computePlayerOnlineReward(
   winner: 'citizens' | 'impostor',
   winReason: string,
   winningMrWhiteUid?: string | null
-): { xpDelta: number; isWinner: boolean } {
+): { xpDelta: number; isWinner: boolean; roundPoints: number } {
   const player = players.find((p) => p.uid === uid);
   const role = rolesByUid[uid];
-  if (!player || !role) return { xpDelta: 0, isWinner: false };
+  if (!player || !role) return { xpDelta: 0, isWinner: false, roundPoints: 0 };
 
   const faction = resolveOnlineWinningFaction(players, rolesByUid, winner, winReason);
   let roundPoints = 0;
@@ -176,5 +176,5 @@ export function computePlayerOnlineReward(
     }
   }
 
-  return { xpDelta, isWinner: roundPoints > 0 };
+  return { xpDelta, isWinner: roundPoints > 0, roundPoints };
 }
