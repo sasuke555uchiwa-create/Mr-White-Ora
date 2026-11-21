@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Loader2 } from 'lucide-react';
 
 export type TacticalButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'cyan';
@@ -27,7 +27,7 @@ const BUTTON_VARIANT_STYLES: Record<TacticalButtonVariant, string> = {
 };
 
 const BUTTON_SIZE_STYLES: Record<TacticalButtonSize, string> = {
-  sm: 'min-h-[40px] px-3.5 py-2 text-xs gap-1.5 rounded-[8px]',
+  sm: 'min-h-[44px] sm:min-h-[40px] px-3.5 py-2 text-xs gap-1.5 rounded-[8px]',
   md: 'min-h-[44px] px-4 py-2.5 text-sm gap-2 rounded-[10px]',
   lg: 'min-h-[50px] px-5 py-3 text-[15px] gap-2.5 rounded-[10px]',
 };
@@ -55,7 +55,7 @@ export const TacticalButton: React.FC<TacticalButtonProps> = ({
       {...props}
     >
       {loading ? <Loader2 size={16} className="animate-spin shrink-0" /> : icon && <span className="shrink-0 flex items-center">{icon}</span>}
-      <span className="truncate">{children}</span>
+      {children !== undefined && children !== null && <span className="truncate">{children}</span>}
       {!loading && trailingIcon && <span className="shrink-0 flex items-center">{trailingIcon}</span>}
     </button>
   );
@@ -81,7 +81,10 @@ export const IconButton: React.FC<IconButtonProps> = ({
   type = 'button',
   ...props
 }) => {
-  const dims = size === 'sm' ? 'w-10 h-10 min-w-[40px] min-h-[40px] rounded-[8px]' : 'w-11 h-11 min-w-[44px] min-h-[44px] rounded-[10px]';
+  const dims =
+    size === 'sm'
+      ? 'w-11 h-11 min-w-[44px] min-h-[44px] sm:w-10 sm:h-10 sm:min-w-[40px] sm:min-h-[40px] rounded-[8px]'
+      : 'w-11 h-11 min-w-[44px] min-h-[44px] rounded-[10px]';
   return (
     <button
       type={type}
@@ -106,6 +109,7 @@ export interface SegmentedControlProps<T extends string> {
   onChange: (value: T) => void;
   className?: string;
   size?: 'sm' | 'md';
+  ariaLabel?: string;
 }
 
 export function SegmentedControl<T extends string>({
@@ -114,13 +118,52 @@ export function SegmentedControl<T extends string>({
   onChange,
   className = '',
   size = 'md',
+  ariaLabel,
 }: SegmentedControlProps<T>) {
+  const containerRef = useRef<HTMLDivElement | null>(null);
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLButtonElement>, currentIdx: number) => {
+    const enabledIndices = options
+      .map((opt, i) => (opt.disabled ? -1 : i))
+      .filter((i) => i !== -1);
+    if (enabledIndices.length <= 1) return;
+
+    const isRtl =
+      (containerRef.current && getComputedStyle(containerRef.current).direction === 'rtl') ||
+      (typeof document !== 'undefined' && document.documentElement.dir === 'rtl');
+
+    let targetIdx: number | null = null;
+    if (e.key === 'Home') {
+      targetIdx = enabledIndices[0];
+    } else if (e.key === 'End') {
+      targetIdx = enabledIndices[enabledIndices.length - 1];
+    } else if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+      const forward = isRtl ? e.key === 'ArrowLeft' : e.key === 'ArrowRight';
+      const currentEnabledPos = enabledIndices.indexOf(currentIdx);
+      if (currentEnabledPos !== -1) {
+        const nextPos = forward
+          ? (currentEnabledPos + 1) % enabledIndices.length
+          : (currentEnabledPos - 1 + enabledIndices.length) % enabledIndices.length;
+        targetIdx = enabledIndices[nextPos];
+      }
+    }
+
+    if (targetIdx !== null && options[targetIdx]) {
+      e.preventDefault();
+      onChange(options[targetIdx].value);
+      const buttons = containerRef.current?.querySelectorAll<HTMLButtonElement>('[role="tab"]');
+      buttons?.[targetIdx]?.focus();
+    }
+  };
+
   return (
     <div
+      ref={containerRef}
       className={`inline-flex items-center bg-bg-card/90 border border-border rounded-[10px] p-1 gap-1 ${className}`}
       role="tablist"
+      aria-label={ariaLabel}
     >
-      {options.map((opt) => {
+      {options.map((opt, idx) => {
         const active = opt.value === value;
         return (
           <button
@@ -128,10 +171,12 @@ export function SegmentedControl<T extends string>({
             type="button"
             role="tab"
             aria-selected={active}
+            tabIndex={active ? 0 : -1}
             disabled={opt.disabled}
             onClick={() => onChange(opt.value)}
+            onKeyDown={(e) => handleKeyDown(e, idx)}
             className={`flex-1 inline-flex items-center justify-center gap-1.5 font-bold whitespace-nowrap shrink-0 transition-all rounded-[7px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#668F9A]/70 disabled:opacity-40 disabled:cursor-not-allowed ${
-              size === 'sm' ? 'min-h-[36px] px-2.5 text-xs' : 'min-h-[40px] px-3 text-xs sm:text-sm'
+              size === 'sm' ? 'min-h-[44px] sm:min-h-[38px] px-2.5 text-xs' : 'min-h-[44px] px-3 text-xs sm:text-sm'
             } ${
               active
                 ? 'bg-bg-surface text-text-main border border-border-strong shadow-xs'
@@ -281,23 +326,168 @@ export const ClassifiedStamp: React.FC<ClassifiedStampProps> = ({
   </span>
 );
 
+export type OperationPhaseType = 'briefing' | 'active' | 'interrogation' | 'tribunal' | 'verdict';
+
+const OPERATION_PHASE_CONFIG: Record<
+  OperationPhaseType,
+  {
+    code: string;
+    tone: 'gold' | 'cyan' | 'crimson' | 'neutral';
+    panelAccentClass: string;
+    labels: { ar: string; en: string; fr: string };
+  }
+> = {
+  briefing: {
+    code: 'BRIEFING',
+    tone: 'gold',
+    panelAccentClass: 'border-[#B49A62]/40',
+    labels: {
+      ar: 'إحاطة سرّية',
+      en: 'Confidential Briefing',
+      fr: 'Briefing confidentiel',
+    },
+  },
+  active: {
+    code: 'ACTIVE OP',
+    tone: 'cyan',
+    panelAccentClass: 'border-[#668F9A]/40',
+    labels: {
+      ar: 'عملية نشطة',
+      en: 'Active Operation',
+      fr: 'Opération active',
+    },
+  },
+  interrogation: {
+    code: 'INTERROGATION',
+    tone: 'neutral',
+    panelAccentClass: 'border-border-strong',
+    labels: {
+      ar: 'استجواب ميداني',
+      en: 'Field Interrogation',
+      fr: 'Interrogatoire',
+    },
+  },
+  tribunal: {
+    code: 'TRIBUNAL',
+    tone: 'crimson',
+    panelAccentClass: 'border-[#963F46]/45',
+    labels: {
+      ar: 'محكمة الاقتراع',
+      en: 'Tribunal Vote',
+      fr: 'Tribunal de vote',
+    },
+  },
+  verdict: {
+    code: 'VERDICT',
+    tone: 'gold',
+    panelAccentClass: 'border-[#B49A62]/45',
+    labels: {
+      ar: 'الحكم الموثّق',
+      en: 'Official Verdict',
+      fr: 'Verdict officiel',
+    },
+  },
+};
+
+export const getOperationPhaseMeta = (phase: OperationPhaseType, lang: string) => {
+  const cfg = OPERATION_PHASE_CONFIG[phase];
+  const normalizedLang = lang === 'sa' ? 'ar' : lang;
+  return {
+    code: cfg.code,
+    tone: cfg.tone,
+    panelAccentClass: cfg.panelAccentClass,
+    label: cfg.labels[normalizedLang as 'ar' | 'en' | 'fr'] || cfg.labels.en,
+  };
+};
+
+export interface OperationPhaseBadgeProps {
+  phase: OperationPhaseType;
+  round?: number;
+  lang?: string;
+  className?: string;
+}
+
+export const OperationPhaseBadge: React.FC<OperationPhaseBadgeProps> = ({
+  phase,
+  round,
+  lang = 'en',
+  className = '',
+}) => {
+  const meta = getOperationPhaseMeta(phase, lang);
+  return (
+    <div className={`inline-flex items-center gap-2 min-w-0 ${className}`}>
+      <ClassifiedStamp tone={meta.tone}>
+        {meta.code}
+        {round !== undefined ? ` · R${round}` : ''}
+      </ClassifiedStamp>
+      <span className="text-xs font-semibold text-text-muted truncate">{meta.label}</span>
+    </div>
+  );
+};
+
 export interface ModalShellProps {
   children: React.ReactNode;
   className?: string;
   maxWidthClass?: string;
+  onClose?: () => void;
+  ariaLabel?: string;
+  ariaLabelledBy?: string;
 }
 
 export const ModalShell: React.FC<ModalShellProps> = ({
   children,
   className = '',
   maxWidthClass = 'max-w-md',
-}) => (
-  <div
-    className={`w-full ${maxWidthClass} rounded-[16px] bg-bg-surface border border-border-strong shadow-[0_24px_64px_rgba(4,7,12,0.68)] overflow-hidden ${className}`}
-  >
-    {children}
-  </div>
-);
+  onClose,
+  ariaLabel,
+  ariaLabelledBy,
+}) => {
+  const dialogRef = useRef<HTMLDivElement | null>(null);
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
+
+  useEffect(() => {
+    const previouslyFocused =
+      typeof document !== 'undefined' ? (document.activeElement as HTMLElement | null) : null;
+
+    const frame = requestAnimationFrame(() => {
+      const el = dialogRef.current;
+      if (el && typeof document !== 'undefined' && !el.contains(document.activeElement)) {
+        el.focus({ preventScroll: true });
+      }
+    });
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && onCloseRef.current) {
+        e.stopPropagation();
+        onCloseRef.current();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      cancelAnimationFrame(frame);
+      document.removeEventListener('keydown', handleKeyDown);
+      if (previouslyFocused && typeof previouslyFocused.focus === 'function') {
+        previouslyFocused.focus({ preventScroll: true });
+      }
+    };
+  }, []);
+
+  return (
+    <div
+      ref={dialogRef}
+      role="dialog"
+      aria-modal="true"
+      aria-label={ariaLabel}
+      aria-labelledby={ariaLabelledBy}
+      tabIndex={-1}
+      className={`w-full ${maxWidthClass} rounded-[16px] bg-bg-surface border border-border-strong shadow-[0_24px_64px_rgba(4,7,12,0.68)] overflow-hidden outline-none ${className}`}
+    >
+      {children}
+    </div>
+  );
+};
 
 export interface ScreenSectionHeaderProps {
   title: string;
@@ -329,3 +519,4 @@ export const ScreenSectionHeader: React.FC<ScreenSectionHeaderProps> = ({
     {action && <div className="shrink-0">{action}</div>}
   </div>
 );
+

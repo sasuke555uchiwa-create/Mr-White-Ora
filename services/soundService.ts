@@ -19,7 +19,16 @@ export type SoundType =
   | 'mrWhiteCaught'
   | 'mrWhiteWin'
   | 'startGame'
-  | 'error';
+  | 'error'
+  | 'dossierOpen'
+  | 'accessGranted'
+  | 'roleReveal'
+  | 'handoff'
+  | 'voteConfirm'
+  | 'voteClose'
+  | 'abilityActivate'
+  | 'guessPhase'
+  | 'verdict';
 
 export interface SoundEffectMeta {
   id: SoundType;
@@ -42,6 +51,15 @@ export const SOUND_EFFECT_LIST: SoundEffectMeta[] = [
   { id: 'win', labels: { ar: 'فوز', en: 'Victory', fr: 'Victoire' } },
   { id: 'trumpets_sad', labels: { ar: 'خسارة ساخرة', en: 'Sad Brass', fr: 'Trompette' } },
   { id: 'startGame', labels: { ar: 'بدء الجولة', en: 'Game Start', fr: 'Départ' } },
+  { id: 'dossierOpen', labels: { ar: 'فتح ملف سري', en: 'Open Dossier', fr: 'Dossier' } },
+  { id: 'accessGranted', labels: { ar: 'منح الصلاحية', en: 'Access Granted', fr: 'Accès' } },
+  { id: 'roleReveal', labels: { ar: 'كشف الهوية', en: 'Role Reveal', fr: 'Identité' } },
+  { id: 'handoff', labels: { ar: 'تمرير مشفّر', en: 'Secure Handoff', fr: 'Relais' } },
+  { id: 'voteConfirm', labels: { ar: 'تأكيد التصويت', en: 'Vote Confirm', fr: 'Confirmation' } },
+  { id: 'voteClose', labels: { ar: 'إغلاق الصندوق', en: 'Ballot Sealed', fr: 'Urne scellée' } },
+  { id: 'abilityActivate', labels: { ar: 'تفعيل قدرة', en: 'Ability Trigger', fr: 'Pouvoir' } },
+  { id: 'guessPhase', labels: { ar: 'طور التخمين', en: 'Guess Override', fr: 'Intrusion' } },
+  { id: 'verdict', labels: { ar: 'الحكم النهائي', en: 'Final Verdict', fr: 'Verdict' } },
 ];
 
 let audioContext: AudioContext | null = null;
@@ -239,15 +257,22 @@ export const playSound = (type: SoundType) => {
       case 'pop':
       case 'cardFlip':
       case 'passPhone':
+      case 'dossierOpen':
+      case 'handoff':
         navigator.vibrate(14);
         break;
       case 'vote':
       case 'reveal':
       case 'startGame':
+      case 'accessGranted':
+      case 'roleReveal':
+      case 'voteConfirm':
         navigator.vibrate(22);
         break;
       case 'shield':
       case 'boomerang':
+      case 'abilityActivate':
+      case 'voteClose':
       case 'error':
         navigator.vibrate([25, 25, 35]);
         break;
@@ -258,11 +283,13 @@ export const playSound = (type: SoundType) => {
         navigator.vibrate([45, 30, 55]);
         break;
       case 'mrWhiteCaught':
+      case 'guessPhase':
       case 'mystery':
         navigator.vibrate([35, 30, 60]);
         break;
       case 'win':
       case 'mrWhiteWin':
+      case 'verdict':
         navigator.vibrate([60, 40, 80, 40, 120]);
         break;
     }
@@ -817,6 +844,239 @@ export const playSound = (type: SoundType) => {
           peakGain: 0.22,
           filterType: 'lowpass',
           filterFreq: 650,
+        });
+      });
+      break;
+    }
+
+    case 'dossierOpen': {
+      // Crisp classified folder unseal: dry paper friction + subtle low-mid lock click
+      playNoiseBurst(ctx, masterGain, {
+        startTime: now,
+        duration: 0.08,
+        attack: 0.004,
+        peakGain: 0.2,
+        filterType: 'bandpass',
+        filterFreq: 1650,
+        filterEndFreq: 2900,
+        filterQ: 1.5,
+      });
+      playTone(ctx, masterGain, {
+        type: 'triangle',
+        freq: 310,
+        endFreq: 465,
+        startTime: now + 0.02,
+        duration: 0.11,
+        attack: 0.004,
+        peakGain: 0.16,
+      });
+      break;
+    }
+
+    case 'accessGranted': {
+      // Restrained encrypted clearance ping: clean dual harmonic lock-in
+      playTone(ctx, masterGain, {
+        type: 'sine',
+        freq: 523.25, // C5
+        startTime: now,
+        duration: 0.11,
+        attack: 0.004,
+        peakGain: 0.14,
+      });
+      playTone(ctx, masterGain, {
+        type: 'sine',
+        freq: 783.99, // G5
+        startTime: now + 0.065,
+        duration: 0.22,
+        attack: 0.006,
+        peakGain: 0.16,
+      });
+      break;
+    }
+
+    case 'roleReveal': {
+      // Confidential noir dossier reveal: muted sub warmth + restrained brass/sine resolve
+      playNoiseBurst(ctx, masterGain, {
+        startTime: now,
+        duration: 0.16,
+        attack: 0.03,
+        peakGain: 0.12,
+        filterType: 'bandpass',
+        filterFreq: 850,
+        filterEndFreq: 2200,
+        filterQ: 1.4,
+      });
+      playTone(ctx, masterGain, {
+        type: 'sine',
+        freq: 146.83, // D3
+        startTime: now,
+        duration: 0.42,
+        attack: 0.012,
+        peakGain: 0.24,
+      });
+      [440, 554.37, 659.25].forEach((freq, i) => {
+        playTone(ctx, masterGain, {
+          type: i === 0 ? 'triangle' : 'sine',
+          freq,
+          startTime: now + 0.04 + i * 0.05,
+          duration: 0.36,
+          attack: 0.01,
+          peakGain: 0.1,
+        });
+      });
+      break;
+    }
+
+    case 'handoff': {
+      // Confidential lock-screen chime: calm descending-then-resolving privacy tone
+      playTone(ctx, masterGain, {
+        type: 'sine',
+        freq: 659.25, // E5
+        startTime: now,
+        duration: 0.14,
+        attack: 0.008,
+        peakGain: 0.14,
+      });
+      playTone(ctx, masterGain, {
+        type: 'triangle',
+        freq: 493.88, // B4
+        startTime: now + 0.075,
+        duration: 0.24,
+        attack: 0.01,
+        peakGain: 0.13,
+      });
+      break;
+    }
+
+    case 'voteConfirm': {
+      // Tactical steel ballot stamp: tight thud + clean mechanical latch
+      playNoiseBurst(ctx, masterGain, {
+        startTime: now,
+        duration: 0.035,
+        attack: 0.002,
+        peakGain: 0.2,
+        filterType: 'bandpass',
+        filterFreq: 1200,
+        filterQ: 1.6,
+      });
+      playTone(ctx, masterGain, {
+        type: 'triangle',
+        freq: 240,
+        endFreq: 78,
+        startTime: now,
+        duration: 0.13,
+        attack: 0.004,
+        peakGain: 0.34,
+      });
+      playTone(ctx, masterGain, {
+        type: 'sine',
+        freq: 620,
+        startTime: now + 0.03,
+        duration: 0.07,
+        attack: 0.003,
+        peakGain: 0.1,
+      });
+      break;
+    }
+
+    case 'voteClose': {
+      // Ballot box sealed & tally initiated: double resonant vault latch
+      playNoiseBurst(ctx, masterGain, {
+        startTime: now,
+        duration: 0.06,
+        attack: 0.003,
+        peakGain: 0.18,
+        filterType: 'lowpass',
+        filterFreq: 1100,
+        filterEndFreq: 280,
+      });
+      playTone(ctx, masterGain, {
+        type: 'sine',
+        freq: 165,
+        endFreq: 58,
+        startTime: now,
+        duration: 0.24,
+        attack: 0.005,
+        peakGain: 0.36,
+      });
+      playTone(ctx, masterGain, {
+        type: 'triangle',
+        freq: 392,
+        startTime: now + 0.09,
+        duration: 0.26,
+        attack: 0.008,
+        peakGain: 0.15,
+      });
+      break;
+    }
+
+    case 'abilityActivate': {
+      // Intelligence special ability trigger: crisp metallic sweep + harmonic pulse
+      playNoiseBurst(ctx, masterGain, {
+        startTime: now,
+        duration: 0.11,
+        attack: 0.006,
+        peakGain: 0.15,
+        filterType: 'highpass',
+        filterFreq: 2100,
+        filterEndFreq: 4800,
+      });
+      [493.88, 739.99, 987.77].forEach((freq, i) => {
+        playTone(ctx, masterGain, {
+          type: i === 0 ? 'triangle' : 'sine',
+          freq,
+          startTime: now + i * 0.035,
+          duration: 0.38 - i * 0.05,
+          attack: 0.006,
+          peakGain: 0.14 - i * 0.02,
+        });
+      });
+      break;
+    }
+
+    case 'guessPhase': {
+      // Priority-override tension sting for Mr. White guess phase
+      playTone(ctx, masterGain, {
+        type: 'sine',
+        freq: 92.5, // F#2
+        startTime: now,
+        duration: 0.75,
+        attack: 0.015,
+        peakGain: 0.3,
+      });
+      [277.18, 415.3, 554.37].forEach((freq, i) => {
+        playTone(ctx, masterGain, {
+          type: 'triangle',
+          freq,
+          startTime: now + i * 0.045,
+          duration: 0.55,
+          attack: 0.01,
+          peakGain: 0.13,
+          filterType: 'lowpass',
+          filterFreq: 1600,
+        });
+      });
+      break;
+    }
+
+    case 'verdict': {
+      // Authoritative blacksited verdict chord: warm sub + muted gold fifth/ninth
+      playTone(ctx, masterGain, {
+        type: 'sine',
+        freq: 110, // A2
+        startTime: now,
+        duration: 0.95,
+        attack: 0.015,
+        peakGain: 0.3,
+      });
+      [440, 554.37, 659.25, 987.77].forEach((freq, i) => {
+        playTone(ctx, masterGain, {
+          type: i < 2 ? 'triangle' : 'sine',
+          freq,
+          startTime: now + i * 0.05,
+          duration: 0.82 - i * 0.08,
+          attack: 0.012,
+          peakGain: 0.12,
         });
       });
       break;

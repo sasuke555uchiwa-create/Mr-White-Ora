@@ -234,7 +234,7 @@ export const OperationArchiveScreen: React.FC<OperationArchiveScreenProps> = ({
               <PlayerIntelligenceCard className="hover:border-[#668F9A]/50 p-4 flex items-center justify-between gap-3">
                 <button
                   onClick={() => {
-                    playSound('click');
+                    playSound('dossierOpen');
                     onOpenCaseFile(item);
                   }}
                   className="flex-1 min-w-0 text-start space-y-1.5"
@@ -299,7 +299,11 @@ export const OperationArchiveScreen: React.FC<OperationArchiveScreenProps> = ({
               exit={{ scale: 0.94, opacity: 0 }}
               className="w-full max-w-sm"
             >
-              <ModalShell className="p-6 text-center space-y-5">
+              <ModalShell
+                onClose={() => setPendingDeleteId(null)}
+                ariaLabel={t('deleteCaseFileConfirm')}
+                className="p-6 text-center space-y-5"
+              >
                 <p className="text-sm font-bold text-text-main">{t('deleteCaseFileConfirm')}</p>
                 <div className="flex gap-3">
                   <TacticalButton

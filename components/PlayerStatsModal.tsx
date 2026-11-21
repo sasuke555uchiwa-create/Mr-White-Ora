@@ -73,7 +73,7 @@ export const PlayerStatsModal: React.FC<PlayerStatsModalProps> = ({
           exit={{ opacity: 0, scale: 0.94, y: 12 }}
           className="w-full max-w-sm"
         >
-          <ModalShell className="p-6 relative">
+          <ModalShell onClose={onClose} ariaLabel={name} className="p-6 relative">
             <div className={`absolute top-4 ${isRTL ? 'left-4' : 'right-4'}`}>
               <IconButton onClick={onClose} size="sm" variant="ghost" aria-label="Close">
                 <X className="w-4 h-4" />

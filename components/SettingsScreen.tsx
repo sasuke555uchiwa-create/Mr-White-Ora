@@ -479,7 +479,12 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
       {/* In-App Confirmation Modal */}
       {pendingConfirm && (
         <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-xs flex items-center justify-center p-5">
-          <ModalShell maxWidthClass="max-w-sm" className="p-6 text-center">
+          <ModalShell
+            maxWidthClass="max-w-sm"
+            className="p-6 text-center"
+            onClose={() => setPendingConfirm(null)}
+            ariaLabel={t('alert')}
+          >
             <h3 className="text-lg font-extrabold text-text-main mb-2">{t('alert')}</h3>
             <p className="text-sm font-medium text-text-muted mb-6 leading-relaxed">
               {pendingConfirm === 'scores' ? t('confirmResetScores') : t('confirmResetApp')}

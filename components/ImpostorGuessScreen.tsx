@@ -7,7 +7,8 @@ import { getUITranslation } from '../translations';
 import { getSettings } from '../services/storageService';
 import { isMrWhiteGuessMatch } from '../src/game/wordEngine';
 import { ROLE_PORTRAITS } from '../src/design/assetRegistry';
-import { ClassifiedStamp, ModalShell, TacticalButton } from './ui/BlacksiteUI';
+import { getRoleVisualIdentity } from '../data/specialRoles';
+import { ClassifiedStamp, ModalShell, OperationPhaseBadge, TacticalButton } from './ui/BlacksiteUI';
 
 interface ImpostorGuessScreenProps {
   impostor: Player;
@@ -32,9 +33,10 @@ export const ImpostorGuessScreen: React.FC<ImpostorGuessScreenProps> = ({
 
   const settings = getSettings();
   const lang = settings.language;
+  const mrWhiteVisual = getRoleVisualIdentity('mrwhite', lang);
 
   useEffect(() => {
-    playSound('mrWhiteCaught');
+    playSound('guessPhase');
   }, []);
 
   const t = (key: string, params?: Record<string, any>) => {
@@ -82,21 +84,31 @@ export const ImpostorGuessScreen: React.FC<ImpostorGuessScreenProps> = ({
   };
 
   return (
-    <div className="flex flex-col h-full items-center justify-center p-5 animate-fade-in bg-[#080B10]/88 backdrop-blur-md fixed inset-0 z-[100]">
+    <div className="flex flex-col h-full items-center justify-center p-5 animate-fade-in bg-[#080B10]/90 backdrop-blur-md fixed inset-0 z-[100]">
       <motion.div
         initial={{ scale: 0.94, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         className="w-full max-w-sm"
       >
-        <ModalShell className="border-[#B49A62]/45 p-7 text-center flex flex-col items-center">
-          <div className="w-full flex items-center justify-between mb-4">
+        <ModalShell
+          ariaLabel={lang === 'ar' ? 'فرصة تخمين Mr. White' : 'Mr. White Guess Override'}
+          className="relative border-[#B49A62]/50 p-7 text-center flex flex-col items-center"
+        >
+          <div
+            aria-hidden="true"
+            className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-[#B49A62]/75 to-transparent"
+          />
+          <div className="w-full flex items-center justify-between gap-2 mb-4">
+            <OperationPhaseBadge phase="verdict" lang={lang} />
             <ClassifiedStamp tone="gold">PRIORITY-OVERRIDE</ClassifiedStamp>
           </div>
 
           {!hasGuessed ? (
             <>
               <div className="mb-4">
-                <div className="w-24 h-24 rounded-[14px] bg-[#080B10] border-2 border-[#B49A62]/65 flex items-center justify-center overflow-hidden shadow-lg">
+                <div
+                  className={`w-24 h-24 rounded-[14px] bg-[#080B10] border-2 ${mrWhiteVisual.frameBorderClass} flex items-center justify-center overflow-hidden shadow-lg`}
+                >
                   <img
                     src={ROLE_PORTRAITS.mrwhite}
                     alt="Mr. White"

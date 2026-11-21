@@ -562,6 +562,8 @@ export const GameSettingsScreen: React.FC<GameSettingsScreenProps> = ({
               <ModalShell
                 maxWidthClass="max-w-lg"
                 className="rounded-b-none sm:rounded-[16px] max-h-[88vh] flex flex-col"
+                onClose={() => setShowSpecialRolesModal(false)}
+                ariaLabel={t('specialRoles')}
               >
                 <div className="p-4 sm:p-5 border-b border-border flex items-center justify-between bg-bg-card">
                   <div>

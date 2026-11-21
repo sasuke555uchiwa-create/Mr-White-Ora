@@ -7,8 +7,8 @@ import { playSound } from '../services/soundService';
 import { Player } from '../types';
 import { Avatar } from './Avatar';
 import {
-  ClassifiedStamp,
   IntelligencePanel,
+  OperationPhaseBadge,
   PlayerIntelligenceCard,
   TacticalButton,
 } from './ui/BlacksiteUI';
@@ -21,7 +21,8 @@ interface DiscussionPhaseProps {
 
 export const DiscussionPhase: React.FC<DiscussionPhaseProps> = ({ players, onSkip }) => {
   const settings = getSettings();
-  const t = (key: string) => getUITranslation(settings.language, key);
+  const lang = settings.language;
+  const t = (key: string) => getUITranslation(lang, key);
 
   const alivePlayers = players.filter((p) => !p.isEliminated);
   const mrWhiteCount = alivePlayers.filter((p) => p.role === 'mrwhite').length;
@@ -48,10 +49,10 @@ export const DiscussionPhase: React.FC<DiscussionPhaseProps> = ({ players, onSki
         animate={{ scale: 1, opacity: 1 }}
         className="w-full max-w-md mb-6"
       >
-        <IntelligencePanel className="p-6 flex flex-col items-center text-center">
+        <IntelligencePanel className="p-6 flex flex-col items-center text-center border-[#B49A62]/35">
           <div className="flex items-center justify-between w-full mb-4">
-            <ClassifiedStamp tone="cyan">BRIEFING</ClassifiedStamp>
-            <span className="text-xs font-mono-code font-bold text-text-muted tabular-nums">
+            <OperationPhaseBadge phase="briefing" lang={lang} />
+            <span className="text-xs font-mono-code font-bold text-text-muted tabular-nums shrink-0">
               {alivePlayers.length} ACTIVE
             </span>
           </div>

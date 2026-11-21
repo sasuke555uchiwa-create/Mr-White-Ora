@@ -24,6 +24,7 @@ import { getUITranslation } from '../translations';
 import {
   getRoleAsset,
   getRoleTitle,
+  getRoleVisualIdentity,
   getSpecialRoleDescription,
 } from '../data/specialRoles';
 import { HERO_ASSETS } from '../src/design/assetRegistry';
@@ -32,6 +33,7 @@ import {
   IconButton,
   IntelligencePanel,
   ModalShell,
+  OperationPhaseBadge,
   StatusIndicator,
   TacticalButton,
 } from './ui/BlacksiteUI';
@@ -73,6 +75,7 @@ export const QuestionPhase: React.FC<QuestionPhaseProps> = ({
   const [showLogModal, setShowLogModal] = useState(false);
   const [showSpecialRolesModal, setShowSpecialRolesModal] = useState(false);
   const [peekPlayer, setPeekPlayer] = useState<Player | null>(null);
+  const [isPeekHandoffConfirmed, setIsPeekHandoffConfirmed] = useState(false);
   const [isPeekingWord, setIsPeekingWord] = useState(false);
   const [showPeekPicker, setShowPeekPicker] = useState(false);
   const [clueInput, setClueInput] = useState('');
@@ -81,7 +84,8 @@ export const QuestionPhase: React.FC<QuestionPhaseProps> = ({
 
   const settings = getSettings();
   const lang = settings.language;
-  const t = (key: string) => getUITranslation(lang, key);
+  const t = (key: string, params?: Record<string, string>) =>
+    getUITranslation(lang, key, params);
 
   const alivePlayers = players.filter((p) => !p.isEliminated);
   const mrWhiteCount = alivePlayers.filter((p) => p.role === 'mrwhite').length;
@@ -254,7 +258,11 @@ export const QuestionPhase: React.FC<QuestionPhaseProps> = ({
   return (
     <div className="flex flex-col min-h-full items-center animate-fade-in pb-28 relative max-w-4xl mx-auto w-full px-4 pt-3">
       {/* Tactical Turn Header */}
-      <IntelligencePanel className="w-full px-4 py-4 mb-4">
+      <IntelligencePanel
+        className={`w-full px-4 py-4 mb-4 ${
+          gameMode === 'question' ? 'border-border-strong' : 'border-[#668F9A]/40'
+        }`}
+      >
         <div className="flex items-center justify-between gap-3">
           {/* Countdown Timer Control */}
           <div className="flex flex-col items-center gap-1">
@@ -277,11 +285,12 @@ export const QuestionPhase: React.FC<QuestionPhaseProps> = ({
           </div>
 
           <div className="text-center min-w-0 flex-1">
-            <div className="flex items-center justify-center gap-2 mb-1">
-              <ClassifiedStamp tone="cyan">R{currentRound}</ClassifiedStamp>
-              <span className="text-xs font-semibold text-text-muted">
-                {lang === 'ar' ? `الجولة ${currentRound}` : `Round ${currentRound}`}
-              </span>
+            <div className="flex items-center justify-center mb-1">
+              <OperationPhaseBadge
+                phase={gameMode === 'question' ? 'interrogation' : 'active'}
+                round={currentRound}
+                lang={lang}
+              />
             </div>
             <h2 className="text-lg sm:text-xl font-bold text-text-main truncate">
               {gameMode === 'expression'
@@ -603,7 +612,12 @@ export const QuestionPhase: React.FC<QuestionPhaseProps> = ({
               exit={{ scale: 0.94, opacity: 0 }}
               className="w-full max-w-sm"
             >
-              <ModalShell className="border-[#A8826B]/45 p-6 text-center">
+              <ModalShell
+                ariaLabel={
+                  lang === 'ar' ? 'تذكير العشاق' : 'Lovers Mutual Reveal Reminder'
+                }
+                className="border-[#A8826B]/45 p-6 text-center"
+              >
                 <div className="w-20 h-20 mx-auto mb-4 rounded-[12px] bg-[#080B10] border border-[#A8826B]/45 flex items-center justify-center overflow-hidden">
                   <img
                     src={getRoleAsset('lovers')}
@@ -633,7 +647,7 @@ export const QuestionPhase: React.FC<QuestionPhaseProps> = ({
                 <div className="flex flex-col gap-2.5">
                   <TacticalButton
                     onClick={() => {
-                      playSound('click');
+                      playSound('dossierOpen');
                       setShowPeekPicker(true);
                     }}
                     variant="secondary"
@@ -678,7 +692,12 @@ export const QuestionPhase: React.FC<QuestionPhaseProps> = ({
               exit={{ scale: 0.94, opacity: 0 }}
               className="w-full max-w-sm"
             >
-              <ModalShell className="p-6 text-center">
+              <ModalShell
+                ariaLabel={
+                  gameMode === 'expression' ? t('enoughExpressions') : t('enoughQuestions')
+                }
+                className="p-6 text-center"
+              >
                 <h3 className="text-xl font-bold text-text-main mb-2">
                   {gameMode === 'expression' ? t('enoughExpressions') : t('enoughQuestions')}
                 </h3>
@@ -729,7 +748,11 @@ export const QuestionPhase: React.FC<QuestionPhaseProps> = ({
               onClick={(e) => e.stopPropagation()}
               className="w-full max-w-md"
             >
-              <ModalShell className="max-h-[80vh] flex flex-col">
+              <ModalShell
+                onClose={() => setShowLogModal(false)}
+                ariaLabel={lang === 'ar' ? 'سجل الوصف' : 'Descriptions Log'}
+                className="max-h-[80vh] flex flex-col"
+              >
                 <div className="bg-bg-card border-b border-border px-4 py-3.5 flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <ClassifiedStamp tone="cyan">LOG</ClassifiedStamp>
@@ -741,7 +764,7 @@ export const QuestionPhase: React.FC<QuestionPhaseProps> = ({
                     size="sm"
                     variant="ghost"
                     onClick={() => setShowLogModal(false)}
-                    aria-label="Close"
+                    aria-label={t('close')}
                   >
                     <X size={16} />
                   </IconButton>
@@ -801,42 +824,54 @@ export const QuestionPhase: React.FC<QuestionPhaseProps> = ({
               onClick={(e) => e.stopPropagation()}
               className="w-full max-w-md"
             >
-              <ModalShell className="p-5 space-y-3">
+              <ModalShell
+                onClose={() => setShowSpecialRolesModal(false)}
+                ariaLabel={t('specialRoles')}
+                className="p-5 space-y-3"
+              >
                 <div className="flex items-center justify-between">
                   <h3 className="text-base font-bold text-text-main">{t('specialRoles')}</h3>
                   <IconButton
                     size="sm"
                     variant="ghost"
                     onClick={() => setShowSpecialRolesModal(false)}
-                    aria-label="Close"
+                    aria-label={t('close')}
                   >
                     <X size={16} />
                   </IconButton>
                 </div>
-                {activeSpecials.map((role) => (
-                  <div
-                    key={role}
-                    className="flex items-center gap-3 p-3 rounded-[10px] bg-bg-card border border-border"
-                  >
-                    <div className="w-11 h-11 rounded-[8px] bg-[#080B10] border border-border-strong shrink-0 overflow-hidden flex items-center justify-center">
-                      <img
-                        src={getRoleAsset(role)}
-                        alt={getRoleTitle(role, lang)}
-                        loading="lazy"
-                        referrerPolicy="no-referrer"
-                        className="w-full h-full object-cover"
-                      />
+                {activeSpecials.map((role) => {
+                  const rv = getRoleVisualIdentity(role, lang);
+                  return (
+                    <div
+                      key={role}
+                      className={`flex items-center gap-3 p-3 rounded-[10px] border ${rv.tintBgClass}`}
+                    >
+                      <div
+                        className={`w-11 h-11 rounded-[8px] bg-[#080B10] border ${rv.frameBorderClass} shrink-0 overflow-hidden flex items-center justify-center`}
+                      >
+                        <img
+                          src={getRoleAsset(role)}
+                          alt={getRoleTitle(role, lang)}
+                          loading="lazy"
+                          referrerPolicy="no-referrer"
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <div className="text-start min-w-0 flex-1">
+                        <div className="flex items-center justify-between gap-2 mb-0.5">
+                          <h4 className="text-sm font-bold text-text-main truncate">
+                            {getRoleTitle(role, lang)}
+                          </h4>
+                          <ClassifiedStamp tone={rv.stampTone}>{rv.stamp}</ClassifiedStamp>
+                        </div>
+                        <p className="text-xs font-medium text-text-muted">
+                          {getSpecialRoleDescription(role, lang)}
+                        </p>
+                      </div>
                     </div>
-                    <div className="text-start">
-                      <h4 className="text-sm font-bold text-text-main">
-                        {getRoleTitle(role, lang)}
-                      </h4>
-                      <p className="text-xs font-medium text-text-muted">
-                        {getSpecialRoleDescription(role, lang)}
-                      </p>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </ModalShell>
             </motion.div>
           </motion.div>
@@ -853,9 +888,10 @@ export const QuestionPhase: React.FC<QuestionPhaseProps> = ({
             onClick={() => {
               setShowPeekPicker(false);
               setPeekPlayer(null);
+              setIsPeekHandoffConfirmed(false);
               setIsPeekingWord(false);
             }}
-            className="fixed inset-0 z-50 bg-[#080B10]/85 backdrop-blur-md flex items-center justify-center p-5"
+            className="fixed inset-0 z-50 bg-bg-dark/98 backdrop-blur-md flex items-center justify-center p-5"
           >
             <motion.div
               initial={{ scale: 0.94, opacity: 0 }}
@@ -864,7 +900,16 @@ export const QuestionPhase: React.FC<QuestionPhaseProps> = ({
               onClick={(e) => e.stopPropagation()}
               className="w-full max-w-sm"
             >
-              <ModalShell className="p-6 text-center">
+              <ModalShell
+                onClose={() => {
+                  setShowPeekPicker(false);
+                  setPeekPlayer(null);
+                  setIsPeekHandoffConfirmed(false);
+                  setIsPeekingWord(false);
+                }}
+                ariaLabel={lang === 'ar' ? 'عرض الكلمة السرية' : 'Peek Secret Word'}
+                className="p-6 text-center"
+              >
                 {!peekPlayer ? (
                   <>
                     <div className="flex items-center justify-between mb-4">
@@ -875,7 +920,7 @@ export const QuestionPhase: React.FC<QuestionPhaseProps> = ({
                         size="sm"
                         variant="ghost"
                         onClick={() => setShowPeekPicker(false)}
-                        aria-label="Close"
+                        aria-label={t('close')}
                       >
                         <X size={16} />
                       </IconButton>
@@ -885,7 +930,9 @@ export const QuestionPhase: React.FC<QuestionPhaseProps> = ({
                         <button
                           key={p.id}
                           onClick={() => {
+                            playSound('click');
                             setPeekPlayer(p);
+                            setIsPeekHandoffConfirmed(false);
                             setIsPeekingWord(false);
                           }}
                           className="p-2.5 rounded-[10px] bg-bg-card hover:border-[#668F9A]/50 border border-border flex flex-col items-center gap-1.5 transition-colors min-h-[84px]"
@@ -898,6 +945,44 @@ export const QuestionPhase: React.FC<QuestionPhaseProps> = ({
                       ))}
                     </div>
                   </>
+                ) : !isPeekHandoffConfirmed ? (
+                  <div className="flex flex-col items-center">
+                    <div className="w-full flex items-center justify-between mb-4">
+                      <ClassifiedStamp tone="cyan">CONFIDENTIAL HANDOFF</ClassifiedStamp>
+                      <IconButton
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => {
+                          setPeekPlayer(null);
+                          setIsPeekHandoffConfirmed(false);
+                          setIsPeekingWord(false);
+                        }}
+                        aria-label={t('close')}
+                      >
+                        <X size={16} />
+                      </IconButton>
+                    </div>
+                    <Avatar avatar={peekPlayer.avatar} name={peekPlayer.name} size={74} />
+                    <h3 className="text-lg font-bold text-text-main mt-3 mb-1.5">
+                      {t('passPhoneToNext', { name: peekPlayer.name })}
+                    </h3>
+                    <p className="text-xs font-medium text-text-muted mb-5 leading-relaxed">
+                      {lang === 'ar'
+                        ? 'تأكد أن الشاشة بعيدة عن أعين الآخرين قبل فتح الملف.'
+                        : 'Ensure nobody else can see the screen before unlocking.'}
+                    </p>
+                    <TacticalButton
+                      onClick={() => {
+                        playSound('handoff');
+                        setIsPeekHandoffConfirmed(true);
+                      }}
+                      variant="cyan"
+                      size="lg"
+                      fullWidth
+                    >
+                      {t('iAmNext', { name: peekPlayer.name })}
+                    </TacticalButton>
+                  </div>
                 ) : (
                   <>
                     <Avatar avatar={peekPlayer.avatar} name={peekPlayer.name} size={68} />
@@ -906,8 +991,8 @@ export const QuestionPhase: React.FC<QuestionPhaseProps> = ({
                     </h3>
                     <p className="text-xs font-medium text-text-muted mb-5">
                       {lang === 'ar'
-                        ? 'تأكد أن لا أحد ينظر إلى الشاشة ثم اضغط على العين'
-                        : 'Make sure nobody is watching, then tap the eye icon'}
+                        ? 'اضغط على أيقونة العين لعرض كلمتك السرية'
+                        : 'Tap the eye button to reveal your secret word'}
                     </p>
 
                     <div className="bg-bg-card border border-border-strong rounded-[12px] p-4 mb-4 flex items-center justify-between gap-3">
@@ -923,7 +1008,10 @@ export const QuestionPhase: React.FC<QuestionPhaseProps> = ({
                         </span>
                       </div>
                       <TacticalButton
-                        onClick={() => setIsPeekingWord(!isPeekingWord)}
+                        onClick={() => {
+                          if (!isPeekingWord) playSound('roleReveal');
+                          setIsPeekingWord(!isPeekingWord);
+                        }}
                         variant="cyan"
                         size="sm"
                         aria-label={isPeekingWord ? 'Hide' : 'Reveal'}
@@ -931,28 +1019,39 @@ export const QuestionPhase: React.FC<QuestionPhaseProps> = ({
                       />
                     </div>
 
-                    {isPeekingWord && peekPlayer.specialRole && (
-                      <div className="bg-[#B49A62]/10 border border-[#B49A62]/35 rounded-[10px] p-3 mb-4 text-xs font-semibold text-text-main text-start space-y-1">
-                        <div className="flex items-center gap-1.5 font-bold text-primary-text">
-                          <Sparkles size={13} />
-                          <span>{getRoleTitle(peekPlayer.specialRole, lang)}</span>
+                    {isPeekingWord && peekPlayer.specialRole && (() => {
+                      const spVisual = getRoleVisualIdentity(peekPlayer.specialRole, lang);
+                      return (
+                        <div
+                          className={`rounded-[10px] border p-3 mb-4 text-xs font-semibold text-text-main text-start space-y-1 ${spVisual.tintBgClass}`}
+                        >
+                          <div className="flex items-center justify-between gap-2">
+                            <div className="flex items-center gap-1.5 font-bold text-primary-text">
+                              <Sparkles size={13} />
+                              <span>{getRoleTitle(peekPlayer.specialRole, lang)}</span>
+                            </div>
+                            <ClassifiedStamp tone={spVisual.stampTone}>
+                              {spVisual.stamp}
+                            </ClassifiedStamp>
+                          </div>
+                          {peekLoverPartner && (
+                            <p className="text-[#C8A189] font-bold flex items-center gap-1">
+                              <Heart size={12} className="fill-current" />
+                              <span>
+                                {lang === 'ar'
+                                  ? `شريكك السري: ${peekLoverPartner.name}`
+                                  : `Your Lover partner: ${peekLoverPartner.name}`}
+                              </span>
+                            </p>
+                          )}
                         </div>
-                        {peekLoverPartner && (
-                          <p className="text-[#C8A189] font-bold flex items-center gap-1">
-                            <Heart size={12} className="fill-current" />
-                            <span>
-                              {lang === 'ar'
-                                ? `شريكك السري: ${peekLoverPartner.name}`
-                                : `Your Lover partner: ${peekLoverPartner.name}`}
-                            </span>
-                          </p>
-                        )}
-                      </div>
-                    )}
+                      );
+                    })()}
 
                     <TacticalButton
                       onClick={() => {
                         setPeekPlayer(null);
+                        setIsPeekHandoffConfirmed(false);
                         setIsPeekingWord(false);
                         setShowPeekPicker(false);
                       }}

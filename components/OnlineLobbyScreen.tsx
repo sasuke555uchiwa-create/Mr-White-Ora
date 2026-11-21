@@ -536,7 +536,12 @@ export const OnlineLobbyScreen: React.FC<OnlineLobbyScreenProps> = ({
             animate={{ opacity: 1, scale: 1 }}
             className="w-full max-w-md my-auto"
           >
-            <ModalShell maxWidthClass="max-w-md" className="p-5 sm:p-6 max-h-[90vh] overflow-y-auto">
+            <ModalShell
+              maxWidthClass="max-w-md"
+              onClose={() => setShowEditSettings(false)}
+              ariaLabel={t('editRoomSettings')}
+              className="p-5 sm:p-6 max-h-[90vh] overflow-y-auto"
+            >
               <h3 className="text-lg font-extrabold mb-4 text-center text-text-main">
                 {t('editRoomSettings')}
               </h3>

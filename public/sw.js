@@ -1,4 +1,4 @@
-const CACHE_NAME = 'undercover-shell-v9';
+const CACHE_NAME = 'blacksite-shell-v10';
 const SHELL_ASSETS = [
   '/',
   '/index.html',

@@ -205,3 +205,197 @@ export const getSpecialRoleDescription = (role: PlayerRole, lang: string): strin
 export const isSpecialRole = (role: PlayerRole): role is SpecialRoleId => {
   return SPECIAL_ROLES.some(r => r.id === role);
 };
+
+export interface RoleVisualIdentity {
+  stamp: string;
+  accentHex: string;
+  frameBorderClass: string;
+  tintBgClass: string;
+  titleColorClass: string;
+  stampTone: 'gold' | 'cyan' | 'crimson' | 'neutral';
+  abilityTag: { ar: string; en: string; fr: string };
+}
+
+const ROLE_VISUAL_MAP: Record<PlayerRole, RoleVisualIdentity> = {
+  citizen: {
+    stamp: 'CLEARANCE · CIV',
+    accentHex: '#668F9A',
+    frameBorderClass: 'border-[#668F9A]/50',
+    tintBgClass: 'bg-[#668F9A]/12 border-[#668F9A]/35',
+    titleColorClass: 'text-cyan-text',
+    stampTone: 'cyan',
+    abilityTag: {
+      ar: 'عميل نظامي موثّق',
+      en: 'Verified Field Operative',
+      fr: 'Agent de terrain vérifié',
+    },
+  },
+  undercover: {
+    stamp: 'COVERT · ASSET',
+    accentHex: '#A46F44',
+    frameBorderClass: 'border-[#A46F44]/55',
+    tintBgClass: 'bg-[#A46F44]/12 border-[#A46F44]/40',
+    titleColorClass: 'text-[#C88D5E]',
+    stampTone: 'crimson',
+    abilityTag: {
+      ar: 'مخترق بكلمة متقاربة',
+      en: 'Deep-Cover Infiltrator',
+      fr: 'Infiltré sous couverture',
+    },
+  },
+  mrwhite: {
+    stamp: 'GHOST · ZERO-KEY',
+    accentHex: '#B49A62',
+    frameBorderClass: 'border-[#B49A62]/60',
+    tintBgClass: 'bg-[#B49A62]/12 border-[#B49A62]/45',
+    titleColorClass: 'text-primary-text',
+    stampTone: 'gold',
+    abilityTag: {
+      ar: 'بدون كلمة · تمويه كامل',
+      en: 'Zero-Word Infiltrator',
+      fr: 'Sans mot · Camouflage total',
+    },
+  },
+  inspector: {
+    stamp: 'AUDIT · INTEL',
+    accentHex: '#668F9A',
+    frameBorderClass: 'border-[#668F9A]/55',
+    tintBgClass: 'bg-[#668F9A]/12 border-[#668F9A]/40',
+    titleColorClass: 'text-cyan-text',
+    stampTone: 'cyan',
+    abilityTag: {
+      ar: 'تحقيق ميداني',
+      en: 'Field Investigation',
+      fr: 'Enquête de terrain',
+    },
+  },
+  fool: {
+    stamp: 'DECOY · +4 PTS',
+    accentHex: '#9A8866',
+    frameBorderClass: 'border-[#9A8866]/55',
+    tintBgClass: 'bg-[#9A8866]/12 border-[#9A8866]/40',
+    titleColorClass: 'text-primary-text',
+    stampTone: 'gold',
+    abilityTag: {
+      ar: 'هدف الإقصاء الأول (+4)',
+      en: 'First-Vote Bait (+4)',
+      fr: 'Appât premier vote (+4)',
+    },
+  },
+  boomerang: {
+    stamp: 'COUNTER · BOUNCE',
+    accentHex: '#963F46',
+    frameBorderClass: 'border-[#963F46]/55',
+    tintBgClass: 'bg-[#963F46]/12 border-[#963F46]/40',
+    titleColorClass: 'text-danger-text',
+    stampTone: 'crimson',
+    abilityTag: {
+      ar: 'عكس الإقصاء لمرة واحدة',
+      en: 'One-Time Vote Reversal',
+      fr: 'Renvoi de vote unique',
+    },
+  },
+  protector: {
+    stamp: 'AEGIS · SHIELD',
+    accentHex: '#5A819E',
+    frameBorderClass: 'border-[#5A819E]/55',
+    tintBgClass: 'bg-[#5A819E]/12 border-[#5A819E]/40',
+    titleColorClass: 'text-cyan-text',
+    stampTone: 'cyan',
+    abilityTag: {
+      ar: 'حماية دفاعية لمرة واحدة',
+      en: 'One-Time Defense Shield',
+      fr: 'Bouclier défensif unique',
+    },
+  },
+  justice: {
+    stamp: 'TRIBUNAL · VETO',
+    accentHex: '#3E7B67',
+    frameBorderClass: 'border-[#3E7B67]/55',
+    tintBgClass: 'bg-[#3E7B67]/12 border-[#3E7B67]/40',
+    titleColorClass: 'text-emerald-text',
+    stampTone: 'cyan',
+    abilityTag: {
+      ar: 'كسر التعادل الحاسم',
+      en: 'Tie-Breaking Authority',
+      fr: 'Arbitre d’égalité',
+    },
+  },
+  ghost: {
+    stamp: 'SPECTRE · VOTE',
+    accentHex: '#668F9A',
+    frameBorderClass: 'border-[#668F9A]/55',
+    tintBgClass: 'bg-[#668F9A]/12 border-[#668F9A]/40',
+    titleColorClass: 'text-cyan-text',
+    stampTone: 'cyan',
+    abilityTag: {
+      ar: 'تصويت مستمر بعد الخروج',
+      en: 'Post-Elimination Vote',
+      fr: 'Vote post-élimination',
+    },
+  },
+  lovers: {
+    stamp: 'PACT · LINKED',
+    accentHex: '#A8826B',
+    frameBorderClass: 'border-[#A8826B]/55',
+    tintBgClass: 'bg-[#A8826B]/12 border-[#A8826B]/40',
+    titleColorClass: 'text-[#C8A189]',
+    stampTone: 'gold',
+    abilityTag: {
+      ar: 'ارتباط مصير مشترك',
+      en: 'Shared Fate Bond',
+      fr: 'Lien de destin partagé',
+    },
+  },
+  avenger: {
+    stamp: 'STRIKE · REPRISAL',
+    accentHex: '#A45A44',
+    frameBorderClass: 'border-[#A45A44]/55',
+    tintBgClass: 'bg-[#A45A44]/12 border-[#A45A44]/40',
+    titleColorClass: 'text-primary-text',
+    stampTone: 'crimson',
+    abilityTag: {
+      ar: 'ضربة انتقامية عند الخروج',
+      en: 'Final Retaliation Strike',
+      fr: 'Frappe de représailles',
+    },
+  },
+  mr_meme: {
+    stamp: 'SILENT · MIME',
+    accentHex: '#7B8794',
+    frameBorderClass: 'border-[#7B8794]/50',
+    tintBgClass: 'bg-[#7B8794]/12 border-[#7B8794]/35',
+    titleColorClass: 'text-text-main',
+    stampTone: 'neutral',
+    abilityTag: {
+      ar: 'وصف بالإيماء الصامت',
+      en: 'Silent Gesture Protocol',
+      fr: 'Protocole mime silencieux',
+    },
+  },
+};
+
+export const getRoleVisualIdentity = (role: PlayerRole, lang: string): {
+  stamp: string;
+  accentHex: string;
+  frameBorderClass: string;
+  tintBgClass: string;
+  titleColorClass: string;
+  stampTone: 'gold' | 'cyan' | 'crimson' | 'neutral';
+  abilityLabel: string;
+} => {
+  const base = ROLE_VISUAL_MAP[role] || ROLE_VISUAL_MAP.citizen;
+  const normalizedLang = lang === 'sa' ? 'ar' : lang;
+  const abilityLabel =
+    base.abilityTag[normalizedLang as 'ar' | 'en' | 'fr'] || base.abilityTag.en;
+  return {
+    stamp: base.stamp,
+    accentHex: base.accentHex,
+    frameBorderClass: base.frameBorderClass,
+    tintBgClass: base.tintBgClass,
+    titleColorClass: base.titleColorClass,
+    stampTone: base.stampTone,
+    abilityLabel,
+  };
+};
+

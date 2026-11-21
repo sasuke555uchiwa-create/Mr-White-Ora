@@ -1,13 +1,13 @@
 {
   "id": "/",
-  "name": "Undercover · Mr white 2?",
-  "short_name": "Undercover",
-  "description": "A social deduction party game where Civilians, Undercovers, and Mr. White bluff, describe secret words, and unmask the infiltrators.",
+  "name": "MR. WHITE — BLACKSITE",
+  "short_name": "BLACKSITE",
+  "description": "Classified intelligence social deduction multiplayer game. Unmask Undercovers and Mr. White through clues, interrogation, and tribunal votes.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
-  "background_color": "#070b14",
-  "theme_color": "#070b14",
+  "background_color": "#080B10",
+  "theme_color": "#080B10",
   "icons": [
     {
       "src": "/images/game_logo.webp",

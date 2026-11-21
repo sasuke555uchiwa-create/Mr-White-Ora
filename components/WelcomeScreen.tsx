@@ -319,7 +319,12 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
               onClick={(e) => e.stopPropagation()}
               className="w-full max-w-md"
             >
-              <ModalShell maxWidthClass="max-w-md" className="p-5 space-y-3.5">
+              <ModalShell
+                maxWidthClass="max-w-md"
+                onClose={() => setShowPlayOptions(false)}
+                ariaLabel={isRTL ? 'اختر وضع التشغيل' : 'Select Operation Mode'}
+                className="p-5 space-y-3.5"
+              >
                 <div className="flex items-center justify-between pb-3 border-b border-border">
                   <div>
                     <h2 className="text-base sm:text-lg font-extrabold text-text-main">
@@ -421,7 +426,12 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
               onClick={(e) => e.stopPropagation()}
               className="w-full max-w-sm"
             >
-              <ModalShell maxWidthClass="max-w-sm" className="p-5">
+              <ModalShell
+                maxWidthClass="max-w-sm"
+                onClose={() => setShowLangModal(false)}
+                ariaLabel={t('language')}
+                className="p-5"
+              >
                 <div className="flex items-center justify-between mb-4 pb-3 border-b border-border">
                   <h3 className="text-base font-extrabold text-text-main flex items-center gap-2">
                     <Globe size={18} className="text-primary-text" />

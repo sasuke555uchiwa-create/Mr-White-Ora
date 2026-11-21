@@ -384,7 +384,12 @@ export const OnlineRoomsScreen: React.FC<OnlineRoomsScreenProps> = ({
             animate={{ opacity: 1, scale: 1 }}
             className="w-full max-w-md my-auto"
           >
-            <ModalShell maxWidthClass="max-w-md" className="p-5 sm:p-6 max-h-[90vh] overflow-y-auto">
+            <ModalShell
+              maxWidthClass="max-w-md"
+              onClose={() => setShowCreateModal(false)}
+              ariaLabel={t('roomSettings')}
+              className="p-5 sm:p-6 max-h-[90vh] overflow-y-auto"
+            >
               <h3 className="text-lg font-extrabold mb-4 text-center text-text-main">
                 {t('roomSettings')}
               </h3>

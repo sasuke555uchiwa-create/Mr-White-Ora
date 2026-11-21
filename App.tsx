@@ -38,10 +38,10 @@ import {
   joinOnlineRoom,
   leaveOnlineRoom,
 } from './utils/onlineRoomService';
-import { getRoleAsset, getRoleTitle } from './data/specialRoles';
+import { getRoleAsset, getRoleTitle, getRoleVisualIdentity } from './data/specialRoles';
 import { useOfflineMatch } from './hooks/useOfflineMatch';
 import { hasSpecialRole } from './src/game/voteEngine';
-import { ModalShell, TacticalButton } from './components/ui/BlacksiteUI';
+import { ClassifiedStamp, ModalShell, TacticalButton } from './components/ui/BlacksiteUI';
 
 const ACTIVE_GAME_PHASES = [
   GamePhase.REVEAL,
@@ -587,6 +587,7 @@ function AppContent() {
                 onVoteComplete={offline.handleVotingComplete}
                 currentRound={offline.currentRound}
                 difficulty={offline.gameSettings.difficulty}
+                descriptionsLog={offline.descriptionsLog}
               />
             </motion.div>
           )}
@@ -797,7 +798,16 @@ function AppContent() {
               exit={{ scale: 0.97, opacity: 0, y: 6 }}
               className="w-full max-w-sm"
             >
-              <ModalShell maxWidthClass="max-w-sm" className="p-6 text-center border-[#3E7B67]/45">
+              <ModalShell
+                maxWidthClass="max-w-sm"
+                ariaLabel={getRoleTitle('justice', currentLanguage)}
+                className="p-6 text-center border-[#3E7B67]/45"
+              >
+                <div className="flex justify-center mb-3">
+                  <ClassifiedStamp tone={getRoleVisualIdentity('justice', currentLanguage).stampTone}>
+                    {getRoleVisualIdentity('justice', currentLanguage).stamp}
+                  </ClassifiedStamp>
+                </div>
                 <div className="w-20 h-20 rounded-[12px] bg-bg-card border border-[#3E7B67]/40 p-1.5 mx-auto mb-3 overflow-hidden">
                   <img
                     src={getRoleAsset('justice')}
@@ -821,7 +831,10 @@ function AppContent() {
                     return (
                       <button
                         key={cand.id}
-                        onClick={() => offline.resolveTieWithJustice(cand.id)}
+                        onClick={() => {
+                          playSound('abilityActivate');
+                          offline.resolveTieWithJustice(cand.id);
+                        }}
                         className="p-3 rounded-[10px] bg-bg-card hover:bg-[#3E7B67]/15 border border-border hover:border-[#3E7B67]/50 flex flex-col items-center gap-2 transition-colors min-h-[44px]"
                       >
                         <Avatar avatar={cand.avatar} name={cand.name} size={52} />
@@ -853,7 +866,16 @@ function AppContent() {
               exit={{ scale: 0.97, opacity: 0, y: 6 }}
               className="w-full max-w-sm"
             >
-              <ModalShell maxWidthClass="max-w-sm" className="p-6 text-center border-[#963F46]/45">
+              <ModalShell
+                maxWidthClass="max-w-sm"
+                ariaLabel={getRoleTitle('boomerang', currentLanguage)}
+                className="p-6 text-center border-[#963F46]/45"
+              >
+                <div className="flex justify-center mb-3">
+                  <ClassifiedStamp tone={getRoleVisualIdentity('boomerang', currentLanguage).stampTone}>
+                    {getRoleVisualIdentity('boomerang', currentLanguage).stamp}
+                  </ClassifiedStamp>
+                </div>
                 <div className="w-20 h-20 rounded-[12px] bg-bg-card border border-[#963F46]/40 p-1.5 mx-auto mb-3 overflow-hidden">
                   <img
                     src={getRoleAsset('boomerang')}
@@ -876,7 +898,10 @@ function AppContent() {
                     .map((target) => (
                       <button
                         key={target.id}
-                        onClick={() => offline.handleBoomerangTargetPick(target.id)}
+                        onClick={() => {
+                          playSound('abilityActivate');
+                          offline.handleBoomerangTargetPick(target.id);
+                        }}
                         className="p-2.5 rounded-[10px] bg-bg-card hover:bg-[#963F46]/15 border border-border hover:border-[#963F46]/50 flex flex-col items-center gap-1.5 transition-colors min-h-[44px]"
                       >
                         <Avatar avatar={target.avatar} name={target.name} size={46} />
@@ -907,7 +932,16 @@ function AppContent() {
               exit={{ scale: 0.97, opacity: 0, y: 6 }}
               className="w-full max-w-sm"
             >
-              <ModalShell maxWidthClass="max-w-sm" className="p-6 text-center border-[#A45A44]/45">
+              <ModalShell
+                maxWidthClass="max-w-sm"
+                ariaLabel={getRoleTitle('avenger', currentLanguage)}
+                className="p-6 text-center border-[#A45A44]/45"
+              >
+                <div className="flex justify-center mb-3">
+                  <ClassifiedStamp tone={getRoleVisualIdentity('avenger', currentLanguage).stampTone}>
+                    {getRoleVisualIdentity('avenger', currentLanguage).stamp}
+                  </ClassifiedStamp>
+                </div>
                 <div className="w-20 h-20 rounded-[12px] bg-bg-card border border-[#A45A44]/40 p-1.5 mx-auto mb-3 overflow-hidden">
                   <img
                     src={getRoleAsset('avenger')}
@@ -930,7 +964,10 @@ function AppContent() {
                     .map((target) => (
                       <button
                         key={target.id}
-                        onClick={() => offline.handleAvengerTargetPick(target.id)}
+                        onClick={() => {
+                          playSound('abilityActivate');
+                          offline.handleAvengerTargetPick(target.id);
+                        }}
                         className="p-2.5 rounded-[10px] bg-bg-card hover:bg-[#A45A44]/15 border border-border hover:border-[#A45A44]/50 flex flex-col items-center gap-1.5 transition-colors min-h-[44px]"
                       >
                         <Avatar avatar={target.avatar} name={target.name} size={46} />
@@ -961,7 +998,12 @@ function AppContent() {
               exit={{ scale: 0.97, opacity: 0, y: 6 }}
               className="w-full max-w-sm"
             >
-              <ModalShell maxWidthClass="max-w-sm" className="p-6">
+              <ModalShell
+                maxWidthClass="max-w-sm"
+                onClose={() => setShowExitConfirmation(false)}
+                ariaLabel={t('alert')}
+                className="p-6"
+              >
                 <h3 className="text-text-main font-bold text-lg mb-2 text-start">{t('alert')}</h3>
                 <p className="text-text-muted text-sm font-medium mb-6 text-start leading-relaxed">
                   {t('exitGameConfirmation')}

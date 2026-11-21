@@ -318,7 +318,12 @@ export const LanguageDictionary: React.FC<LanguageDictionaryProps> = ({ onBack }
               exit={{ scale: 0.97, opacity: 0, y: 8 }}
               className="w-full max-w-sm relative z-10"
             >
-              <ModalShell maxWidthClass="max-w-sm" className="p-6">
+              <ModalShell
+                maxWidthClass="max-w-sm"
+                className="p-6"
+                onClose={() => setIsAdding(false)}
+                ariaLabel={t('gameWords')}
+              >
                 <h3 className="text-lg font-extrabold text-center text-text-main mb-4">
                   {t('gameWords')}
                 </h3>

@@ -23,7 +23,7 @@ import { ResultScreen } from './ResultScreen';
 import { ChatBox } from './ChatBox';
 import { Avatar } from './Avatar';
 import { PlayerStatsModal } from './PlayerStatsModal';
-import { getRoleAsset } from '../data/specialRoles';
+import { getRoleAsset, getRoleVisualIdentity } from '../data/specialRoles';
 import { playSound } from '../services/soundService';
 import { Player, PlayerRole } from '../types';
 import {
@@ -51,6 +51,7 @@ import {
   IconButton,
   IntelligencePanel,
   ModalShell,
+  OperationPhaseBadge,
   PlayerIntelligenceCard,
   StatusIndicator,
   TacticalButton,
@@ -409,7 +410,7 @@ export const OnlineGameScreen: React.FC<OnlineGameScreenProps> = ({
     if (submittingVote || !suspectUid) return;
     setSubmittingVote(true);
     try {
-      playSound('vote');
+      playSound('voteConfirm');
       await submitOnlineVote(roomId, suspectUid);
     } catch (err) {
       console.error('Vote submission failed:', err);
@@ -490,13 +491,17 @@ export const OnlineGameScreen: React.FC<OnlineGameScreenProps> = ({
     }
 
     if (privatePlayer.role === 'mrwhite') {
+      const rv = getRoleVisualIdentity('mrwhite', settings.language);
       return (
         <div className="text-primary-text flex flex-col items-center">
+          <ClassifiedStamp tone={rv.stampTone} className="mb-3">
+            {rv.stamp}
+          </ClassifiedStamp>
           <img
             src={getRoleAsset('mrwhite')}
             alt="Mr. White"
             referrerPolicy="no-referrer"
-            className="w-24 h-24 rounded-[12px] object-cover border border-[#B49A62]/45 shadow-lg mb-3 bg-[#080B10]"
+            className={`w-24 h-24 rounded-[12px] object-cover border-2 ${rv.frameBorderClass} shadow-lg mb-3 bg-[#080B10]`}
           />
           <span className="text-2xl sm:text-3xl font-bold block mb-2">{t('mrWhiteRole')}</span>
           <p className="text-xs sm:text-sm font-medium text-text-muted">{t('tryToGuessWord')}</p>
@@ -507,6 +512,9 @@ export const OnlineGameScreen: React.FC<OnlineGameScreenProps> = ({
     if (privatePlayer.role === 'hidden' || difficulty === 'hard') {
       return (
         <div className="text-cyan-text flex flex-col items-center">
+          <ClassifiedStamp tone="cyan" className="mb-3">
+            CLEARANCE · REDACTED
+          </ClassifiedStamp>
           <div className="flex items-center justify-center gap-2 text-sm font-bold mb-3">
             <EyeOff size={18} />
             <span>{isRTL ? 'دورك مخفي (وضع صعب)' : 'Role Hidden (Hard Mode)'}</span>
@@ -522,13 +530,17 @@ export const OnlineGameScreen: React.FC<OnlineGameScreenProps> = ({
     }
 
     if (privatePlayer.role === 'undercover') {
+      const rv = getRoleVisualIdentity('undercover', settings.language);
       return (
         <div className="text-[#C88D5E] flex flex-col items-center">
+          <ClassifiedStamp tone={rv.stampTone} className="mb-3">
+            {rv.stamp}
+          </ClassifiedStamp>
           <img
             src={getRoleAsset('undercover')}
             alt="Undercover"
             referrerPolicy="no-referrer"
-            className="w-24 h-24 rounded-[12px] object-cover border border-[#A46F44]/50 shadow-lg mb-3 bg-[#080B10]"
+            className={`w-24 h-24 rounded-[12px] object-cover border-2 ${rv.frameBorderClass} shadow-lg mb-3 bg-[#080B10]`}
           />
           <span className="text-2xl sm:text-3xl font-bold block mb-3">{t('undercoverRole')}</span>
           <p className="text-xs font-semibold mb-2 text-text-muted">{t('secretWordIs')}</p>
@@ -541,13 +553,17 @@ export const OnlineGameScreen: React.FC<OnlineGameScreenProps> = ({
       );
     }
 
+    const rv = getRoleVisualIdentity('citizen', settings.language);
     return (
       <div className="text-cyan-text flex flex-col items-center">
+        <ClassifiedStamp tone={rv.stampTone} className="mb-3">
+          {rv.stamp}
+        </ClassifiedStamp>
         <img
           src={getRoleAsset('citizen')}
           alt="Citizen"
           referrerPolicy="no-referrer"
-          className="w-24 h-24 rounded-[12px] object-cover border border-[#668F9A]/45 shadow-lg mb-3 bg-[#080B10]"
+          className={`w-24 h-24 rounded-[12px] object-cover border-2 ${rv.frameBorderClass} shadow-lg mb-3 bg-[#080B10]`}
         />
         <span className="text-2xl sm:text-3xl font-bold block mb-3">{t('citizenRole')}</span>
         <p className="text-xs font-semibold mb-2 text-text-muted">{t('secretWordIs')}</p>
@@ -568,6 +584,9 @@ export const OnlineGameScreen: React.FC<OnlineGameScreenProps> = ({
       if (isHost) {
         return (
           <div className="flex flex-col items-center justify-center flex-1 text-center p-6 max-w-md mx-auto w-full">
+            <div className="mb-3">
+              <OperationPhaseBadge phase="briefing" round={currentRound} lang={settings.language} />
+            </div>
             <div className="w-16 h-16 rounded-[12px] bg-[#B49A62]/15 border border-[#B49A62]/35 flex items-center justify-center mb-4">
               <Play className="w-7 h-7 text-primary-text" />
             </div>
@@ -638,10 +657,14 @@ export const OnlineGameScreen: React.FC<OnlineGameScreenProps> = ({
       return (
         <div className="flex flex-col items-center justify-center flex-1 text-center p-5 max-w-md mx-auto w-full">
           <div className="mb-3">
-            <ClassifiedStamp tone="gold">CLASSIFIED BRIEFING</ClassifiedStamp>
+            <OperationPhaseBadge phase="briefing" round={currentRound} lang={settings.language} />
           </div>
           <h2 className="text-xl sm:text-2xl font-bold mb-4 text-text-main">{t('yourTurn')}</h2>
-          <IntelligencePanel className="p-6 w-full border-[#B49A62]/35">
+          <IntelligencePanel className="relative p-6 w-full border-[#B49A62]/40 overflow-hidden">
+            <div
+              aria-hidden="true"
+              className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-[#B49A62]/70 to-transparent"
+            />
             <h3 className="text-sm font-semibold text-text-muted mb-4">{t('youAreLabel')}</h3>
             {renderWordCardInner()}
           </IntelligencePanel>
@@ -680,6 +703,10 @@ export const OnlineGameScreen: React.FC<OnlineGameScreenProps> = ({
 
       return (
         <div className="flex flex-col flex-1 w-full max-w-3xl mx-auto px-4 pb-24 pt-2 gap-4">
+          <div className="flex items-center justify-between gap-2">
+            <OperationPhaseBadge phase="active" round={currentRound} lang={settings.language} />
+          </div>
+
           {currentPlayer?.isEliminated && (
             <div className="px-4 py-2.5 rounded-[10px] bg-[#963F46]/15 border border-[#963F46]/35 text-danger-text text-xs font-semibold flex items-center gap-2">
               <ShieldAlert size={16} className="shrink-0" />
@@ -902,9 +929,10 @@ export const OnlineGameScreen: React.FC<OnlineGameScreenProps> = ({
 
       return (
         <div className="flex flex-col items-center flex-1 text-center p-4 pb-24 w-full max-w-2xl mx-auto gap-4">
-          <div>
+          <div className="flex flex-col items-center gap-1.5">
+            <OperationPhaseBadge phase="tribunal" round={currentRound} lang={settings.language} />
             <h2 className="text-xl sm:text-2xl font-bold text-danger-text">{t('votingTime')}</h2>
-            <p className="text-xs font-mono-code font-bold text-text-muted mt-1 tabular-nums">
+            <p className="text-xs font-mono-code font-bold text-text-muted tabular-nums">
               {t('votedCount', { count: validVoteCount, total: alivePlayers.length })}
             </p>
           </div>
@@ -933,21 +961,30 @@ export const OnlineGameScreen: React.FC<OnlineGameScreenProps> = ({
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 w-full">
                 {alivePlayers
                   .filter((p) => p.uid !== user.uid)
-                  .map((p) => (
-                    <button
-                      key={p.uid}
-                      disabled={submittingVote}
-                      onClick={() => p.uid && handleVote(p.uid)}
-                      className="text-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#963F46]/70 rounded-[12px] disabled:opacity-50"
-                    >
-                      <PlayerIntelligenceCard className="min-h-[116px] p-3 flex flex-col items-center justify-center hover:bg-[#963F46]/10 hover:border-[#963F46]/55">
-                        <Avatar avatar={p.avatar} name={p.name} size={54} className="mb-2" />
-                        <span className="font-bold text-sm text-text-main truncate max-w-full">
-                          {p.name}
-                        </span>
-                      </PlayerIntelligenceCard>
-                    </button>
-                  ))}
+                  .map((p) => {
+                    const playerClues = clues.filter((c) => c.uid === p.uid && !c.skipped);
+                    const latestClue = playerClues[playerClues.length - 1];
+                    return (
+                      <button
+                        key={p.uid}
+                        disabled={submittingVote}
+                        onClick={() => p.uid && handleVote(p.uid)}
+                        className="text-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#963F46]/70 rounded-[12px] disabled:opacity-50"
+                      >
+                        <PlayerIntelligenceCard className="min-h-[126px] p-3 flex flex-col items-center justify-center hover:bg-[#963F46]/10 hover:border-[#963F46]/55">
+                          <Avatar avatar={p.avatar} name={p.name} size={54} className="mb-2" />
+                          <span className="font-bold text-sm text-text-main truncate max-w-full">
+                            {p.name}
+                          </span>
+                          {latestClue && (
+                            <span className="mt-1 text-[11px] font-medium text-text-muted truncate max-w-full">
+                              "{latestClue.text}"
+                            </span>
+                          )}
+                        </PlayerIntelligenceCard>
+                      </button>
+                    );
+                  })}
               </div>
             </>
           ) : (
@@ -1142,6 +1179,7 @@ export const OnlineGameScreen: React.FC<OnlineGameScreenProps> = ({
             {currentPlayer && !currentPlayer.isEliminated && (
               <TacticalButton
                 onClick={() => {
+                  playSound('dossierOpen');
                   setPeekRevealed(false);
                   setShowWordPeek(true);
                 }}
@@ -1194,18 +1232,26 @@ export const OnlineGameScreen: React.FC<OnlineGameScreenProps> = ({
       {showWordPeek && currentPlayer && (
         <div
           onClick={() => setShowWordPeek(false)}
-          className="fixed inset-0 z-50 bg-[#080B10]/85 backdrop-blur-md flex items-center justify-center p-5"
+          className="fixed inset-0 z-50 bg-[#080B10]/90 backdrop-blur-md flex items-center justify-center p-5"
         >
           <div onClick={(e) => e.stopPropagation()} className="w-full max-w-sm">
-            <ModalShell className="p-6 text-center">
+            <ModalShell
+              onClose={() => setShowWordPeek(false)}
+              ariaLabel={t('myWordPeek')}
+              className="p-6 text-center"
+            >
               {!peekRevealed ? (
                 <div className="py-4 flex flex-col items-center gap-4">
+                  <ClassifiedStamp tone="cyan">CONFIDENTIAL PEEK</ClassifiedStamp>
                   <div className="w-14 h-14 rounded-[12px] bg-[#668F9A]/15 border border-[#668F9A]/35 flex items-center justify-center">
                     <EyeOff size={28} className="text-cyan-text" />
                   </div>
                   <p className="text-sm font-medium text-text-muted">{t('tapToRevealWord')}</p>
                   <TacticalButton
-                    onClick={() => setPeekRevealed(true)}
+                    onClick={() => {
+                      playSound('roleReveal');
+                      setPeekRevealed(true);
+                    }}
                     variant="cyan"
                     size="lg"
                     fullWidth
@@ -1232,9 +1278,16 @@ export const OnlineGameScreen: React.FC<OnlineGameScreenProps> = ({
       )}
 
       {showLeaveConfirm && (
-        <div className="fixed inset-0 z-50 bg-[#080B10]/85 backdrop-blur-sm flex items-center justify-center p-5">
-          <div className="w-full max-w-sm">
-            <ModalShell className="p-6 text-center">
+        <div
+          onClick={() => setShowLeaveConfirm(false)}
+          className="fixed inset-0 z-50 bg-[#080B10]/85 backdrop-blur-sm flex items-center justify-center p-5"
+        >
+          <div onClick={(e) => e.stopPropagation()} className="w-full max-w-sm">
+            <ModalShell
+              onClose={() => setShowLeaveConfirm(false)}
+              ariaLabel={t('leaveRoom')}
+              className="p-6 text-center"
+            >
               <h3 className="text-lg font-bold text-text-main mb-2">{t('leaveRoom')}</h3>
               <p className="text-sm font-medium text-text-muted mb-6">{t('leaveRoomConfirm')}</p>
               <div className="flex gap-3">

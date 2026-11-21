@@ -436,7 +436,12 @@ export const PlayerSetup: React.FC<PlayerSetupProps> = ({
       {/* Character Avatar Selection Modal */}
       {editingIndex !== null && (
         <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-xs flex items-center justify-center p-4">
-          <ModalShell maxWidthClass="max-w-md" className="p-5 max-h-[88vh] flex flex-col">
+          <ModalShell
+            maxWidthClass="max-w-md"
+            className="p-5 max-h-[88vh] flex flex-col"
+            onClose={() => setEditingIndex(null)}
+            ariaLabel={t('changeAvatar')}
+          >
             <div className="flex justify-between items-center mb-4 pb-3 border-b border-border">
               <h3 className="text-base sm:text-lg font-extrabold text-text-main">
                 {t('changeAvatar')}

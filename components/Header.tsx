@@ -41,7 +41,7 @@ export const Header: React.FC<HeaderProps> = ({ onHome, showHome }) => {
                 isRTL ? 'font-cairo' : 'font-sans tracking-wider'
               }`}
             >
-              {isRTL ? 'المتخفي · MR. WHITE' : 'MR. WHITE · UNDERCOVER'}
+              {isRTL ? 'المتخفي · BLACKSITE' : 'MR. WHITE · BLACKSITE'}
             </h1>
           </div>
         )}

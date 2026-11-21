@@ -6,12 +6,13 @@ import { Player } from '../types';
 import { playSound } from '../services/soundService';
 import { getUITranslation } from '../translations';
 import { getSettings } from '../services/storageService';
-import { getRoleAsset, getRoleTitle } from '../data/specialRoles';
+import { getRoleAsset, getRoleTitle, getRoleVisualIdentity } from '../data/specialRoles';
 import { getPlayerRoundPoints, resolveWinningFaction } from '../services/gameScoring';
 import {
   ClassifiedStamp,
   IntelligencePanel,
   ModalShell,
+  OperationPhaseBadge,
   PlayerIntelligenceCard,
   StatusIndicator,
   TacticalButton,
@@ -64,7 +65,7 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({
   useEffect(() => {
     const timer = setTimeout(() => {
       if (roundWinner) {
-        playSound(winReason === 'impostor_guessed' ? 'mrWhiteWin' : 'win');
+        playSound(winReason === 'impostor_guessed' ? 'mrWhiteWin' : 'verdict');
       } else {
         playSound('dramatic');
       }
@@ -73,7 +74,7 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({
   }, [roundWinner, winReason]);
 
   const handleWinSelection = (winner: 'impostor' | 'citizens') => {
-    playSound('win');
+    playSound('verdict');
     onGameEnd(winner);
     setWinnerSelected(true);
     setShowWinOverlay(true);
@@ -206,7 +207,10 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({
               transition={{ delay: 0.15 }}
               className="w-full mb-4"
             >
-              <IntelligencePanel className="py-4 px-5 text-center">
+              <IntelligencePanel className="py-4 px-5 text-center border-[#B49A62]/35">
+                <div className="flex items-center justify-center mb-3">
+                  <OperationPhaseBadge phase="verdict" lang={lang} />
+                </div>
                 <div className="flex justify-around items-center gap-3">
                   <div>
                     <h3
@@ -274,6 +278,7 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({
 
                   const roleTitle = getRoleTitle(p.role, lang);
                   const roleImg = getRoleAsset(p.role);
+                  const roleVisual = getRoleVisualIdentity(p.role, lang);
                   const specialTitle = p.specialRole ? getRoleTitle(p.specialRole, lang) : null;
                   const partner =
                     p.loverPartnerId !== undefined
@@ -303,17 +308,9 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({
                                 src={roleImg}
                                 alt={roleTitle}
                                 referrerPolicy="no-referrer"
-                                className="w-4 h-4 rounded-[4px] object-cover border border-border"
+                                className={`w-4 h-4 rounded-[4px] object-cover border ${roleVisual.frameBorderClass}`}
                               />
-                              <span
-                                className={`text-xs font-bold ${
-                                  p.role === 'mrwhite'
-                                    ? 'text-primary-text'
-                                    : p.role === 'undercover'
-                                    ? 'text-[#C88D5E]'
-                                    : 'text-cyan-text'
-                                }`}
-                              >
+                              <span className={`text-xs font-bold ${roleVisual.titleColorClass}`}>
                                 {roleTitle}
                               </span>
                               {specialTitle && (
@@ -366,7 +363,7 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({
           {onOpenCaseFile && (
             <TacticalButton
               onClick={() => {
-                playSound('click');
+                playSound('dossierOpen');
                 onOpenCaseFile();
               }}
               variant="cyan"
@@ -396,7 +393,7 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({
           {onOpenCaseFile && (
             <TacticalButton
               onClick={() => {
-                playSound('click');
+                playSound('dossierOpen');
                 onOpenCaseFile();
               }}
               variant="cyan"
@@ -487,8 +484,12 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({
               transition={{ duration: 0.25 }}
               className="w-full max-w-sm"
             >
-              <ModalShell className="border-[#B49A62]/45 p-4 flex flex-col gap-3.5">
-                <div className="flex items-center justify-between">
+              <ModalShell
+                ariaLabel={getResultTitle()}
+                className="border-[#B49A62]/45 p-4 flex flex-col gap-3.5"
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <OperationPhaseBadge phase="verdict" lang={lang} />
                   <ClassifiedStamp tone={winningFaction === 'citizens' ? 'cyan' : 'gold'}>
                     OPERATION COMPLETE
                   </ClassifiedStamp>

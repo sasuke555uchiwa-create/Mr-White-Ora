@@ -4,15 +4,21 @@ import { playSound } from '../services/soundService';
 import { getSettings } from '../services/storageService';
 import { Avatar } from './Avatar';
 import { ArrowRight, ShieldCheck, RotateCcw, Sparkles, Heart } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 import { getUITranslation } from '../translations';
 import {
   getRoleAsset,
   getRoleBadgeIcon,
   getRoleTitle,
+  getRoleVisualIdentity,
   getSpecialRoleDescription,
 } from '../data/specialRoles';
-import { ClassifiedStamp, ModalShell, TacticalButton } from './ui/BlacksiteUI';
+import {
+  ClassifiedStamp,
+  ModalShell,
+  OperationPhaseBadge,
+  TacticalButton,
+} from './ui/BlacksiteUI';
 
 interface RevealVoteResultProps {
   votedPlayerId: number;
@@ -43,6 +49,7 @@ export const RevealVoteResult: React.FC<RevealVoteResultProps> = ({
   foolBonusTriggered = false,
   loversPartnerName = null,
 }) => {
+  const prefersReducedMotion = useReducedMotion();
   const settings = getSettings();
   const lang = settings.language;
   const isRTL = ['ar', 'sa'].includes(lang);
@@ -68,7 +75,7 @@ export const RevealVoteResult: React.FC<RevealVoteResultProps> = ({
     } else if (blockedBySpecial === 'boomerang') {
       playSound('boomerang');
     } else if (isBadGuy) {
-      playSound('win');
+      playSound('verdict');
     } else {
       playSound('eliminate');
     }
@@ -80,8 +87,13 @@ export const RevealVoteResult: React.FC<RevealVoteResultProps> = ({
   const roleBadgeSrc = getRoleBadgeIcon(votedPlayer.role);
   const rolePortraitSrc = getRoleAsset(votedPlayer.role);
   const roleTitle = getRoleTitle(votedPlayer.role, lang);
+  const roleVisual = getRoleVisualIdentity(
+    isSaved && blockedBySpecial ? blockedBySpecial : votedPlayer.role,
+    lang
+  );
   const specialTitle = activeSpecial ? getRoleTitle(activeSpecial, lang) : null;
   const specialDesc = activeSpecial ? getSpecialRoleDescription(activeSpecial, lang) : null;
+  const specialVisual = activeSpecial ? getRoleVisualIdentity(activeSpecial, lang) : null;
 
   const getHeadline = () => {
     if (blockedBySpecial === 'boomerang') {
@@ -111,28 +123,37 @@ export const RevealVoteResult: React.FC<RevealVoteResultProps> = ({
     ? 'text-[#C88D5E]'
     : 'text-danger-text';
 
-  const roleBadgeStyle = isImpostor
-    ? 'bg-[#B49A62]/15 text-primary-text border-[#B49A62]/45'
-    : isUndercover
-    ? 'bg-[#A46F44]/15 text-[#C88D5E] border-[#A46F44]/45'
-    : 'bg-[#668F9A]/15 text-cyan-text border-[#668F9A]/45';
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#080B10]/85 backdrop-blur-md">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#080B10]/88 backdrop-blur-md">
       <motion.div
-        initial={{ opacity: 0, scale: 0.94, y: 14 }}
+        initial={prefersReducedMotion ? false : { opacity: 0, scale: 0.94, y: 14 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         className="w-full max-w-sm"
       >
-        <ModalShell className="p-6 text-center flex flex-col max-h-[90vh] overflow-y-auto custom-scrollbar">
-          <div className="flex items-center justify-between mb-3">
-            <ClassifiedStamp tone={isSaved ? 'cyan' : isImpostor ? 'gold' : 'crimson'}>
-              {isSaved ? 'INTERCEPTED' : 'VERDICT'}
+        <ModalShell
+          ariaLabel={getHeadline()}
+          className={`relative p-6 text-center flex flex-col max-h-[90vh] overflow-y-auto custom-scrollbar ${roleVisual.frameBorderClass}`}
+        >
+          <div
+            aria-hidden="true"
+            className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-[#B49A62]/65 to-transparent"
+          />
+
+          <div className="flex items-center justify-between gap-2 mb-3">
+            {isSaved ? (
+              <ClassifiedStamp tone="cyan">INTERCEPTED</ClassifiedStamp>
+            ) : (
+              <OperationPhaseBadge phase="verdict" lang={lang} />
+            )}
+            <ClassifiedStamp tone={isSaved ? roleVisual.stampTone : roleVisual.stampTone}>
+              {isSaved ? roleVisual.stamp : roleVisual.stamp}
             </ClassifiedStamp>
           </div>
 
           <div className="mx-auto mb-3 relative">
-            <div className="w-20 h-20 rounded-[14px] bg-[#080B10] border border-border-strong shadow-lg flex items-center justify-center overflow-hidden">
+            <div
+              className={`w-20 h-20 rounded-[14px] bg-[#080B10] border-2 ${roleVisual.frameBorderClass} shadow-lg flex items-center justify-center overflow-hidden`}
+            >
               <img
                 src={isSaved && blockedBySpecial ? getRoleAsset(blockedBySpecial) : rolePortraitSrc}
                 alt={isSaved && blockedBySpecial ? getRoleTitle(blockedBySpecial, lang) : roleTitle}
@@ -172,8 +193,8 @@ export const RevealVoteResult: React.FC<RevealVoteResultProps> = ({
           {/* Eliminated/Saved Player + Role Badge */}
           <div className="mb-4 flex flex-col items-center">
             <motion.div
-              initial={{ rotateY: 0 }}
-              animate={{ rotateY: [0, 90, 0] }}
+              initial={prefersReducedMotion ? false : { rotateY: 0 }}
+              animate={prefersReducedMotion ? undefined : { rotateY: [0, 90, 0] }}
               transition={{ duration: 0.55, delay: 0.15 }}
               className="relative"
             >
@@ -204,9 +225,9 @@ export const RevealVoteResult: React.FC<RevealVoteResultProps> = ({
 
             {isSaved ? (
               <motion.div
-                initial={{ opacity: 0, scale: 0.85 }}
+                initial={prefersReducedMotion ? false : { opacity: 0, scale: 0.85 }}
                 animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.35 }}
+                transition={{ delay: prefersReducedMotion ? 0 : 0.35 }}
                 className="mt-2 px-4 py-1.5 rounded-[8px] text-xs font-bold border flex items-center gap-2 bg-[#668F9A]/15 text-cyan-text border-[#668F9A]/40"
               >
                 {blockedBySpecial === 'boomerang' ? (
@@ -222,10 +243,10 @@ export const RevealVoteResult: React.FC<RevealVoteResultProps> = ({
               </motion.div>
             ) : (
               <motion.div
-                initial={{ opacity: 0, scale: 0.85 }}
+                initial={prefersReducedMotion ? false : { opacity: 0, scale: 0.85 }}
                 animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.35 }}
-                className={`mt-2 px-4 py-1.5 rounded-[8px] text-xs font-bold border flex items-center gap-2 ${roleBadgeStyle}`}
+                transition={{ delay: prefersReducedMotion ? 0 : 0.35 }}
+                className={`mt-2 px-4 py-1.5 rounded-[8px] text-xs font-bold border flex items-center gap-2 ${roleVisual.tintBgClass} ${roleVisual.titleColorClass}`}
               >
                 <img
                   src={roleBadgeSrc}
@@ -238,9 +259,13 @@ export const RevealVoteResult: React.FC<RevealVoteResultProps> = ({
             )}
 
             {/* Layered Special Role Badge & Effect */}
-            {!isSaved && activeSpecial && specialTitle && (
-              <div className="w-full bg-[#B49A62]/10 border border-[#B49A62]/30 rounded-[10px] p-3 mt-3 text-start flex items-center gap-3">
-                <div className="w-10 h-10 rounded-[8px] bg-[#080B10] border border-border-strong shrink-0 overflow-hidden flex items-center justify-center">
+            {!isSaved && activeSpecial && specialTitle && specialVisual && (
+              <div
+                className={`w-full rounded-[10px] border p-3 mt-3 text-start flex items-center gap-3 ${specialVisual.tintBgClass}`}
+              >
+                <div
+                  className={`w-10 h-10 rounded-[8px] bg-[#080B10] border ${specialVisual.frameBorderClass} shrink-0 overflow-hidden flex items-center justify-center`}
+                >
                   <img
                     src={getRoleAsset(activeSpecial)}
                     alt={specialTitle}
@@ -248,10 +273,15 @@ export const RevealVoteResult: React.FC<RevealVoteResultProps> = ({
                     className="w-full h-full object-cover"
                   />
                 </div>
-                <div className="min-w-0">
-                  <div className="flex items-center gap-1 text-primary-text font-bold text-xs">
-                    <Sparkles size={12} />
-                    <span>{specialTitle}</span>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-1 text-primary-text font-bold text-xs">
+                      <Sparkles size={12} />
+                      <span>{specialTitle}</span>
+                    </div>
+                    <ClassifiedStamp tone={specialVisual.stampTone}>
+                      {specialVisual.stamp}
+                    </ClassifiedStamp>
                   </div>
                   {specialDesc && (
                     <p className="text-xs font-medium text-text-muted leading-snug mt-0.5">
