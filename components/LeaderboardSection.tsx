@@ -7,7 +7,7 @@ import { Trophy, Medal, Star } from 'lucide-react';
 import { getUITranslation } from '../translations';
 import { getSettings } from '../services/storageService';
 import { Avatar } from './Avatar';
-import { IntelligencePanel } from './ui/BlacksiteUI';
+import { IntelligencePanel, ScreenSectionHeader } from './ui/BlacksiteUI';
 
 export const LeaderboardSection: React.FC = () => {
   const { user } = useAuth();
@@ -67,15 +67,14 @@ export const LeaderboardSection: React.FC = () => {
 
   return (
     <div className="mt-8 mb-8" dir={isRTL ? 'rtl' : 'ltr'}>
-      <h3
-        className={`text-base font-bold text-text-main mb-4 flex items-center gap-2 ${
-          isRTL ? 'text-right justify-start' : 'text-left justify-start'
-        }`}
-      >
-        <Trophy className="w-5 h-5 text-primary-text" /> {getUITranslation(lang, 'leaderboard')}
-      </h3>
+      <ScreenSectionHeader
+        title={getUITranslation(lang, 'leaderboard')}
+        icon={<Trophy className="w-4 h-4" />}
+        className="mb-4"
+      />
 
-      <IntelligencePanel className="overflow-hidden divide-y divide-border">
+      <IntelligencePanel className="relative overflow-hidden divide-y divide-border">
+        <div aria-hidden="true" className="blacksite-hairline absolute inset-x-0 top-0 pointer-events-none" />
         {leaders.map((leader, index) => (
           <div key={leader.id} className="flex items-center gap-3 p-3.5">
             <div className="w-8 text-center font-mono-code font-bold text-sm tabular-nums shrink-0">

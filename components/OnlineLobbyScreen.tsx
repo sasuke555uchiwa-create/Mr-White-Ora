@@ -41,6 +41,7 @@ import { showToast } from '../utils/toast';
 import {
   BottomActionBar,
   ClassifiedStamp,
+  DossierHeaderBand,
   IconButton,
   IntelligencePanel,
   InteractiveCard,
@@ -48,6 +49,7 @@ import {
   PlayerIntelligenceCard,
   StatusIndicator,
   TacticalButton,
+  TacticalToolbar,
 } from './ui/BlacksiteUI';
 
 interface OnlineLobbyScreenProps {
@@ -312,39 +314,47 @@ export const OnlineLobbyScreen: React.FC<OnlineLobbyScreenProps> = ({
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -6 }}
-      className="flex flex-col px-4 sm:px-6 pt-4 max-w-3xl mx-auto w-full relative min-h-full"
+      className="flex flex-col px-4 sm:px-6 pt-4 max-w-4xl mx-auto w-full relative min-h-full"
     >
       {/* Header */}
-      <div className="flex items-center justify-between mb-5">
-        <IconButton onClick={handleLeave} aria-label={t('leaveRoom')} variant="secondary">
-          <ArrowRight className={`w-5 h-5 ${isRTL ? '' : 'rotate-180'}`} />
-        </IconButton>
-        <div className="text-center min-w-0 px-2">
-          <h2 className="text-lg sm:text-xl font-extrabold text-text-main truncate">
-            {t('waitingRoom')}
-          </h2>
-          <p className="text-xs text-text-muted font-medium truncate">
-            {t('hostLabel')} {room.hostName}
-          </p>
-        </div>
-        <IconButton
-          onClick={() => setShowChat(true)}
-          aria-label={t('chat')}
-          variant="secondary"
-          className="relative"
-        >
-          <MessageCircle className="w-5 h-5" />
-          {room.messages?.length > 0 && (
-            <span className="absolute -top-1 -end-1 min-w-[18px] h-[18px] px-1 rounded-[5px] bg-[#B49A62] text-[#080B10] font-mono-code text-[10px] font-extrabold flex items-center justify-center border border-bg-surface tabular-nums">
-              {Math.min(99, room.messages.length)}
-            </span>
-          )}
-        </IconButton>
-      </div>
+      <DossierHeaderBand
+        accent="gold"
+        className="mb-4"
+        badge={
+          <ClassifiedStamp tone="gold">
+            {room.isPrivate ? 'PRIVATE OP' : 'PUBLIC OP'}
+          </ClassifiedStamp>
+        }
+        title={t('waitingRoom')}
+        subtitle={`${t('hostLabel')} ${room.hostName}`}
+        icon={<Users className="w-5 h-5" />}
+        action={
+          <TacticalToolbar>
+            <IconButton onClick={handleLeave} aria-label={t('leaveRoom')} variant="ghost" size="sm">
+              <ArrowRight className={`w-5 h-5 ${isRTL ? '' : 'rotate-180'}`} />
+            </IconButton>
+            <TacticalButton
+              onClick={() => setShowChat(true)}
+              aria-label={t('chat')}
+              variant="secondary"
+              size="sm"
+              icon={<MessageCircle className="w-4 h-4 text-cyan-text" />}
+            >
+              <span>{t('chat')}</span>
+              {room.messages?.length > 0 && (
+                <span className="px-1.5 py-0.5 rounded-[5px] bg-[#B49A62] text-[#080B10] font-mono-code text-[10px] font-extrabold tabular-nums">
+                  {Math.min(99, room.messages.length)}
+                </span>
+              )}
+            </TacticalButton>
+          </TacticalToolbar>
+        }
+      />
 
       {/* Room Code & Live Settings Card */}
-      <IntelligencePanel className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-3">
-        <div className="flex items-center gap-2.5">
+      <IntelligencePanel className="relative overflow-hidden p-4 sm:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 mb-3">
+        <div aria-hidden="true" className="blacksite-hairline absolute inset-x-0 top-0 pointer-events-none" />
+        <div className="flex items-center gap-3">
           <div>
             <p className="text-[11px] text-text-muted mb-0.5 font-bold">{t('roomCodeLabel')}</p>
             <p
@@ -418,41 +428,50 @@ export const OnlineLobbyScreen: React.FC<OnlineLobbyScreenProps> = ({
           </span>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
           {playersArr.map((player: any) => {
             const isCardHost = player.uid === room.hostId;
             const hasActions = (isHost && !isCardHost) || player.uid !== user?.uid;
             return (
               <PlayerIntelligenceCard
                 key={player.uid}
-                className="p-3.5 flex flex-col items-center text-center relative overflow-hidden bg-bg-surface border-border-strong"
+                className={`p-3.5 flex flex-col items-center text-center bg-bg-surface ${
+                  isCardHost
+                    ? 'border-[#B49A62]/45'
+                    : player.isReady
+                    ? 'border-[#3E7B67]/45'
+                    : 'border-border-strong'
+                }`}
               >
-                {isCardHost && (
-                  <div className="absolute top-0 end-0 bg-[#B49A62] text-[#080B10] text-[10px] font-extrabold px-2 py-0.5 rounded-es-[8px] z-10">
-                    {t('host')}
-                  </div>
-                )}
-
-                <div className="mt-2">
-                  <Avatar
-                    avatar={player.avatar}
-                    name={player.name}
-                    size={58}
-                    showName={true}
-                    status={isCardHost ? 'none' : player.isReady ? 'ready' : 'waiting'}
-                    badge={
-                      isCardHost ? (
-                        <div className="bg-[#B49A62] p-1 rounded-[6px] border border-bg-surface shadow-xs">
-                          <Crown className="w-2.5 h-2.5 text-[#080B10]" />
-                        </div>
-                      ) : player.isReady ? (
-                        <div className="bg-[#3E7B67] p-1 rounded-[6px] border border-bg-surface shadow-xs">
-                          <Check className="w-2.5 h-2.5 text-[#F4F6F8]" />
-                        </div>
-                      ) : null
-                    }
-                  />
+                <div className="w-full flex items-center justify-between gap-1 mb-2.5 min-h-[22px]">
+                  <span className="font-mono-code text-[10px] font-bold text-text-muted">
+                    {player.uid === user?.uid ? (isRTL ? 'أنت' : 'YOU') : 'AGENT'}
+                  </span>
+                  {isCardHost ? (
+                    <StatusIndicator tone="gold" icon={<Crown size={10} />}>
+                      {t('host')}
+                    </StatusIndicator>
+                  ) : player.isReady ? (
+                    <StatusIndicator tone="emerald" icon={<Check size={10} />}>
+                      {isRTL ? 'جاهز' : 'Ready'}
+                    </StatusIndicator>
+                  ) : (
+                    <StatusIndicator tone="neutral">
+                      {isRTL ? 'ينتظر' : 'Standby'}
+                    </StatusIndicator>
+                  )}
                 </div>
+
+                <Avatar
+                  avatar={player.avatar}
+                  name={player.name}
+                  size={56}
+                  status={isCardHost ? 'none' : player.isReady ? 'ready' : 'waiting'}
+                />
+
+                <span className="mt-2 font-bold text-xs sm:text-sm text-text-main truncate max-w-full">
+                  {player.name}
+                </span>
 
                 {hasActions && (
                   <div className="mt-2.5 pt-2 border-t border-border w-full flex items-center justify-center gap-1.5">
@@ -499,7 +518,7 @@ export const OnlineLobbyScreen: React.FC<OnlineLobbyScreenProps> = ({
           {Array.from({ length: emptySlotsCount }).map((_, i) => (
             <div
               key={`empty-${i}`}
-              className="rounded-[12px] p-3 flex flex-col items-center justify-center border border-dashed border-border-strong bg-bg-surface/40 opacity-60 min-h-[124px]"
+              className="rounded-[12px] p-3 flex flex-col items-center justify-center border border-dashed border-border-strong bg-bg-surface/40 opacity-60 min-h-[146px]"
             >
               <div className="w-12 h-12 rounded-[10px] bg-bg-card mb-2 border border-border" />
               <p className="text-xs font-medium text-text-muted">{t('waitingForPlayer')}</p>

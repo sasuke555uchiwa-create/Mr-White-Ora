@@ -258,7 +258,7 @@ export const GameRound: React.FC<GameRoundProps> = ({
           </div>
 
           {/* Sealed Mystery Card Grid */}
-          <div className="grid grid-cols-3 sm:grid-cols-4 gap-3 sm:gap-4 w-full max-w-lg mb-6">
+          <div className="grid grid-cols-3 sm:grid-cols-4 gap-3 sm:gap-4 w-full max-w-xl mb-6">
             {rolePool.map((_, index) => {
               const pickerId = pickedCards[index];
               const isPicked = pickerId !== undefined;
@@ -274,30 +274,35 @@ export const GameRound: React.FC<GameRoundProps> = ({
                   aria-label={`${lang === 'ar' ? 'ملف سري رقم' : 'Sealed Dossier'} ${String(index + 1).padStart(2, '0')}`}
                   className={`relative aspect-[3/4] rounded-[12px] border overflow-hidden transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#668F9A]/70 ${
                     isPicked
-                      ? 'border-border opacity-55 cursor-default shadow-sm'
+                      ? 'border-border-strong bg-bg-surface cursor-default opacity-80'
                       : 'border-[#B49A62]/45 hover:border-[#B49A62] hover:-translate-y-0.5 active:scale-[0.97] cursor-pointer shadow-[0_12px_28px_rgba(4,7,12,0.42)]'
                   }`}
                 >
-                  <img
-                    src={HERO_ASSETS.mysteryCardBack}
-                    alt="Mystery Card"
-                    referrerPolicy="no-referrer"
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#080B10]/85 via-transparent to-transparent" />
                   {isPicked && !isCurrentSelection && picker ? (
-                    <div className="absolute inset-0 bg-[#080B10]/78 backdrop-blur-[2px] flex flex-col items-center justify-center p-2">
-                      <Avatar avatar={picker.avatar} name={picker.name} size={40} />
-                      <span className="mt-1.5 text-[11px] font-bold text-[#ECEFF4] bg-[#0D1219]/90 border border-white/15 px-2 py-0.5 rounded-[6px] truncate max-w-full">
+                    <div className="w-full h-full bg-bg-card flex flex-col items-center justify-between p-2.5">
+                      <span className="font-mono-code text-[10px] font-semibold text-text-muted tabular-nums">
+                        {String(index + 1).padStart(2, '0')} · SEALED
+                      </span>
+                      <Avatar avatar={picker.avatar} name={picker.name} size={42} />
+                      <span className="w-full text-[11px] font-bold text-text-main truncate text-center">
                         {picker.name}
                       </span>
                     </div>
                   ) : (
-                    <div className="absolute inset-x-0 bottom-2 flex justify-center">
-                      <span className="min-w-[30px] h-7 px-2 rounded-[6px] bg-[#080B10]/92 text-[#B49A62] font-mono-code text-xs font-bold flex items-center justify-center tabular-nums border border-[#B49A62]/45">
-                        {String(index + 1).padStart(2, '0')}
-                      </span>
-                    </div>
+                    <>
+                      <img
+                        src={HERO_ASSETS.mysteryCardBack}
+                        alt="Mystery Card"
+                        referrerPolicy="no-referrer"
+                        className="w-full h-full object-cover"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-[#080B10]/90 via-transparent to-[#080B10]/25" />
+                      <div className="absolute inset-x-0 bottom-2 flex justify-center">
+                        <span className="min-w-[32px] h-7 px-2 rounded-[6px] bg-[#080B10]/92 text-[#B49A62] font-mono-code text-xs font-bold flex items-center justify-center tabular-nums border border-[#B49A62]/45">
+                          {String(index + 1).padStart(2, '0')}
+                        </span>
+                      </div>
+                    </>
                   )}
                 </button>
               );

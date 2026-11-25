@@ -42,11 +42,14 @@ import {
 import {
   ClassifiedDossierPanel,
   ClassifiedStamp,
+  DossierHeaderBand,
   IconButton,
   IntelligencePanel,
   PlayerIntelligenceCard,
+  ScreenSectionHeader,
   TacticalButton,
   TacticalInput,
+  TacticalToolbar,
 } from './ui/BlacksiteUI';
 
 interface ProfileScreenProps {
@@ -314,57 +317,76 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ onBack, onOpenArch
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -10 }}
-      className="flex flex-col px-4 sm:px-6 pt-4 max-w-2xl mx-auto w-full pb-24"
+      className="flex flex-col px-4 sm:px-6 pt-4 max-w-3xl mx-auto w-full pb-24"
       dir={isRTL ? 'rtl' : 'ltr'}
     >
       {/* Header */}
-      <div
-        className={`flex justify-between items-center mb-6 gap-3 ${
-          isRTL ? 'flex-row-reverse' : 'flex-row'
-        }`}
-      >
-        <IconButton onClick={onBack} variant="secondary" aria-label={getUITranslation(lang, 'back')}>
-          <ArrowRight className={`w-5 h-5 ${isRTL ? '' : 'rotate-180'}`} />
-        </IconButton>
-        {onOpenArchive && (
-          <TacticalButton
-            onClick={onOpenArchive}
-            variant="cyan"
-            size="sm"
-            icon={<Archive size={15} />}
-          >
-            {getUITranslation(lang, 'operationArchive')}
-          </TacticalButton>
-        )}
-      </div>
+      <DossierHeaderBand
+        accent="gold"
+        className="mb-5"
+        badge={<ClassifiedStamp tone="gold">OPERATIVE FILE</ClassifiedStamp>}
+        title={profile.displayName}
+        subtitle={
+          isRTL
+            ? `المستوى ${levelInfo.level} · ${profile.stats.wins} انتصار`
+            : `Level ${levelInfo.level} · ${profile.stats.wins} total wins`
+        }
+        action={
+          <TacticalToolbar>
+            <IconButton
+              onClick={onBack}
+              variant="ghost"
+              size="sm"
+              aria-label={getUITranslation(lang, 'back')}
+            >
+              <ArrowRight className={`w-5 h-5 ${isRTL ? '' : 'rotate-180'}`} />
+            </IconButton>
+            {onOpenArchive && (
+              <TacticalButton
+                onClick={onOpenArchive}
+                variant="cyan"
+                size="sm"
+                icon={<Archive size={15} />}
+              >
+                {getUITranslation(lang, 'operationArchive')}
+              </TacticalButton>
+            )}
+          </TacticalToolbar>
+        }
+      />
 
       {/* Avatar & Name */}
-      <div className="flex flex-col items-center mb-6">
-        <div className="relative">
-          <Avatar
-            avatar={isEditing ? editAvatar : profile.photoURL || ''}
-            name={isEditing ? editName : profile.displayName}
-            size={104}
-            frameUrl={selectedFrame !== 'none' ? COSMETIC_FRAMES[selectedFrame] : undefined}
-          />
-          {isEditing ? (
-            <div className="relative">
-              <IconButton
+      <IntelligencePanel className="relative overflow-hidden p-5 flex flex-col items-center mb-5">
+        <div aria-hidden="true" className="blacksite-hairline-cyan absolute inset-x-0 top-0 pointer-events-none" />
+        <Avatar
+          avatar={isEditing ? editAvatar : profile.photoURL || ''}
+          name={isEditing ? editName : profile.displayName}
+          size={100}
+          frameUrl={selectedFrame !== 'none' ? COSMETIC_FRAMES[selectedFrame] : undefined}
+        />
+
+        <input
+          type="file"
+          ref={fileInputRef}
+          onChange={handleFileChange}
+          accept="image/png, image/jpeg, image/jpg, image/gif, image/webp"
+          className="hidden"
+        />
+
+        {isEditing ? (
+          <div className="mt-4 flex flex-col items-center gap-3 w-full max-w-xs">
+            <div className="relative w-full flex justify-center">
+              <TacticalButton
                 onClick={() => setShowAvatarMenu(!showAvatarMenu)}
-                variant="primary"
+                variant="secondary"
                 size="sm"
-                aria-label={getUITranslation(lang, 'uploadImage')}
-                className="absolute bottom-0 end-0 bg-[#B49A62] border-[#080B10] text-[#080B10] hover:bg-[#C2A870] z-10"
+                icon={<ImageIcon className="w-4 h-4 text-cyan-text" />}
               >
-                <Edit2 className="w-4 h-4" />
-              </IconButton>
+                {getUITranslation(lang, 'uploadImage')}
+              </TacticalButton>
 
               {showAvatarMenu && (
-                <div
-                  className={`absolute top-full mt-2 ${
-                    isRTL ? 'left-[-40px]' : 'right-[-40px]'
-                  } w-48 blacksite-panel rounded-[12px] overflow-hidden z-20`}
-                >
+                <div className="absolute top-full mt-2 w-52 blacksite-panel rounded-[12px] overflow-hidden z-20">
                   <button
                     onClick={() => {
                       setShowAvatarMenu(false);
@@ -396,29 +418,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ onBack, onOpenArch
                 </div>
               )}
             </div>
-          ) : (
-            <IconButton
-              onClick={() => setIsEditing(true)}
-              variant="secondary"
-              size="sm"
-              className="absolute bottom-0 end-0 hover:border-[#B49A62]"
-              aria-label="Edit Profile"
-            >
-              <Edit2 className="w-4 h-4" />
-            </IconButton>
-          )}
-        </div>
 
-        <input
-          type="file"
-          ref={fileInputRef}
-          onChange={handleFileChange}
-          accept="image/png, image/jpeg, image/jpg, image/gif, image/webp"
-          className="hidden"
-        />
-
-        {isEditing ? (
-          <div className="mt-4 flex flex-col items-center gap-3 w-full max-w-xs">
             <TacticalInput
               type="text"
               value={editName}
@@ -431,6 +431,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ onBack, onOpenArch
               <TacticalButton
                 onClick={() => {
                   setIsEditing(false);
+                  setShowAvatarMenu(false);
                   setEditName(profile.displayName);
                   setEditAvatar(profile.photoURL || '');
                 }}
@@ -454,40 +455,40 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ onBack, onOpenArch
             </div>
           </div>
         ) : (
-          <h2 className="text-xl sm:text-2xl font-bold text-text-main mt-3.5 flex items-center gap-1.5">
-            <span>{profile.displayName}</span>
+          <div className="mt-3.5 flex items-center justify-center gap-2 flex-wrap">
+            <h3 className="text-xl font-bold text-text-main">{profile.displayName}</h3>
             <IconButton
               onClick={() => setIsEditing(true)}
-              variant="ghost"
+              variant="secondary"
               size="sm"
-              aria-label="Edit Name"
+              aria-label="Edit Profile"
             >
               <Edit2 className="w-4 h-4" />
             </IconButton>
-          </h2>
+          </div>
         )}
-      </div>
 
-      {/* Level & XP */}
-      <IntelligencePanel className="p-3 flex items-center gap-3 mb-6">
-        <div className="flex-1 px-1">
-          <div className="flex justify-between text-xs font-mono-code font-semibold text-text-muted mb-1.5 tabular-nums">
-            <span>
-              XP {profile.xp.toLocaleString()} / {levelInfo.nextLevelTotalXp.toLocaleString()}
-            </span>
-            <span>
-              {levelInfo.currentLevelXp} / {levelInfo.levelSpanXp}
-            </span>
+        {/* Level & XP */}
+        <div className="w-full mt-4 pt-4 border-t border-border flex items-center gap-3">
+          <div className="flex-1 px-1">
+            <div className="flex justify-between text-xs font-mono-code font-semibold text-text-muted mb-1.5 tabular-nums">
+              <span>
+                XP {profile.xp.toLocaleString()} / {levelInfo.nextLevelTotalXp.toLocaleString()}
+              </span>
+              <span>
+                {levelInfo.currentLevelXp} / {levelInfo.levelSpanXp}
+              </span>
+            </div>
+            <div className="h-2 bg-bg-card rounded-full overflow-hidden border border-border">
+              <div
+                className="h-full bg-[#668F9A] rounded-full transition-all"
+                style={{ width: `${levelInfo.progressPercent}%` }}
+              />
+            </div>
           </div>
-          <div className="h-2 bg-bg-card rounded-full overflow-hidden border border-border">
-            <div
-              className="h-full bg-[#668F9A] rounded-full transition-all"
-              style={{ width: `${levelInfo.progressPercent}%` }}
-            />
+          <div className="bg-[#B49A62] text-[#080B10] font-mono-code font-bold px-3.5 py-2 rounded-[8px] text-xs shrink-0 tabular-nums">
+            LV {levelInfo.level}
           </div>
-        </div>
-        <div className="bg-[#B49A62] text-[#080B10] font-mono-code font-bold px-3.5 py-2 rounded-[8px] text-xs shrink-0 tabular-nums">
-          LV {levelInfo.level}
         </div>
       </IntelligencePanel>
 
@@ -628,19 +629,16 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ onBack, onOpenArch
 
         return (
           <div className="mb-8">
-            <div
-              className={`flex items-center justify-between mb-3 ${
-                isRTL ? 'flex-row-reverse' : 'flex-row'
-              }`}
-            >
-              <h3 className="text-base font-bold flex items-center gap-2 text-text-main">
-                <Award className="w-5 h-5 text-primary-text" />
-                <span>{isRTL ? 'أوسمة وإنجازات الوكالة' : 'Agency Achievements'}</span>
-              </h3>
-              <span className="text-xs font-mono-code font-bold text-text-muted tabular-nums">
-                {unlockedCount} / {ACHIEVEMENT_CATALOG.length}
-              </span>
-            </div>
+            <ScreenSectionHeader
+              title={isRTL ? 'أوسمة وإنجازات الوكالة' : 'Agency Achievements'}
+              icon={<Award className="w-4 h-4" />}
+              action={
+                <span className="text-xs font-mono-code font-bold text-text-muted tabular-nums">
+                  {unlockedCount} / {ACHIEVEMENT_CATALOG.length}
+                </span>
+              }
+              className="mb-3"
+            />
 
             <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
               {ACHIEVEMENT_CATALOG.map((ach) => {

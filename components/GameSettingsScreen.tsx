@@ -21,6 +21,7 @@ import { playSound } from '../services/soundService';
 import { CATEGORY_COVERS, ROLE_PORTRAITS } from '../src/design/assetRegistry';
 import {
   BottomActionBar,
+  DossierHeaderBand,
   IconButton,
   IntelligencePanel,
   InteractiveCard,
@@ -173,35 +174,32 @@ export const GameSettingsScreen: React.FC<GameSettingsScreenProps> = ({
   ];
 
   return (
-    <div className="flex flex-col min-h-full relative px-4 sm:px-6 pt-4 pb-0 max-w-4xl mx-auto w-full">
+    <div className="flex flex-col min-h-full relative px-4 sm:px-6 pt-4 pb-0 max-w-5xl mx-auto w-full">
       {/* Top Players Summary Bar */}
-      <IntelligencePanel className="flex items-center justify-between mb-4 p-3.5">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-[10px] bg-[#668F9A]/15 border border-[#668F9A]/35 flex items-center justify-center text-cyan-text shrink-0">
-            <Users size={20} />
-          </div>
-          <div>
-            <p className="text-xs text-text-muted">{t('gameSettings')}</p>
-            <h2 className="text-base sm:text-lg font-extrabold text-text-main tabular-nums">
-              {t('playersLabel')}: {playersCount}
-            </h2>
-          </div>
-        </div>
-        <TacticalButton
-          variant="secondary"
-          size="sm"
-          onClick={onEditPlayers || onBack}
-          trailingIcon={<ChevronLeft size={14} className="ltr:rotate-180" />}
-        >
-          {isRTL ? 'تعديل الأسماء' : 'Edit Players'}
-        </TacticalButton>
-      </IntelligencePanel>
+      <DossierHeaderBand
+        accent="gold"
+        className="mb-4"
+        icon={<Users size={20} />}
+        title={`${t('playersLabel')}: ${playersCount}`}
+        subtitle={t('gameSettings')}
+        action={
+          <TacticalButton
+            variant="secondary"
+            size="sm"
+            onClick={onEditPlayers || onBack}
+            trailingIcon={<ChevronLeft size={14} className="ltr:rotate-180" />}
+          >
+            {isRTL ? 'تعديل الأسماء' : 'Edit Players'}
+          </TacticalButton>
+        }
+      />
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start mb-6">
         {/* Left Column: Role Distribution + Special Roles */}
         <div className="space-y-4">
-          <IntelligencePanel className="p-4 sm:p-5 space-y-3">
-            <div className="flex items-center justify-between gap-2">
+          <IntelligencePanel className="relative overflow-hidden p-4 sm:p-5 space-y-3">
+            <div aria-hidden="true" className="blacksite-hairline absolute inset-x-0 top-0 pointer-events-none" />
+            <div className="flex items-center justify-between gap-2 pb-2 border-b border-border/70">
               <h3 className="text-base font-extrabold text-text-main">{t('roleDistribution')}</h3>
               <span className="text-xs font-bold text-text-muted tabular-nums">
                 {isRTL
@@ -350,24 +348,27 @@ export const GameSettingsScreen: React.FC<GameSettingsScreenProps> = ({
                 : 'Bonus abilities layered over main roles (never win solo)'}
             </p>
 
-            <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide">
+            <div className="grid grid-cols-4 gap-2">
               {SPECIAL_ROLES.map((role) => {
                 const isSelected = selectedSpecialRoles.includes(role.id);
                 return (
                   <div
                     key={role.id}
-                    className={`w-11 h-11 rounded-[9px] border flex items-center justify-center shrink-0 overflow-hidden transition-all ${
+                    className={`rounded-[10px] border p-1.5 flex items-center gap-1.5 overflow-hidden transition-all ${
                       isSelected
-                        ? 'bg-[#080B10] border-[#B49A62] opacity-100'
-                        : 'bg-[#080B10] border-border opacity-45 grayscale'
+                        ? 'bg-[#B49A62]/12 border-[#B49A62] opacity-100'
+                        : 'bg-bg-card/80 border-border opacity-55 grayscale'
                     }`}
                   >
                     <img
                       src={role.image}
                       alt={role.names[lang] || role.names.en}
                       referrerPolicy="no-referrer"
-                      className="w-full h-full object-cover"
+                      className="w-7 h-7 rounded-[6px] bg-[#080B10] object-cover shrink-0"
                     />
+                    <span className="text-[10.5px] font-bold text-text-main truncate">
+                      {role.names[lang] || role.names.en}
+                    </span>
                   </div>
                 );
               })}
@@ -378,22 +379,29 @@ export const GameSettingsScreen: React.FC<GameSettingsScreenProps> = ({
         {/* Right Column: Decks + Mode + Timer */}
         <div className="space-y-4">
           {/* Word Category Decks */}
-          <IntelligencePanel className="p-4 sm:p-5">
-            <h3 className="text-base font-extrabold text-text-main mb-3">{t('wordCategory')}</h3>
+          <IntelligencePanel className="relative overflow-hidden p-4 sm:p-5">
+            <div aria-hidden="true" className="blacksite-hairline-cyan absolute inset-x-0 top-0 pointer-events-none" />
+            <div className="flex items-center justify-between gap-2 mb-3 pb-2 border-b border-border/70">
+              <h3 className="text-base font-extrabold text-text-main">{t('wordCategory')}</h3>
+              <span className="text-xs font-semibold text-primary-text truncate">
+                {categories.find((c) => c.id === category)?.title}
+              </span>
+            </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
               {categories.map((cat) => {
                 const isActive = category === cat.id;
                 return (
                   <button
                     key={cat.id}
+                    type="button"
                     onClick={() => {
                       playSound('click');
                       setCategory(cat.id);
                     }}
-                    className={`relative rounded-[12px] overflow-hidden border-2 text-start transition-colors ${
+                    className={`group relative rounded-[12px] overflow-hidden border text-start transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#668F9A]/75 ${
                       isActive
-                        ? 'border-[#B49A62]'
-                        : 'border-border opacity-80 hover:opacity-100'
+                        ? 'border-[#B49A62] ring-1 ring-[#B49A62]/60 shadow-[0_10px_24px_rgba(4,7,12,0.45)]'
+                        : 'border-border opacity-80 hover:opacity-100 hover:border-border-strong'
                     }`}
                   >
                     <div className="aspect-[4/3] w-full relative">
@@ -404,19 +412,21 @@ export const GameSettingsScreen: React.FC<GameSettingsScreenProps> = ({
                         referrerPolicy="no-referrer"
                         className="w-full h-full object-cover"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-[#080B10] via-[#080B10]/35 to-transparent" />
-                      {isActive && (
-                        <div className="absolute top-2 right-2 w-6 h-6 rounded-[6px] bg-[#B49A62] text-[#080B10] flex items-center justify-center shadow-md">
-                          <Check size={14} strokeWidth={3} />
+                      <div className="absolute inset-0 bg-gradient-to-t from-[#080B10] via-[#080B10]/40 to-transparent" />
+                      <div className="absolute inset-x-2.5 bottom-2 flex items-end justify-between gap-1.5">
+                        <div className="min-w-0">
+                          <p className="text-xs sm:text-sm font-bold text-[#ECEFF4] leading-tight truncate">
+                            {cat.title}
+                          </p>
+                          <p className="text-[11px] text-[#A8B1BA] truncate">
+                            {cat.subtitle}
+                          </p>
                         </div>
-                      )}
-                      <div className="absolute bottom-2 left-2.5 right-2.5">
-                        <p className="text-xs sm:text-sm font-bold text-[#ECEFF4] leading-tight truncate">
-                          {cat.title}
-                        </p>
-                        <p className="text-[11px] text-[#A8B1BA] truncate">
-                          {cat.subtitle}
-                        </p>
+                        {isActive && (
+                          <span className="w-5 h-5 rounded-[5px] bg-[#B49A62] text-[#080B10] flex items-center justify-center shrink-0">
+                            <Check size={12} strokeWidth={3} />
+                          </span>
+                        )}
                       </div>
                     </div>
                   </button>
@@ -532,7 +542,7 @@ export const GameSettingsScreen: React.FC<GameSettingsScreenProps> = ({
       </div>
 
       {/* Bottom Start CTA */}
-      <BottomActionBar className="mt-6">
+      <BottomActionBar className="mt-auto">
         <div className="w-full max-w-md mx-auto">
           <TacticalButton
             variant="primary"

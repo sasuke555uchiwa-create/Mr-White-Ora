@@ -16,6 +16,7 @@ import { showToast } from '../utils/toast';
 import {
   BottomActionBar,
   ClassifiedStamp,
+  DossierHeaderBand,
   IconButton,
   IntelligencePanel,
   InteractiveCard,
@@ -23,6 +24,7 @@ import {
   SegmentedControl,
   TacticalButton,
   TacticalInput,
+  TacticalToolbar,
 } from './ui/BlacksiteUI';
 
 interface Room {
@@ -218,74 +220,85 @@ export const OnlineRoomsScreen: React.FC<OnlineRoomsScreenProps> = ({
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -6 }}
-      className="flex flex-col px-4 sm:px-6 pt-4 max-w-3xl mx-auto w-full min-h-full"
+      className="flex flex-col px-4 sm:px-6 pt-4 max-w-4xl mx-auto w-full min-h-full"
     >
       {/* Header */}
-      <div className="flex items-center justify-between gap-2.5 mb-4">
-        <IconButton onClick={onBack} aria-label={t('back')} variant="secondary">
-          <ArrowRight className={`w-5 h-5 ${isRTL ? '' : 'rotate-180'}`} />
-        </IconButton>
-        <h2 className="text-lg sm:text-xl font-extrabold text-text-main truncate">
-          {t('publicRooms')}
-        </h2>
-        <TacticalButton
-          variant="cyan"
-          size="sm"
-          onClick={handleQuickJoin}
-          disabled={loading}
-          loading={joining}
-          icon={<Zap size={15} />}
-        >
-          {t('quickJoin')}
-        </TacticalButton>
-      </div>
-
-      {/* Join by 6-digit Code */}
-      <form
-        onSubmit={handleJoinWithCode}
-        className="rounded-[12px] blacksite-panel p-1.5 flex items-center gap-2 mb-3"
-      >
-        <TacticalInput
-          type="text"
-          inputMode="numeric"
-          maxLength={6}
-          placeholder={t('joinByCodePlaceholder')}
-          value={joinCode}
-          onChange={(e) => {
-            setJoinCode(e.target.value.replace(/\D/g, ''));
-            if (joinError) setJoinError(null);
-          }}
-          className="flex-1 px-3 py-2 font-mono-code font-bold tracking-widest tabular-nums placeholder:tracking-normal placeholder:font-sans placeholder:font-medium placeholder:text-text-muted/70 text-start"
-        />
-        <IconButton
-          type="submit"
-          variant="primary"
-          disabled={joining || joinCode.trim().length < 4}
-          aria-label={t('joinByCodePlaceholder')}
-        >
-          <Search className="w-4 h-4" />
-        </IconButton>
-      </form>
-      {joinError && (
-        <p className="text-xs font-bold text-danger-text text-center mb-3">{joinError}</p>
-      )}
-
-      {/* Filter Tabs */}
-      <SegmentedControl<RoomFilter>
-        options={filterTabs}
-        value={activeFilter}
-        onChange={setActiveFilter}
-        className="w-full mb-4"
+      <DossierHeaderBand
+        accent="cyan"
+        className="mb-4"
+        badge={<ClassifiedStamp tone="cyan">NET-OPS</ClassifiedStamp>}
+        title={t('publicRooms')}
+        subtitle={`${rooms.length} ${isRTL ? 'غرفة متاحة' : 'active lobbies'}`}
+        icon={<Globe className="w-5 h-5" />}
+        action={
+          <TacticalToolbar>
+            <IconButton onClick={onBack} aria-label={t('back')} variant="ghost" size="sm">
+              <ArrowRight className={`w-5 h-5 ${isRTL ? '' : 'rotate-180'}`} />
+            </IconButton>
+            <TacticalButton
+              variant="cyan"
+              size="sm"
+              onClick={handleQuickJoin}
+              disabled={loading}
+              loading={joining}
+              icon={<Zap size={15} />}
+            >
+              {t('quickJoin')}
+            </TacticalButton>
+          </TacticalToolbar>
+        }
       />
 
+      {/* Join by 6-digit Code + Filter Tabs */}
+      <IntelligencePanel className="relative overflow-hidden p-3.5 sm:p-4 space-y-3 mb-4">
+        <div aria-hidden="true" className="blacksite-hairline-cyan absolute inset-x-0 top-0 pointer-events-none" />
+        <form
+          onSubmit={handleJoinWithCode}
+          className="flex items-center gap-2"
+        >
+          <TacticalInput
+            type="text"
+            inputMode="numeric"
+            maxLength={6}
+            placeholder={t('joinByCodePlaceholder')}
+            value={joinCode}
+            onChange={(e) => {
+              setJoinCode(e.target.value.replace(/\D/g, ''));
+              if (joinError) setJoinError(null);
+            }}
+            className="flex-1 px-3.5 py-2 font-mono-code font-bold tracking-widest tabular-nums placeholder:tracking-normal placeholder:font-sans placeholder:font-medium placeholder:text-text-muted/70 text-start"
+          />
+          <TacticalButton
+            type="submit"
+            variant="primary"
+            size="md"
+            disabled={joining || joinCode.trim().length < 4}
+            aria-label={t('joinByCodePlaceholder')}
+            icon={<Search className="w-4 h-4" />}
+          >
+            {isRTL ? 'دخول' : 'Join'}
+          </TacticalButton>
+        </form>
+        {joinError && (
+          <p className="text-xs font-bold text-danger-text text-start">{joinError}</p>
+        )}
+
+        <SegmentedControl<RoomFilter>
+          options={filterTabs}
+          value={activeFilter}
+          onChange={setActiveFilter}
+          className="w-full"
+        />
+      </IntelligencePanel>
+
       {/* Rooms List */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6 flex-1 content-start">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-6 flex-1 content-start">
         {loading ? (
-          <div className="sm:col-span-2 flex justify-center py-12">
+          <div className="sm:col-span-2 lg:col-span-3 flex justify-center py-12">
             <div className="animate-spin rounded-full h-8 w-8 border-2 border-[#B49A62] border-t-transparent" />
           </div>
         ) : filteredRooms.length === 0 ? (
-          <IntelligencePanel className="sm:col-span-2 text-center py-12 p-6 border-dashed">
+          <IntelligencePanel className="sm:col-span-2 lg:col-span-3 text-center py-12 p-6 border-dashed">
             <Globe className="w-10 h-10 mx-auto mb-3 text-text-muted opacity-55" />
             <p className="font-bold text-text-main text-sm">{t('noRoomsAvailable')}</p>
             <p className="text-xs text-text-muted mt-1">{t('beFirstToCreate')}</p>

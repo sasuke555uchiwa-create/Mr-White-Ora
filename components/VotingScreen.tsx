@@ -164,8 +164,9 @@ export const VotingScreen: React.FC<VotingScreenProps> = ({
       {!isSecretGuardedView && (
         <>
           {/* Tribunal Header Panel */}
-          <IntelligencePanel className="w-full p-4 sm:p-5 mb-4 border-[#963F46]/45">
-            <div className="flex items-center justify-between gap-2 mb-3">
+          <IntelligencePanel className="relative overflow-hidden w-full p-4 sm:p-5 mb-4 border-[#963F46]/45">
+            <div aria-hidden="true" className="blacksite-hairline absolute inset-x-0 top-0 pointer-events-none" />
+            <div className="flex items-center justify-between gap-2 mb-3 pb-2.5 border-b border-border/70">
               <OperationPhaseBadge phase="tribunal" round={currentRound} lang={lang} />
               <span className="text-xs font-semibold text-text-muted shrink-0">
                 {lang === 'ar' ? `تصويت الجولة ${currentRound}` : `Round ${currentRound} Vote`}
@@ -372,33 +373,26 @@ export const VotingScreen: React.FC<VotingScreenProps> = ({
                     disabled={isSelfInSecret || isClosingBallot}
                     whileTap={prefersReducedMotion || isSelfInSecret ? undefined : { scale: 0.97 }}
                     onClick={() => handleSuspectSelect(p.id)}
-                    className={`text-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#963F46]/70 rounded-[12px] ${
+                    className={`group text-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#963F46]/70 rounded-[12px] ${
                       isSelfInSecret ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'
                     }`}
                   >
                     <PlayerIntelligenceCard
-                      className={`p-3.5 flex flex-col items-center justify-between min-h-[146px] relative ${
+                      className={`p-3.5 flex flex-col items-center justify-between min-h-[154px] transition-colors ${
                         isSelected
                           ? 'border-[#963F46] bg-[#963F46]/15'
                           : isGuardedByCurrentShield
-                          ? 'border-[#668F9A] bg-[#668F9A]/10'
+                          ? 'border-[#668F9A] bg-[#668F9A]/12'
                           : !isSelfInSecret
-                          ? 'hover:border-[#963F46]/65 hover:bg-[#963F46]/10'
+                          ? 'group-hover:border-[#963F46]/65 group-hover:bg-[#963F46]/10'
                           : ''
                       }`}
                     >
-                      {isGuardedByCurrentShield && (
-                        <span className="absolute top-2 right-2 text-cyan-text" title="Guarded">
-                          <Shield size={14} />
-                        </span>
-                      )}
-
                       <div className="flex flex-col items-center w-full">
                         <Avatar avatar={p.avatar} name={p.name} size={60} />
-                        <span className="mt-2 text-sm font-bold text-text-main truncate max-w-full">
+                        <span className="mt-2.5 text-sm font-bold text-text-main truncate max-w-full">
                           {p.name}
                         </span>
-                        {/* Factual match clue telemetry only — no fabricated suspicion percentages */}
                         {latestClue ? (
                           <span className="mt-1 inline-flex items-center gap-1 text-[11px] font-medium text-text-muted max-w-full truncate">
                             <MessageSquare size={10} className="shrink-0 text-cyan-text" />
@@ -411,11 +405,22 @@ export const VotingScreen: React.FC<VotingScreenProps> = ({
                         ) : null}
                       </div>
 
-                      {!isSelfInSecret && (
-                        <span className="mt-2 text-danger-text text-[11px] font-bold tracking-wide">
-                          {lang === 'ar' ? 'تصويت للاستبعاد' : 'Cast Ballot'}
-                        </span>
-                      )}
+                      <div className="w-full mt-2.5 pt-2 border-t border-border/60 flex items-center justify-center gap-1.5">
+                        {isGuardedByCurrentShield ? (
+                          <span className="inline-flex items-center gap-1 text-cyan-text text-[11px] font-bold">
+                            <Shield size={12} />
+                            <span>{lang === 'ar' ? 'محمي بالدرع' : 'Shielded'}</span>
+                          </span>
+                        ) : !isSelfInSecret ? (
+                          <span className="text-danger-text text-[11px] font-bold tracking-wide">
+                            {lang === 'ar' ? 'تصويت للاستبعاد' : 'Cast Ballot'}
+                          </span>
+                        ) : (
+                          <span className="text-text-muted text-[11px] font-semibold">
+                            {lang === 'ar' ? 'أنت' : 'You'}
+                          </span>
+                        )}
+                      </div>
                     </PlayerIntelligenceCard>
                   </motion.button>
                 );

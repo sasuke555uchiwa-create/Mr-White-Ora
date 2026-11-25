@@ -79,3 +79,14 @@ Root `package.json` separates verification into independent, composable scripts:
 - **Zero Gameplay/Security Mutation**: Role distribution, scoring formulas, special-role resolution, Cloud Functions handlers, `firestore.rules`, and localization dictionaries remain functionally unchanged.
 - **UI Design System Regression Gate**: Added `tests/uiDesignSystem.test.tsx` verifying Home layout regions in Arabic RTL and English LTR, `BlacksiteUI` accessibility roles/touch-target classes, and `SegmentedControl` RTL/LTR keyboard handling alongside all 9 Phase 4 Vitest suites.
 
+---
+
+## 6. Phase 4.2: Visual Identity, Cinematic Composition & Screen Unification
+
+### 6.1 Architectural & Visual Refinements
+- **New Layout Primitives**: Added `DossierHeaderBand`, `TacticalToolbar`, and `SectionDivider` to `components/ui/BlacksiteUI.tsx`, plus `.blacksite-hairline`, `.blacksite-hairline-cyan`, `.blacksite-dossier-surface`, and `.blacksite-corner-brackets` surface trims in `index.css`.
+- **Whole-App Composition Upgrade**:
+  - Upgraded `WelcomeScreen.tsx` to a balanced `lg:grid-cols-12` Intelligence Command Center (`max-w-5xl`) featuring the focal dossier emblem, Primary Play CTA, Command Console mode cues, and framed Core Factions showcase while preserving the unified 5-tab `NavDock`.
+  - Standardized Pass & Play (`PlayerSetup`, `GameSettingsScreen`, `GameRound`, `QuestionPhase`, `DiscussionPhase`, `VotingScreen`, `RevealVoteResult`, `ResultScreen`), Online (`OnlineRoomsScreen`, `OnlineLobbyScreen`, `OnlineGameScreen`), and Utility/Profile (`ProfileScreen`, `FriendsSection`, `LeaderboardSection`, `ScoreboardScreen`, `SettingsScreen`, `InventoryScreen`, `RulesScreen`, `LanguageDictionary`, `OperationArchiveScreen`, `CaseFileScreen`) screens around `DossierHeaderBand`, non-overlapping structured card headers/footers, inline button counters, and `BottomActionBar`.
+- **Verification**: `tests/uiDesignSystem.test.tsx` expanded to validate Phase 4.2 layout primitives (`DossierHeaderBand`, `TacticalToolbar`, `SectionDivider`) and RTL/LTR render integrity across transformed Pass & Play, Online-adjacent, and Utility screens alongside `npm run check`.
+

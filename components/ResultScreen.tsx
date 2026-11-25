@@ -9,6 +9,7 @@ import { getSettings } from '../services/storageService';
 import { getRoleAsset, getRoleTitle, getRoleVisualIdentity } from '../data/specialRoles';
 import { getPlayerRoundPoints, resolveWinningFaction } from '../services/gameScoring';
 import {
+  BottomActionBar,
   ClassifiedStamp,
   IntelligencePanel,
   ModalShell,
@@ -151,11 +152,11 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({
   };
 
   return (
-    <div className="flex flex-col min-h-full items-center p-4 animate-fade-in relative max-w-3xl mx-auto w-full pb-24">
-      <div className="w-full max-w-lg flex flex-col items-center text-center mb-4">
+    <div className="flex flex-col min-h-full items-center px-4 sm:px-6 pt-4 pb-0 animate-fade-in relative max-w-4xl mx-auto w-full">
+      <div className="w-full max-w-2xl flex flex-col items-center text-center mb-6">
         {!winnerSelected && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="w-full mb-4">
-            <IntelligencePanel className="p-4">
+            <IntelligencePanel className="p-4 sm:p-5">
               <h3 className="text-center text-text-main font-bold mb-3 text-base flex items-center justify-center gap-2">
                 <Trophy size={18} className="text-primary-text" />
                 <span>{t('whoIsWinner')}</span>
@@ -200,49 +201,79 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({
 
         {winnerSelected && (
           <>
-            {/* Secret Word Reveal */}
+            {/* Official Debrief Summary + Secret Word Cipher */}
             <motion.div
               initial={{ y: 12, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.15 }}
-              className="w-full mb-4"
+              transition={{ delay: 0.12 }}
+              className="w-full mb-5"
             >
-              <IntelligencePanel className="py-4 px-5 text-center border-[#B49A62]/35">
-                <div className="flex items-center justify-center mb-3">
-                  <OperationPhaseBadge phase="verdict" lang={lang} />
-                </div>
-                <div className="flex justify-around items-center gap-3">
-                  <div>
-                    <h3
-                      className={`text-text-muted mb-1 text-xs font-semibold flex items-center justify-center gap-1 ${
-                        !isRTL ? 'uppercase tracking-wider' : ''
-                      }`}
-                    >
-                      <Key size={12} />
-                      <span>{t('citizenWord')}</span>
-                    </h3>
-                    <p className="text-xl font-bold text-cyan-text">{secretWord}</p>
-                  </div>
-                  {undercover && (
-                    <div>
-                      <h3
-                        className={`text-text-muted mb-1 text-xs font-semibold flex items-center justify-center gap-1 ${
-                          !isRTL ? 'uppercase tracking-wider' : ''
-                        }`}
-                      >
-                        <Key size={12} />
-                        <span>{t('undercoverWordLabel')}</span>
-                      </h3>
-                      <p className="text-xl font-bold text-[#C88D5E]">{undercoverWord}</p>
-                    </div>
-                  )}
-                </div>
+              <IntelligencePanel className="relative overflow-hidden border-[#B49A62]/40">
+                <div aria-hidden="true" className="blacksite-hairline absolute inset-x-0 top-0 pointer-events-none" />
 
-                {winReason === 'impostor_guessed' && (
-                  <div className="mt-3">
-                    <StatusIndicator tone="crimson">{t('heGuessedIt')}</StatusIndicator>
+                <div className="grid grid-cols-1 sm:grid-cols-12 items-stretch">
+                  {/* Faction Outcome Artwork Strip */}
+                  <div className="sm:col-span-5 relative aspect-[16/9] sm:aspect-auto min-h-[130px] bg-[#080B10] overflow-hidden border-b sm:border-b-0 sm:border-e border-border">
+                    <img
+                      src={getWinImage()}
+                      alt={getResultTitle()}
+                      referrerPolicy="no-referrer"
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#080B10] via-[#080B10]/35 to-transparent flex flex-col justify-between p-3 text-start">
+                      <OperationPhaseBadge phase="verdict" lang={lang} />
+                      <div>
+                        <h2 className="text-base sm:text-lg font-extrabold text-[#ECEFF4] leading-tight">
+                          {getResultTitle()}
+                        </h2>
+                        <p className="text-[11px] font-medium text-[#C9B17B] line-clamp-2 mt-0.5">
+                          {getResultSubtitle()}
+                        </p>
+                      </div>
+                    </div>
                   </div>
-                )}
+
+                  {/* Secret Word Cipher Breakdown */}
+                  <div className="sm:col-span-7 p-4 sm:p-5 flex flex-col justify-center gap-3 text-start">
+                    <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 gap-3">
+                      <div className="rounded-[10px] bg-bg-card border border-[#668F9A]/35 p-3">
+                        <h3
+                          className={`text-text-muted mb-1 text-[11px] font-semibold flex items-center gap-1 ${
+                            !isRTL ? 'uppercase tracking-wider' : ''
+                          }`}
+                        >
+                          <Key size={11} className="text-cyan-text" />
+                          <span>{t('citizenWord')}</span>
+                        </h3>
+                        <p className="text-lg sm:text-xl font-extrabold text-cyan-text truncate">
+                          {secretWord}
+                        </p>
+                      </div>
+
+                      {undercover && (
+                        <div className="rounded-[10px] bg-bg-card border border-[#A46F44]/35 p-3">
+                          <h3
+                            className={`text-text-muted mb-1 text-[11px] font-semibold flex items-center gap-1 ${
+                              !isRTL ? 'uppercase tracking-wider' : ''
+                            }`}
+                          >
+                            <Key size={11} className="text-[#C88D5E]" />
+                            <span>{t('undercoverWordLabel')}</span>
+                          </h3>
+                          <p className="text-lg sm:text-xl font-extrabold text-[#C88D5E] truncate">
+                            {undercoverWord}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+
+                    {winReason === 'impostor_guessed' && (
+                      <div className="flex justify-start">
+                        <StatusIndicator tone="crimson">{t('heGuessedIt')}</StatusIndicator>
+                      </div>
+                    )}
+                  </div>
+                </div>
               </IntelligencePanel>
             </motion.div>
 
@@ -359,78 +390,101 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({
       </div>
 
       {winnerSelected && !isOnline && (
-        <div className="w-full max-w-md mt-auto space-y-2.5">
-          {onOpenCaseFile && (
+        <BottomActionBar className="self-stretch mt-auto">
+          <div className="w-full max-w-lg mx-auto flex flex-col sm:flex-row gap-2.5">
+            {onOpenCaseFile && (
+              <TacticalButton
+                onClick={() => {
+                  playSound('dossierOpen');
+                  onOpenCaseFile();
+                }}
+                variant="cyan"
+                size="lg"
+                className="flex-1"
+                icon={<FileText size={16} />}
+              >
+                {t('viewClassifiedCaseFile')}
+              </TacticalButton>
+            )}
             <TacticalButton
               onClick={() => {
-                playSound('dossierOpen');
-                onOpenCaseFile();
+                playSound('click');
+                onNext();
               }}
-              variant="cyan"
+              variant="primary"
               size="lg"
-              fullWidth
-              icon={<FileText size={16} />}
+              className="flex-1"
             >
-              {t('viewClassifiedCaseFile')}
+              {t('next')}
             </TacticalButton>
-          )}
-          <TacticalButton
-            onClick={() => {
-              playSound('click');
-              onNext();
-            }}
-            variant="primary"
-            size="lg"
-            fullWidth
-          >
-            {t('next')}
-          </TacticalButton>
-        </div>
+          </div>
+        </BottomActionBar>
       )}
 
       {winnerSelected && isOnline && (
-        <div className="w-full max-w-md mt-auto space-y-2.5">
-          {onOpenCaseFile && (
-            <TacticalButton
-              onClick={() => {
-                playSound('dossierOpen');
-                onOpenCaseFile();
-              }}
-              variant="cyan"
-              size="lg"
-              fullWidth
-              icon={<FileText size={16} />}
-            >
-              {t('viewClassifiedCaseFile')}
-            </TacticalButton>
-          )}
-          {isHost ? (
-            <div className="flex flex-col gap-2.5">
+        <BottomActionBar className="self-stretch mt-auto">
+          <div className="w-full max-w-lg mx-auto space-y-2.5">
+            {onOpenCaseFile && (
               <TacticalButton
                 onClick={() => {
-                  playSound('click');
-                  onNext();
+                  playSound('dossierOpen');
+                  onOpenCaseFile();
                 }}
-                variant="primary"
+                variant="cyan"
                 size="lg"
                 fullWidth
+                icon={<FileText size={16} />}
               >
-                {t('nextRound')}
+                {t('viewClassifiedCaseFile')}
               </TacticalButton>
-              <div className="flex gap-2.5">
-                {onBackToLobby && (
-                  <TacticalButton
-                    onClick={() => {
-                      playSound('click');
-                      onBackToLobby();
-                    }}
-                    variant="secondary"
-                    size="md"
-                    className="flex-1"
-                  >
-                    {t('backToLobby')}
-                  </TacticalButton>
-                )}
+            )}
+            {isHost ? (
+              <div className="flex flex-col gap-2.5">
+                <TacticalButton
+                  onClick={() => {
+                    playSound('click');
+                    onNext();
+                  }}
+                  variant="primary"
+                  size="lg"
+                  fullWidth
+                >
+                  {t('nextRound')}
+                </TacticalButton>
+                <div className="flex gap-2.5">
+                  {onBackToLobby && (
+                    <TacticalButton
+                      onClick={() => {
+                        playSound('click');
+                        onBackToLobby();
+                      }}
+                      variant="secondary"
+                      size="md"
+                      className="flex-1"
+                    >
+                      {t('backToLobby')}
+                    </TacticalButton>
+                  )}
+                  {onLeaveRoom && (
+                    <TacticalButton
+                      onClick={() => {
+                        playSound('click');
+                        onLeaveRoom();
+                      }}
+                      variant="danger"
+                      size="md"
+                      className="flex-1"
+                    >
+                      {t('leaveRoom')}
+                    </TacticalButton>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-2.5">
+                <div className="w-full py-3 rounded-[10px] bg-bg-card border border-border text-center text-xs font-semibold text-text-muted">
+                  {t('waitingForHostToStartNewRound')}
+                </div>
                 {onLeaveRoom && (
                   <TacticalButton
                     onClick={() => {
@@ -439,34 +493,15 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({
                     }}
                     variant="danger"
                     size="md"
-                    className="flex-1"
+                    fullWidth
                   >
                     {t('leaveRoom')}
                   </TacticalButton>
                 )}
               </div>
-            </div>
-          ) : (
-            <div className="flex flex-col gap-2.5">
-              <div className="w-full py-3 rounded-[10px] bg-bg-surface border border-border text-center text-xs font-semibold text-text-muted">
-                {t('waitingForHostToStartNewRound')}
-              </div>
-              {onLeaveRoom && (
-                <TacticalButton
-                  onClick={() => {
-                    playSound('click');
-                    onLeaveRoom();
-                  }}
-                  variant="danger"
-                  size="md"
-                  fullWidth
-                >
-                  {t('leaveRoom')}
-                </TacticalButton>
-              )}
-            </div>
-          )}
-        </div>
+            )}
+          </div>
+        </BottomActionBar>
       )}
 
       {/* Restrained BLACKSITE Classified Verdict Overlay */}

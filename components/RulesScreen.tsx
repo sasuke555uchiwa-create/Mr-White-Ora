@@ -16,8 +16,11 @@ import { getSettings } from '../services/storageService';
 import { SPECIAL_ROLES } from '../data/specialRoles';
 import {
   BottomActionBar,
+  ClassifiedStamp,
+  DossierHeaderBand,
   IconButton,
   IntelligencePanel,
+  SectionDivider,
   TacticalButton,
 } from './ui/BlacksiteUI';
 
@@ -81,12 +84,18 @@ export const RulesScreen: React.FC<RulesScreenProps> = ({ onBack }) => {
 
   return (
     <div className="w-full min-h-full flex flex-col px-4 sm:px-6 pt-4 pb-0 max-w-3xl mx-auto">
-      <div className="flex items-center justify-between mb-5">
-        <h2 className="text-xl font-extrabold text-text-main">{t('gameRules')}</h2>
-        <IconButton onClick={onBack} aria-label={t('back')} variant="secondary">
-          <ArrowRight className="w-5 h-5 ltr:rotate-180" />
-        </IconButton>
-      </div>
+      <DossierHeaderBand
+        accent="cyan"
+        className="mb-5"
+        badge={<ClassifiedStamp tone="cyan">FIELD MANUAL</ClassifiedStamp>}
+        title={t('gameRules')}
+        icon={<Gamepad2 className="w-5 h-5" />}
+        action={
+          <IconButton onClick={onBack} aria-label={t('back')} variant="secondary">
+            <ArrowRight className="w-5 h-5 ltr:rotate-180" />
+          </IconButton>
+        }
+      />
 
       <div className="space-y-3 pb-6">
         {steps.map((step, index) => (
@@ -96,7 +105,8 @@ export const RulesScreen: React.FC<RulesScreenProps> = ({ onBack }) => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.03 }}
           >
-            <IntelligencePanel className="p-4 flex items-start gap-3.5">
+            <IntelligencePanel className="relative overflow-hidden p-4 flex items-start gap-3.5">
+              <div aria-hidden="true" className="blacksite-hairline-cyan absolute inset-x-0 top-0 pointer-events-none" />
               <div className="p-2.5 rounded-[10px] bg-bg-card border border-border shrink-0">
                 {step.icon}
               </div>
@@ -112,6 +122,7 @@ export const RulesScreen: React.FC<RulesScreenProps> = ({ onBack }) => {
 
         {/* Special Roles Guide Section */}
         <div className="pt-4">
+          <SectionDivider label={t('specialRoles')} className="mb-4" />
           <div className="mb-3">
             <h3 className="text-base sm:text-lg font-extrabold text-text-main flex items-center gap-2">
               <Sparkles size={18} className="text-primary-text" />

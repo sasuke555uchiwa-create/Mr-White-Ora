@@ -424,7 +424,7 @@ export const QuestionPhase: React.FC<QuestionPhaseProps> = ({
           />
           <div className="absolute inset-0 bg-[#080B10]/72" />
 
-          <div className="relative z-10 grid grid-cols-3 sm:grid-cols-4 gap-3.5 sm:gap-5 justify-items-center">
+          <div className="relative z-10 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4">
             {players.map((p) => {
               const isActiveSpeaker = activeSpeaker?.id === p.id;
               const isTargetPlayer = gameMode === 'question' && target?.id === p.id;
@@ -434,47 +434,50 @@ export const QuestionPhase: React.FC<QuestionPhaseProps> = ({
               return (
                 <div
                   key={p.id}
-                  className={`relative flex flex-col items-center transition-opacity ${
-                    p.isEliminated ? 'opacity-40 grayscale' : ''
+                  className={`flex flex-col items-center rounded-[12px] p-2.5 border transition-all ${
+                    p.isEliminated
+                      ? 'opacity-40 grayscale bg-[#0D1219]/60 border-white/10'
+                      : isActiveSpeaker
+                      ? 'bg-[#668F9A]/16 border-[#668F9A] shadow-[0_10px_24px_rgba(4,7,12,0.45)]'
+                      : isTargetPlayer
+                      ? 'bg-[#963F46]/16 border-[#963F46] shadow-[0_10px_24px_rgba(4,7,12,0.45)]'
+                      : 'bg-[#0D1219]/75 border-white/10'
                   }`}
                 >
-                  {isActiveSpeaker && !p.isEliminated && (
-                    <div className="absolute -top-2 -right-1 z-20 px-2 py-0.5 rounded-[5px] bg-[#668F9A] text-[#080B10] font-mono-code text-[10px] font-bold shadow">
-                      SPEAKING
-                    </div>
-                  )}
-                  {isTargetPlayer && !p.isEliminated && (
-                    <div className="absolute -top-2 -right-1 z-20 px-2 py-0.5 rounded-[5px] bg-[#963F46] text-[#F4F6F8] font-mono-code text-[10px] font-bold shadow">
-                      TARGET
-                    </div>
-                  )}
-
-                  <div
-                    className={`rounded-[14px] p-1 transition-all ${
-                      isActiveSpeaker
-                        ? 'ring-2 ring-[#668F9A] bg-[#668F9A]/15'
-                        : isTargetPlayer
-                        ? 'ring-2 ring-[#963F46] bg-[#963F46]/15'
-                        : ''
-                    }`}
-                  >
-                    <Avatar avatar={p.avatar} name={p.name} size={60} />
+                  <div className="w-full flex items-center justify-center min-h-[18px] mb-1">
+                    {isActiveSpeaker && !p.isEliminated ? (
+                      <span className="font-mono-code text-[10px] font-bold tracking-wider text-[#85ADB8]">
+                        SPEAKING
+                      </span>
+                    ) : isTargetPlayer && !p.isEliminated ? (
+                      <span className="font-mono-code text-[10px] font-bold tracking-wider text-[#D2757C]">
+                        TARGET
+                      </span>
+                    ) : (
+                      <span className="font-mono-code text-[10px] text-white/35">
+                        {p.isEliminated ? 'OUT' : 'ACTIVE'}
+                      </span>
+                    )}
                   </div>
 
+                  <Avatar avatar={p.avatar} name={p.name} size={56} />
+
                   <span
-                    className={`mt-1.5 px-2.5 py-0.5 rounded-[6px] text-xs font-bold truncate max-w-[96px] border ${
+                    className={`mt-2 px-2 py-0.5 rounded-[6px] text-xs font-bold truncate max-w-full text-center ${
                       p.isEliminated
-                        ? 'bg-[#0D1219]/90 border-white/10 text-[#A8B1BA] line-through'
+                        ? 'text-[#A8B1BA] line-through'
                         : isActiveSpeaker
-                        ? 'bg-[#668F9A] border-[#8CB3BE]/50 text-[#080B10]'
-                        : 'bg-[#0D1219]/90 border-white/15 text-[#ECEFF4]'
+                        ? 'bg-[#668F9A] text-[#080B10]'
+                        : isTargetPlayer
+                        ? 'bg-[#963F46] text-[#F4F6F8]'
+                        : 'text-[#ECEFF4]'
                     }`}
                   >
                     {p.name}
                   </span>
 
                   {latestClue && (
-                    <span className="mt-1 text-[11px] font-medium text-[#D4BE8A] bg-[#080B10]/85 border border-[#B49A62]/30 px-2 py-0.5 rounded-[6px] max-w-[100px] truncate">
+                    <span className="mt-1 text-[11px] font-medium text-[#D4BE8A] bg-[#080B10]/85 border border-[#B49A62]/30 px-2 py-0.5 rounded-[6px] max-w-full truncate">
                       "{latestClue.text}"
                     </span>
                   )}
@@ -557,24 +560,20 @@ export const QuestionPhase: React.FC<QuestionPhaseProps> = ({
       {/* Bottom Action Dock */}
       <BottomActionBar className="self-stretch mt-auto">
         <div className="max-w-4xl mx-auto flex items-center justify-between gap-2.5">
-          <div className="relative shrink-0">
-            <IconButton
-              onClick={() => {
-                playSound('click');
-                setShowLogModal(true);
-              }}
-              variant="secondary"
-              aria-label={lang === 'ar' ? 'سجل الأوصاف' : 'Descriptions Log'}
-              title={lang === 'ar' ? 'سجل الأوصاف' : 'Descriptions Log'}
-            >
-              <FileText size={18} />
-            </IconButton>
-            {descriptionsLog.length > 0 && (
-              <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 rounded-[5px] bg-[#B49A62] text-[#080B10] font-mono-code text-[10px] font-bold flex items-center justify-center tabular-nums">
-                {descriptionsLog.length}
-              </span>
-            )}
-          </div>
+          <TacticalButton
+            onClick={() => {
+              playSound('click');
+              setShowLogModal(true);
+            }}
+            variant="secondary"
+            size="md"
+            aria-label={lang === 'ar' ? 'سجل الأوصاف' : 'Descriptions Log'}
+            title={lang === 'ar' ? 'سجل الأوصاف' : 'Descriptions Log'}
+            icon={<FileText size={16} className="text-primary-text" />}
+            className="shrink-0"
+          >
+            <span className="font-mono-code tabular-nums">{descriptionsLog.length}</span>
+          </TacticalButton>
 
           <TacticalButton
             onClick={() => {

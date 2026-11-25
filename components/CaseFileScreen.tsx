@@ -38,6 +38,7 @@ import {
   PlayerIntelligenceCard,
   StatusIndicator,
   TacticalButton,
+  TacticalToolbar,
 } from './ui/BlacksiteUI';
 
 interface CaseFileScreenProps {
@@ -257,7 +258,7 @@ export const CaseFileScreen: React.FC<CaseFileScreenProps> = ({
       dir={isRTL ? 'rtl' : 'ltr'}
     >
       {/* Top Bar */}
-      <div className="flex items-center justify-between gap-3">
+      <TacticalToolbar className="w-full justify-between px-2 py-1.5">
         <TacticalButton
           onClick={() => {
             playSound('click');
@@ -271,7 +272,7 @@ export const CaseFileScreen: React.FC<CaseFileScreenProps> = ({
         </TacticalButton>
 
         <ClassifiedStamp tone="gold">{resolvedFile.operationCode}</ClassifiedStamp>
-      </div>
+      </TacticalToolbar>
 
       {/* 1. CLASSIFIED COVER */}
       <motion.section
@@ -325,7 +326,8 @@ export const CaseFileScreen: React.FC<CaseFileScreenProps> = ({
       </motion.section>
 
       {/* 2. OPERATION SUMMARY */}
-      <ClassifiedDossierPanel className="p-5 space-y-4">
+      <ClassifiedDossierPanel className="relative overflow-hidden p-5 space-y-4">
+        <div aria-hidden="true" className="blacksite-hairline absolute inset-x-0 top-0 pointer-events-none" />
         <div
           className={`flex items-center gap-2 text-xs font-bold text-cyan-text ${
             !isRTL ? 'uppercase tracking-wider' : ''
@@ -401,7 +403,8 @@ export const CaseFileScreen: React.FC<CaseFileScreenProps> = ({
       </ClassifiedDossierPanel>
 
       {/* 3. PLAYER INTELLIGENCE DOSSIERS */}
-      <IntelligencePanel className="p-5 space-y-4">
+      <IntelligencePanel className="relative overflow-hidden p-5 space-y-4">
+        <div aria-hidden="true" className="blacksite-hairline-cyan absolute inset-x-0 top-0 pointer-events-none" />
         <div
           className={`flex items-center gap-2 text-xs font-bold text-cyan-text ${
             !isRTL ? 'uppercase tracking-wider' : ''
@@ -802,7 +805,8 @@ export const CaseFileScreen: React.FC<CaseFileScreenProps> = ({
       </IntelligencePanel>
 
       {/* 7. FINAL VERDICT & DETERMINISTIC AWARDS */}
-      <ClassifiedDossierPanel className="p-5 space-y-4">
+      <ClassifiedDossierPanel className="relative overflow-hidden p-5 space-y-4">
+        <div aria-hidden="true" className="blacksite-hairline absolute inset-x-0 top-0 pointer-events-none" />
         <div
           className={`flex items-center gap-2 text-xs font-bold text-primary-text ${
             !isRTL ? 'uppercase tracking-wider' : ''

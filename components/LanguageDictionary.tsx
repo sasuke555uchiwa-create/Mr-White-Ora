@@ -12,6 +12,8 @@ import { WORD_PAIRS } from '../data/offlineData';
 import { getUITranslation } from '../translations';
 import { useAuth } from '../contexts/AuthContext';
 import {
+  ClassifiedStamp,
+  DossierHeaderBand,
   IconButton,
   IntelligencePanel,
   InteractiveCard,
@@ -19,6 +21,7 @@ import {
   StatusIndicator,
   TacticalButton,
   TacticalInput,
+  TacticalToolbar,
 } from './ui/BlacksiteUI';
 
 interface LanguageDictionaryProps {
@@ -146,29 +149,34 @@ export const LanguageDictionary: React.FC<LanguageDictionaryProps> = ({ onBack }
   };
 
   return (
-    <div className="flex flex-col h-full w-full relative max-w-2xl mx-auto">
+    <div className="flex flex-col h-full w-full relative max-w-3xl mx-auto px-4 sm:px-6 pt-4">
       {/* Header */}
-      <div className="p-4 flex items-center justify-between border-b border-border-strong bg-bg-surface sticky top-0 z-20">
-        <div className="flex items-center gap-3 min-w-0">
-          <IconButton onClick={onBack} aria-label={t('back')} variant="secondary">
-            <ArrowLeft className={`w-5 h-5 ${isRTL ? 'rotate-180' : ''}`} />
-          </IconButton>
-          <div className="min-w-0">
-            <h2 className="text-lg font-extrabold text-text-main truncate">{t('gameWords')}</h2>
-            <p className="text-xs text-text-muted truncate">{t('dataManagementDesc')}</p>
-          </div>
-        </div>
-        <IconButton
-          variant="primary"
-          onClick={() => {
-            setNewCategory(selectedCategory === 'all' ? 'standard' : selectedCategory);
-            setIsAdding(true);
-          }}
-          aria-label={t('addWord')}
-        >
-          <Plus className="w-5 h-5" />
-        </IconButton>
-      </div>
+      <DossierHeaderBand
+        accent="cyan"
+        className="mb-3"
+        badge={<ClassifiedStamp tone="cyan">LEXICON</ClassifiedStamp>}
+        title={t('gameWords')}
+        subtitle={t('dataManagementDesc')}
+        icon={<BookOpen className="w-5 h-5" />}
+        action={
+          <TacticalToolbar>
+            <IconButton onClick={onBack} aria-label={t('back')} variant="ghost" size="sm">
+              <ArrowLeft className={`w-5 h-5 ${isRTL ? 'rotate-180' : ''}`} />
+            </IconButton>
+            <IconButton
+              variant="primary"
+              size="sm"
+              onClick={() => {
+                setNewCategory(selectedCategory === 'all' ? 'standard' : selectedCategory);
+                setIsAdding(true);
+              }}
+              aria-label={t('addWord')}
+            >
+              <Plus className="w-5 h-5" />
+            </IconButton>
+          </TacticalToolbar>
+        }
+      />
 
       {/* Language Selector */}
       <div className="p-3.5 overflow-x-auto whitespace-nowrap scrollbar-hide flex gap-2 border-b border-border bg-bg-main/60">
@@ -216,8 +224,9 @@ export const LanguageDictionary: React.FC<LanguageDictionaryProps> = ({ onBack }
       </div>
 
       {/* Stats Bar */}
-      <div className="p-4 grid grid-cols-2 gap-3">
-        <IntelligencePanel className="p-3 flex flex-col items-center justify-center">
+      <div className="py-3 grid grid-cols-2 gap-3">
+        <IntelligencePanel className="relative overflow-hidden p-3 flex flex-col items-center justify-center">
+          <div aria-hidden="true" className="blacksite-hairline absolute inset-x-0 top-0 pointer-events-none" />
           <span className="text-[11px] font-bold text-text-muted mb-1 flex items-center gap-1.5">
             <BookOpen size={13} className="text-primary-text" />
             {t('builtInCount')}
@@ -243,7 +252,8 @@ export const LanguageDictionary: React.FC<LanguageDictionaryProps> = ({ onBack }
             </span>
           </InteractiveCard>
         ) : (
-          <IntelligencePanel className="p-3 flex flex-col items-center justify-center">
+          <IntelligencePanel className="relative overflow-hidden p-3 flex flex-col items-center justify-center">
+            <div aria-hidden="true" className="blacksite-hairline-cyan absolute inset-x-0 top-0 pointer-events-none" />
             <span className="text-[11px] font-bold text-text-muted mb-1 flex items-center gap-1.5">
               <UserCircle size={13} className="text-cyan-text" />
               {t('myWordsCount')}
@@ -256,7 +266,7 @@ export const LanguageDictionary: React.FC<LanguageDictionaryProps> = ({ onBack }
       </div>
 
       {/* Word List */}
-      <div className="flex-1 overflow-y-auto px-4 pb-20 space-y-2.5 custom-scrollbar">
+      <div className="flex-1 overflow-y-auto pb-20 space-y-2.5 custom-scrollbar">
         {currentPairs.map((pair, index) => (
           <React.Fragment key={pair.id}>
             {!pair.isBase && currentPairs[index - 1]?.isBase && (

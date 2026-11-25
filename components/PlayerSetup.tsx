@@ -28,6 +28,7 @@ import { compressAvatarImage } from '../utils/imageUtils';
 import { showToast } from '../utils/toast';
 import {
   BottomActionBar,
+  DossierHeaderBand,
   IconButton,
   IntelligencePanel,
   InteractiveCard,
@@ -227,42 +228,37 @@ export const PlayerSetup: React.FC<PlayerSetupProps> = ({
   return (
     <div className="flex flex-col min-h-full relative px-4 sm:px-6 pt-3 max-w-3xl mx-auto w-full pb-0">
       {/* Header Summary */}
-      <IntelligencePanel className="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5 p-4">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-[10px] bg-[#668F9A]/15 border border-[#668F9A]/35 flex items-center justify-center text-cyan-text shrink-0">
-            <Users size={20} />
-          </div>
-          <div>
-            <h2 className="text-base sm:text-lg font-extrabold text-text-main">
-              {mode === 'manage' ? t('managePlayers') : t('whoIsPlaying')}
-            </h2>
-            <p className="text-xs text-text-muted">
-              {mode === 'manage'
-                ? t('editDeletePlayers')
-                : isRTL
-                ? 'أدخل أسماء العملاء واختر ملفاتهم التعريفية'
-                : 'Enter operative callsigns and select portraits'}
-            </p>
-          </div>
-        </div>
-
-        {mode === 'setup' && (
-          <div className="flex items-center gap-2">
-            <StatusIndicator tone={isValid ? 'emerald' : 'crimson'}>
-              {t('count')} {activeCount}
-            </StatusIndicator>
-            {!isValid && (
-              <span className="text-xs font-bold text-danger-text">{t('atLeast3')}</span>
-            )}
-          </div>
-        )}
-      </IntelligencePanel>
+      <DossierHeaderBand
+        accent="cyan"
+        className="mb-4"
+        icon={<Users size={20} />}
+        title={mode === 'manage' ? t('managePlayers') : t('whoIsPlaying')}
+        subtitle={
+          mode === 'manage'
+            ? t('editDeletePlayers')
+            : isRTL
+            ? 'أدخل أسماء العملاء واختر ملفاتهم التعريفية'
+            : 'Enter operative callsigns and select portraits'
+        }
+        action={
+          mode === 'setup' ? (
+            <div className="flex items-center gap-2">
+              <StatusIndicator tone={isValid ? 'emerald' : 'crimson'}>
+                {t('count')} {activeCount}
+              </StatusIndicator>
+              {!isValid && (
+                <span className="text-xs font-bold text-danger-text">{t('atLeast3')}</span>
+              )}
+            </div>
+          ) : undefined
+        }
+      />
 
       {/* Quick Add Recent Players */}
       {unselectedRecentPlayers.length > 0 && mode === 'setup' && (
-        <div className="mb-4">
-          <p className="text-xs font-bold text-text-muted mb-2">
-            {isRTL ? 'إضافة سريعة من العملاء المسجلين:' : 'Quick add registered operatives:'}
+        <IntelligencePanel className="mb-4 p-3.5">
+          <p className="text-xs font-bold text-text-muted mb-2.5">
+            {isRTL ? 'إضافة سريعة من العملاء المسجلين' : 'Quick add registered operatives'}
           </p>
           <div className="flex flex-wrap gap-2">
             {unselectedRecentPlayers.map((player) => (
@@ -277,7 +273,7 @@ export const PlayerSetup: React.FC<PlayerSetupProps> = ({
               </InteractiveCard>
             ))}
           </div>
-        </div>
+        </IntelligencePanel>
       )}
 
       {/* Duplicate Name Warning */}
@@ -287,8 +283,8 @@ export const PlayerSetup: React.FC<PlayerSetupProps> = ({
         </div>
       )}
 
-      {/* Players Input Rows */}
-      <div className="space-y-2.5 w-full flex flex-col">
+      {/* Unified Operative Roster Sheet */}
+      <IntelligencePanel className="p-3 sm:p-4 space-y-2.5 w-full flex flex-col">
         {players.map((player, index) => {
           if (mode === 'setup' && player.isSleeping) return null;
 
@@ -309,23 +305,22 @@ export const PlayerSetup: React.FC<PlayerSetupProps> = ({
           return (
             <PlayerIntelligenceCard
               key={index}
-              className={`px-3 py-2.5 flex items-center gap-3 relative focus-within:border-[#668F9A] ${
-                isDuplicateRow ? 'border-[#963F46] bg-[#963F46]/10' : 'border-border-strong bg-bg-surface'
+              className={`px-3 py-2 flex items-center gap-2.5 sm:gap-3 relative focus-within:border-[#668F9A] ${
+                isDuplicateRow ? 'border-[#963F46] bg-[#963F46]/10' : 'border-border bg-bg-card/90'
               } ${player.isSleeping ? 'opacity-50 grayscale' : ''}`}
               style={{ zIndex: focusedIndex === index ? 20 : 1 }}
             >
               <button
+                type="button"
                 onClick={() => {
                   playSound('click');
                   setEditingIndex(index);
                 }}
                 title={t('changeAvatar')}
-                className="relative active:scale-95 transition-transform shrink-0"
+                aria-label={`${t('changeAvatar')} ${player.name || `${t('playerNumber')} ${index + 1}`}`}
+                className="group relative rounded-full p-0.5 border border-border-strong hover:border-[#B49A62] transition-colors active:scale-95 shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#668F9A]/75"
               >
-                <Avatar avatar={player.avatar} name={player.name} size={44} />
-                <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-[6px] bg-[#B49A62] text-[#080B10] border border-bg-surface flex items-center justify-center shadow-xs">
-                  <Pencil size={10} />
-                </div>
+                <Avatar avatar={player.avatar} name={player.name} size={42} />
               </button>
 
               <div className="relative flex-1 min-w-0">
@@ -336,7 +331,7 @@ export const PlayerSetup: React.FC<PlayerSetupProps> = ({
                   onChange={(e) => handleNameChange(index, e.target.value)}
                   onFocus={() => setFocusedIndex(index)}
                   onBlur={() => setTimeout(() => setFocusedIndex(null), 180)}
-                  className="w-full bg-transparent border-b border-transparent focus:border-[#668F9A]/60 py-1.5 text-start text-sm sm:text-base outline-none text-text-main placeholder-text-muted font-bold transition-colors"
+                  className="w-full bg-bg-input border border-border rounded-[9px] focus:border-[#668F9A] px-3 py-2 text-start text-sm sm:text-base outline-none text-text-main placeholder-text-muted font-bold transition-colors min-h-[44px]"
                   autoComplete="off"
                 />
 
@@ -371,7 +366,19 @@ export const PlayerSetup: React.FC<PlayerSetupProps> = ({
                   )}
               </div>
 
-              <div className="flex items-center gap-1.5 shrink-0">
+              <div className="flex items-center gap-1 shrink-0">
+                <IconButton
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => {
+                    playSound('click');
+                    setEditingIndex(index);
+                  }}
+                  title={t('changeAvatar')}
+                  aria-label={t('changeAvatar')}
+                >
+                  <Pencil size={15} className="text-primary-text" />
+                </IconButton>
                 {mode === 'manage' && (
                   <IconButton
                     size="sm"
@@ -399,18 +406,21 @@ export const PlayerSetup: React.FC<PlayerSetupProps> = ({
           );
         })}
 
-        <button
-          type="button"
-          onClick={addPlayerField}
-          className="w-full min-h-[48px] py-3 border border-dashed border-border-strong text-text-muted rounded-[12px] text-sm font-bold hover:bg-bg-surface/80 hover:text-text-main hover:border-[#668F9A]/60 transition-colors flex items-center justify-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#668F9A]/75"
-        >
-          <Plus size={17} />
-          <span>{t('addPlayer')}</span>
-        </button>
-      </div>
+        <div className="pt-1.5">
+          <TacticalButton
+            variant="secondary"
+            size="md"
+            fullWidth
+            onClick={addPlayerField}
+            icon={<Plus size={16} />}
+          >
+            {t('addPlayer')}
+          </TacticalButton>
+        </div>
+      </IntelligencePanel>
 
       {/* Bottom Sticky Action */}
-      <BottomActionBar className="mt-6">
+      <BottomActionBar className="mt-auto pt-3">
         <div className="w-full max-w-md mx-auto">
           {mode === 'setup' ? (
             <TacticalButton

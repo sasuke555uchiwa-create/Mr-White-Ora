@@ -89,3 +89,18 @@ Select themes: `.theme-dark` (primary), `.theme-gray` (slate tactical), `.theme-
 - **Zero Floating Clutter**: Eliminate unanchored mini-badges, corner status dots, and `fixed` floating overlays over scrollable player grids; replace with inline badges or structured action rows.
 - **RTL/LTR Parity**: Logical directional spacing (`start`/`end`, `ps-`/`pe-`), RTL keyboard arrow inversion in `SegmentedControl`, and mirrored chevron affordances.
 
+---
+
+## 7. Phase 4.2 — Cinematic Composition, Hairlines & Screen Framing
+
+### Compositional Primitives (`components/ui/BlacksiteUI.tsx` & `index.css`)
+- **Metallic Hairlines & Surfaces**: `.blacksite-hairline` (gold `#B49A62` gradient line), `.blacksite-hairline-cyan` (cyan `#668F9A` gradient line), `.blacksite-dossier-surface`, and `.blacksite-corner-brackets`.
+- **`DossierHeaderBand`**: Standardized header container across setup, settings, online rooms, online lobby, scoreboard, profile, vault, lexicon, rules, and archive screens (`ClassifiedStamp` + title/subtitle + optional icon + `TacticalToolbar` action slot).
+- **`TacticalToolbar`**: Grouped horizontal utility bar (`inline-flex rounded-[12px] blacksite-panel p-1`) for compact top-bar navigation & mode switches without scattered floating buttons.
+- **`SectionDivider`**: Hairline rule with centered label separating major briefing sections.
+
+### Layout & Card Seat Rules
+- **No Overlapping Corner Badges or Floating Counters**: Status tags (`SPEAKING`, `TARGET`, `HOST`, `READY`, `Shielded`) and chat/log counters sit inside structured card header/footer strips or inline `TacticalButton` counters rather than floating `-top-2 -right-1` badges over avatars.
+- **Flagship Home (`WelcomeScreen.tsx`)**: Responsive `lg:grid-cols-12` composition (`max-w-5xl`) balancing the focal hero emblem & Play CTA with a Command Console mode preview, 3-column framed Core Factions dossier (`/images/1.png`–`4.png`), and the unified 5-tab `NavDock`.
+- **Anchored Bottom Actions**: Setup, settings, active match, scoreboard, debrief, and utility flows terminate cleanly in sticky in-flow `BottomActionBar` containers rather than orphaned buttons.
+

@@ -215,9 +215,10 @@ export const NavDock: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({
   ...props
 }) => (
   <div
-    className={`blacksite-panel rounded-[14px] p-1.5 grid grid-cols-5 gap-1 ${className}`}
+    className={`relative overflow-hidden blacksite-panel rounded-[14px] p-1.5 grid grid-cols-5 gap-1 ${className}`}
     {...props}
   >
+    <div aria-hidden="true" className="blacksite-hairline absolute inset-x-6 top-0 pointer-events-none" />
     {children}
   </div>
 );
@@ -241,15 +242,15 @@ export const NavButton: React.FC<NavButtonProps> = ({
       type={type}
       className={`group relative flex flex-col items-center justify-center gap-1 min-h-[50px] px-0.5 sm:px-1.5 py-2 rounded-[10px] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#668F9A]/75 active:scale-[0.97] ${
         active
-          ? 'bg-bg-card text-text-main'
-          : 'bg-transparent hover:bg-bg-card/65 text-text-muted hover:text-text-main'
+          ? 'bg-bg-card text-text-main border border-border'
+          : 'bg-transparent hover:bg-bg-card/65 text-text-muted hover:text-text-main border border-transparent'
       } ${className}`}
       {...props}
     >
       {active && (
         <span
           aria-hidden="true"
-          className="absolute top-1 w-4 h-[2px] rounded-full bg-[#B49A62]"
+          className="absolute top-1 w-5 h-[2px] rounded-full bg-[#B49A62]"
         />
       )}
       <span
@@ -570,8 +571,9 @@ export const ModalShell: React.FC<ModalShellProps> = ({
       aria-label={ariaLabel}
       aria-labelledby={ariaLabelledBy}
       tabIndex={-1}
-      className={`w-full ${maxWidthClass} rounded-[16px] bg-bg-surface border border-border-strong shadow-[0_24px_64px_rgba(4,7,12,0.68)] overflow-hidden outline-none ${className}`}
+      className={`relative w-full ${maxWidthClass} rounded-[16px] bg-bg-surface border border-border-strong shadow-[0_24px_64px_rgba(4,7,12,0.72)] overflow-hidden outline-none ${className}`}
     >
+      <div aria-hidden="true" className="blacksite-hairline absolute inset-x-0 top-0 pointer-events-none" />
       {children}
     </div>
   );
@@ -605,6 +607,101 @@ export const ScreenSectionHeader: React.FC<ScreenSectionHeaderProps> = ({
       </div>
     </div>
     {action && <div className="shrink-0">{action}</div>}
+  </div>
+);
+
+export interface DossierHeaderBandProps {
+  title: string;
+  subtitle?: string;
+  icon?: React.ReactNode;
+  badge?: React.ReactNode;
+  action?: React.ReactNode;
+  accent?: 'gold' | 'cyan' | 'crimson';
+  className?: string;
+  children?: React.ReactNode;
+}
+
+const DOSSIER_HEADER_ACCENTS: Record<NonNullable<DossierHeaderBandProps['accent']>, string> = {
+  gold: 'border-[#B49A62]/35',
+  cyan: 'border-[#668F9A]/35',
+  crimson: 'border-[#963F46]/40',
+};
+
+const DOSSIER_ICON_TONES: Record<NonNullable<DossierHeaderBandProps['accent']>, string> = {
+  gold: 'bg-[#B49A62]/14 border-[#B49A62]/35 text-primary-text',
+  cyan: 'bg-[#668F9A]/14 border-[#668F9A]/35 text-cyan-text',
+  crimson: 'bg-[#963F46]/15 border-[#963F46]/40 text-danger-text',
+};
+
+export const DossierHeaderBand: React.FC<DossierHeaderBandProps> = ({
+  title,
+  subtitle,
+  icon,
+  badge,
+  action,
+  accent = 'gold',
+  className = '',
+  children,
+}) => (
+  <div
+    className={`relative overflow-hidden rounded-[14px] blacksite-panel blacksite-dossier-surface p-4 sm:p-5 ${DOSSIER_HEADER_ACCENTS[accent]} ${className}`}
+  >
+    <div
+      aria-hidden="true"
+      className={`${accent === 'cyan' ? 'blacksite-hairline-cyan' : 'blacksite-hairline'} absolute inset-x-0 top-0 pointer-events-none`}
+    />
+    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+      <div className="flex items-center gap-3.5 min-w-0">
+        {icon && (
+          <div
+            className={`w-11 h-11 rounded-[10px] border flex items-center justify-center shrink-0 ${DOSSIER_ICON_TONES[accent]}`}
+          >
+            {icon}
+          </div>
+        )}
+        <div className="min-w-0 text-start">
+          {badge && <div className="mb-1 flex items-center gap-2 flex-wrap">{badge}</div>}
+          <h2 className="text-lg sm:text-xl font-extrabold text-text-main leading-tight truncate">
+            {title}
+          </h2>
+          {subtitle && (
+            <p className="text-xs sm:text-sm font-medium text-text-muted mt-0.5 leading-snug">
+              {subtitle}
+            </p>
+          )}
+        </div>
+      </div>
+      {action && <div className="flex items-center gap-2 shrink-0 flex-wrap">{action}</div>}
+    </div>
+    {children && <div className="mt-3.5 pt-3 border-t border-border/70">{children}</div>}
+  </div>
+);
+
+export const TacticalToolbar: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({
+  className = '',
+  children,
+  ...props
+}) => (
+  <div
+    className={`inline-flex items-center gap-1 rounded-[12px] blacksite-panel p-1 shrink-0 ${className}`}
+    {...props}
+  >
+    {children}
+  </div>
+);
+
+export const SectionDivider: React.FC<{ label?: string; className?: string }> = ({
+  label,
+  className = '',
+}) => (
+  <div className={`flex items-center gap-3 ${className}`}>
+    <div className="flex-1 h-px bg-border" />
+    {label && (
+      <span className="text-[11px] font-bold text-text-muted whitespace-nowrap shrink-0">
+        {label}
+      </span>
+    )}
+    <div className="flex-1 h-px bg-border" />
   </div>
 );
 

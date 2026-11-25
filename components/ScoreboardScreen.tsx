@@ -4,7 +4,9 @@ import { SHOP_ITEMS } from '../data/shopItems';
 import { Medal, TrendingDown, ArrowLeft, Play, Archive } from 'lucide-react';
 import { getUITranslation } from '../translations';
 import {
+  BottomActionBar,
   ClassifiedStamp,
+  DossierHeaderBand,
   IntelligencePanel,
   PlayerIntelligenceCard,
   TacticalButton,
@@ -45,27 +47,27 @@ export const ScoreboardScreen: React.FC<ScoreboardScreenProps> = ({
   });
 
   return (
-    <div className="flex flex-col min-h-full animate-fade-in relative px-4 py-4 max-w-2xl mx-auto w-full pb-28">
-      <div className="w-full max-w-lg mx-auto flex flex-col">
+    <div className="flex flex-col min-h-full animate-fade-in relative px-4 sm:px-6 pt-4 max-w-3xl mx-auto w-full">
+      <div className="w-full max-w-xl mx-auto flex flex-col flex-1">
         {/* Header Banner */}
-        <IntelligencePanel className="p-5 text-center mb-5 flex flex-col items-center">
-          <div className="w-full flex justify-between items-center mb-2">
-            <ClassifiedStamp tone="gold">RANKINGS</ClassifiedStamp>
-          </div>
-          <img
-            src="/i1.png"
-            alt={t('playerRanking')}
-            referrerPolicy="no-referrer"
-            className="w-12 h-12 object-contain mb-2"
-          />
-          <h2 className="text-xl sm:text-2xl font-bold text-text-main">{t('playerRanking')}</h2>
-          <p className="text-text-muted text-xs sm:text-sm font-medium mt-1">
-            {t('whoIsTheBoss')}
-          </p>
-        </IntelligencePanel>
+        <DossierHeaderBand
+          accent="gold"
+          className="mb-5"
+          badge={<ClassifiedStamp tone="gold">RANKINGS</ClassifiedStamp>}
+          title={t('playerRanking')}
+          subtitle={t('whoIsTheBoss')}
+          icon={
+            <img
+              src="/i1.png"
+              alt={t('playerRanking')}
+              referrerPolicy="no-referrer"
+              className="w-7 h-7 object-contain"
+            />
+          }
+        />
 
         {/* Standings List */}
-        <div className="pb-4">
+        <div className="pb-6 flex-1">
           {sortedPlayers.length === 0 ? (
             <IntelligencePanel className="flex flex-col items-center justify-center h-64 text-text-muted p-6">
               <TrendingDown size={34} className="mb-3 opacity-50" />
@@ -131,30 +133,34 @@ export const ScoreboardScreen: React.FC<ScoreboardScreenProps> = ({
             </div>
           )}
         </div>
+      </div>
 
-        <div className="mt-4 flex flex-col gap-2.5">
-          {onOpenArchive && (
-            <TacticalButton
-              onClick={onOpenArchive}
-              variant="cyan"
-              size="lg"
-              fullWidth
-              icon={<Archive size={16} />}
-            >
-              {t('operationArchive')}
-            </TacticalButton>
-          )}
-          {onNextRound && (
-            <TacticalButton
-              onClick={onNextRound}
-              variant="primary"
-              size="lg"
-              fullWidth
-              icon={<Play size={16} className="fill-current" />}
-            >
-              {t('nextRound')}
-            </TacticalButton>
-          )}
+      <BottomActionBar className="mt-auto">
+        <div className="max-w-xl mx-auto flex flex-col gap-2">
+          <div className="flex flex-col sm:flex-row gap-2">
+            {onOpenArchive && (
+              <TacticalButton
+                onClick={onOpenArchive}
+                variant="cyan"
+                size="md"
+                className="flex-1"
+                icon={<Archive size={16} />}
+              >
+                {t('operationArchive')}
+              </TacticalButton>
+            )}
+            {onNextRound && (
+              <TacticalButton
+                onClick={onNextRound}
+                variant="primary"
+                size="md"
+                className="flex-1"
+                icon={<Play size={16} className="fill-current" />}
+              >
+                {t('nextRound')}
+              </TacticalButton>
+            )}
+          </div>
           <TacticalButton
             onClick={onBack}
             variant="secondary"
@@ -165,7 +171,7 @@ export const ScoreboardScreen: React.FC<ScoreboardScreenProps> = ({
             {onNextRound ? t('endGame') : t('back')}
           </TacticalButton>
         </div>
-      </div>
+      </BottomActionBar>
     </div>
   );
 };

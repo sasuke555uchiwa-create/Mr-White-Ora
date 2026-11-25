@@ -12,6 +12,8 @@ import { getUITranslation } from '../translations';
 import { playSound } from '../services/soundService';
 import { SHOP_ITEMS, ShopItem, getShopItemField } from '../data/shopItems';
 import {
+  ClassifiedStamp,
+  DossierHeaderBand,
   IconButton,
   IntelligencePanel,
   PlayerIntelligenceCard,
@@ -104,7 +106,7 @@ export const InventoryScreen: React.FC<InventoryScreenProps> = ({ onBack }) => {
   const currentInventory = selectedPlayer ? unlockedItems[selectedPlayer] || [] : [];
 
   return (
-    <div className="flex flex-col h-full w-full relative max-w-2xl mx-auto px-4 pb-24">
+    <div className="flex flex-col h-full w-full relative max-w-3xl mx-auto px-4 sm:px-6 pt-4 pb-24">
       <AnimatePresence>
         {alertMsg && (
           <motion.div
@@ -135,33 +137,32 @@ export const InventoryScreen: React.FC<InventoryScreenProps> = ({ onBack }) => {
       </AnimatePresence>
 
       {/* Header */}
-      <div className="py-3.5 flex items-center justify-between border-b border-border-strong bg-bg-surface sticky top-0 z-20 -mx-4 px-4">
-        <div className="flex items-center gap-3">
+      <DossierHeaderBand
+        accent="gold"
+        badge={<ClassifiedStamp tone="gold">AGENT VAULT</ClassifiedStamp>}
+        title={
+          lang === 'ar'
+            ? 'خزينة المقتنيات والمزايا'
+            : lang === 'fr'
+            ? 'Coffre des Avantages'
+            : 'Agent Vault & Perks'
+        }
+        subtitle={
+          lang === 'ar'
+            ? 'استبدل نقاطك بشارات ومزايا فعلية داخل جولات المتخفي'
+            : 'Spend points to unlock badges and real in-game perks'
+        }
+        icon={<ShoppingBag className="w-5 h-5" />}
+        action={
           <IconButton onClick={onBack} variant="secondary" aria-label={t('back')}>
             <ArrowLeft className="w-5 h-5 rtl:rotate-180" />
           </IconButton>
-          <div>
-            <h2 className="text-lg sm:text-xl font-bold tracking-tight flex items-center gap-2 text-text-main">
-              <ShoppingBag className="text-primary-text w-5 h-5" />
-              <span>
-                {lang === 'ar'
-                  ? 'خزينة المقتنيات والمزايا'
-                  : lang === 'fr'
-                  ? 'Coffre des Avantages'
-                  : 'Agent Vault & Perks'}
-              </span>
-            </h2>
-            <p className="text-xs text-text-muted font-medium">
-              {lang === 'ar'
-                ? 'استبدل نقاطك بشارات ومزايا فعلية داخل جولات المتخفي'
-                : 'Spend points to unlock badges and real in-game perks'}
-            </p>
-          </div>
-        </div>
-      </div>
+        }
+      />
 
       {/* Player Selector Panel */}
-      <IntelligencePanel className="mt-4 p-4">
+      <IntelligencePanel className="relative overflow-hidden mt-4 p-4">
+        <div aria-hidden="true" className="blacksite-hairline absolute inset-x-0 top-0 pointer-events-none" />
         <h4
           className={`text-xs font-bold text-text-muted mb-3 flex items-center gap-1.5 ${
             !isRTL ? 'uppercase tracking-wider' : ''

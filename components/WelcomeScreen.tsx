@@ -31,6 +31,7 @@ import {
   NavButton,
   NavDock,
   TacticalButton,
+  TacticalToolbar,
 } from './ui/BlacksiteUI';
 
 interface WelcomeScreenProps {
@@ -100,27 +101,32 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
   return (
     <div className="flex flex-col min-h-full w-full relative overflow-x-hidden justify-between select-none">
       {/* Top Agency Toolbar */}
-      <header className="w-full max-w-4xl mx-auto flex justify-between items-center gap-2 px-4 sm:px-6 pt-3.5 sm:pt-4 pb-2 z-30">
+      <header className="w-full max-w-5xl mx-auto flex justify-between items-center gap-2.5 px-4 sm:px-6 pt-3.5 sm:pt-4 pb-2 z-30">
         <button
           type="button"
           onClick={() => {
             playSound('click');
             onShowProfile();
           }}
-          className="h-11 min-h-[44px] active:scale-[0.98] transition-colors flex items-center gap-2 rounded-[10px] blacksite-panel px-2.5 sm:px-3 hover:border-[#B49A62]/55 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#668F9A]/75 min-w-0"
+          className="h-11 min-h-[44px] active:scale-[0.98] transition-colors flex items-center gap-2.5 rounded-[12px] blacksite-panel px-2.5 sm:px-3.5 hover:border-[#B49A62]/55 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#668F9A]/75 min-w-0"
         >
           <Avatar
             avatar={avatarSrc}
             name={displayName}
-            size={28}
+            size={30}
             status={loading ? 'waiting' : 'none'}
           />
-          <span className="text-xs sm:text-sm font-bold text-text-main max-w-[92px] sm:max-w-[150px] truncate">
-            {displayName}
-          </span>
+          <div className="text-start min-w-0">
+            <span className="block text-xs sm:text-sm font-bold text-text-main max-w-[110px] sm:max-w-[170px] truncate leading-tight">
+              {displayName}
+            </span>
+            <span className="hidden sm:block text-[10.5px] font-medium text-text-muted leading-tight truncate">
+              {isRTL ? 'ملف العميل' : 'Operative Dossier'}
+            </span>
+          </div>
         </button>
 
-        <div className="flex items-center gap-2 shrink-0">
+        <TacticalToolbar>
           <IconButton
             onClick={() => {
               playSound('click');
@@ -128,10 +134,13 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
             }}
             title={t('howToPlay')}
             aria-label={t('howToPlay')}
-            variant="secondary"
+            variant="ghost"
+            size="sm"
           >
             <HelpCircle size={18} className="text-cyan-text" />
           </IconButton>
+
+          <div aria-hidden="true" className="w-px h-6 bg-border-strong" />
 
           <button
             type="button"
@@ -139,46 +148,49 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
               playSound('click');
               setShowLangModal(true);
             }}
-            className="h-11 min-h-[44px] rounded-[10px] blacksite-panel hover:border-[#B49A62]/55 px-2.5 sm:px-3 font-bold text-text-main text-xs sm:text-sm transition-colors flex items-center gap-1.5 sm:gap-2 whitespace-nowrap active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#668F9A]/75"
+            className="h-11 min-h-[44px] rounded-[9px] hover:bg-bg-card px-2.5 sm:px-3 font-bold text-text-main text-xs sm:text-sm transition-colors flex items-center gap-1.5 sm:gap-2 whitespace-nowrap active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#668F9A]/75"
           >
             <Globe size={16} className="text-primary-text shrink-0" />
             <span className="font-mono-code text-[11px] text-text-muted">{activeLangObj.code}</span>
-            <span className="hidden xs:inline sm:inline">{activeLangObj.label}</span>
+            <span className="hidden sm:inline">{activeLangObj.label}</span>
           </button>
-        </div>
+        </TacticalToolbar>
       </header>
 
-      {/* Center Hero Briefing + Launch Action */}
-      <div className="flex-1 flex flex-col items-center justify-center px-4 sm:px-6 py-3 sm:py-4 z-20 max-w-4xl mx-auto w-full">
+      {/* Flagship Agency Showcase + Launch Command Center */}
+      <div className="flex-1 flex flex-col items-center justify-center px-4 sm:px-6 py-3 sm:py-5 z-20 max-w-5xl mx-auto w-full">
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.25 }}
-          className="w-full max-w-xl flex flex-col gap-3.5 sm:gap-4"
+          className="w-full grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-5 items-stretch"
         >
           {/* Classified Hero Artwork Frame */}
-          <div className="relative w-full aspect-[16/9] max-h-[225px] sm:max-h-[265px] rounded-[16px] overflow-hidden border border-[#B49A62]/35 shadow-[0_20px_52px_rgba(4,7,12,0.58)] bg-[#080B10]">
+          <div className="lg:col-span-7 relative w-full aspect-[16/10] sm:aspect-[16/9] lg:aspect-auto lg:min-h-[360px] rounded-[16px] overflow-hidden border border-[#B49A62]/40 shadow-[0_22px_56px_rgba(4,7,12,0.62)] bg-[#080B10]">
             <img
               src={HERO_ASSETS.mainBanner}
               alt="Mr. White Classified Intelligence"
               referrerPolicy="no-referrer"
               className="w-full h-full object-cover object-center"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#080B10] via-[#080B10]/35 to-[#080B10]/45 flex flex-col justify-between p-3.5 sm:p-5">
+            <div className="absolute inset-0 bg-gradient-to-t from-[#080B10] via-[#080B10]/35 to-[#080B10]/55 flex flex-col justify-between p-4 sm:p-6">
               <div className="flex items-center justify-between gap-2">
                 <ClassifiedStamp tone="gold">BLACKSITE · OP-02</ClassifiedStamp>
                 <ClassifiedStamp tone="cyan">3–20 AGENTS</ClassifiedStamp>
               </div>
 
-              <div className="text-start">
+              <div className="text-start max-w-lg">
+                <p className="text-[11px] font-mono-code font-semibold tracking-wider text-primary-text/90 mb-1">
+                  {isRTL ? 'ملف الاستنتاج الاجتماعي السري' : 'CLASSIFIED SOCIAL DEDUCTION'}
+                </p>
                 <h1
-                  className={`text-2xl sm:text-4xl font-extrabold text-[#ECEFF4] leading-none drop-shadow-sm ${
+                  className={`text-2xl sm:text-4xl lg:text-[42px] font-extrabold text-[#ECEFF4] leading-none drop-shadow-sm text-balance ${
                     isRTL ? 'font-cairo' : 'tracking-tight'
                   }`}
                 >
                   {isRTL ? 'المتخفي · MR. WHITE' : 'MR. WHITE'}
                 </h1>
-                <p className="text-xs sm:text-sm font-semibold text-[#C9B17B] mt-1.5">
+                <p className="text-xs sm:text-sm font-semibold text-[#C9B17B] mt-2 leading-relaxed">
                   {isRTL
                     ? 'المدنيون · المتخفون · العميل المجهول'
                     : 'Civilians · Undercovers · Mr. White'}
@@ -187,63 +199,116 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
             </div>
           </div>
 
-          {/* Primary Launch Control + Special Roles Briefing Card */}
-          <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 w-full items-stretch">
-            <TacticalButton
-              variant="primary"
-              size="lg"
-              onClick={() => {
-                playSound('pop');
-                setShowPlayOptions(true);
-              }}
-              className="sm:col-span-7 min-h-[62px] px-4 sm:px-5 rounded-[12px] justify-between"
-            >
-              <span className="flex items-center gap-3 min-w-0 flex-1">
-                <span className="w-10 h-10 rounded-[8px] bg-[#080B10]/15 border border-[#080B10]/20 flex items-center justify-center shrink-0 text-[#080B10]">
-                  <Play size={18} className="fill-current rtl:rotate-180" />
-                </span>
-                <span className="text-start min-w-0">
-                  <span className="block text-base sm:text-lg font-extrabold leading-tight truncate">
-                    {isRTL ? 'ابدأ اللعب' : t('play')}
-                  </span>
-                  <span className="block text-[11px] font-semibold opacity-80 leading-tight truncate">
-                    {isRTL ? 'أونلاين أو نفس الهاتف' : 'Online or Pass & Play'}
-                  </span>
-                </span>
-              </span>
-              <ArrowRight size={18} className="shrink-0 rtl:rotate-180 opacity-85" />
-            </TacticalButton>
+          {/* Right Command Console + Faction Dossier */}
+          <div className="lg:col-span-5 flex flex-col justify-between gap-3.5 sm:gap-4">
+            {/* Operation Launch Console */}
+            <IntelligencePanel className="relative overflow-hidden blacksite-dossier-surface p-4 sm:p-5 border-[#B49A62]/35 flex flex-col gap-3.5">
+              <div aria-hidden="true" className="blacksite-hairline absolute inset-x-0 top-0 pointer-events-none" />
 
-            <IntelligencePanel className="sm:col-span-5 px-3.5 py-3 flex items-center justify-between gap-3">
-              <div className="flex items-center -space-x-2 rtl:space-x-reverse shrink-0">
-                <img
-                  src={ROLE_PORTRAITS.citizen}
-                  alt="Civilian"
-                  referrerPolicy="no-referrer"
-                  className="w-9 h-9 rounded-[8px] bg-[#0D1219] border border-[#668F9A]/55 object-cover relative z-30 shadow-xs"
-                />
-                <img
-                  src={ROLE_PORTRAITS.undercover}
-                  alt="Undercover"
-                  referrerPolicy="no-referrer"
-                  className="w-9 h-9 rounded-[8px] bg-[#0D1219] border border-[#A46F44]/55 object-cover relative z-20 shadow-xs"
-                />
-                <img
-                  src={ROLE_PORTRAITS.mrwhite}
-                  alt="Mr. White"
-                  referrerPolicy="no-referrer"
-                  className="w-9 h-9 rounded-[8px] bg-[#0D1219] border border-[#B49A62]/55 object-cover relative z-10 shadow-xs"
-                />
+              <div className="flex items-center justify-between gap-2 text-start">
+                <div className="min-w-0">
+                  <p className="text-xs font-bold text-primary-text">
+                    {isRTL ? 'مركز العمليات الميدانية' : 'Operation Command'}
+                  </p>
+                  <p className="text-xs text-text-muted mt-0.5 truncate">
+                    {isRTL
+                      ? 'تحقيق مباشر على الطاولة أو عبر الشبكة'
+                      : 'Tabletop pass & play or encrypted online rooms'}
+                  </p>
+                </div>
+                <ClassifiedStamp tone="gold">READY</ClassifiedStamp>
               </div>
 
-              <div className="text-start min-w-0 flex-1">
-                <div className="flex items-center gap-1.5 text-xs font-bold text-text-main">
-                  <Shield size={13} className="text-primary-text shrink-0" />
+              <TacticalButton
+                variant="primary"
+                size="lg"
+                fullWidth
+                onClick={() => {
+                  playSound('pop');
+                  setShowPlayOptions(true);
+                }}
+                className="min-h-[62px] px-4 sm:px-5 rounded-[12px] justify-between"
+              >
+                <span className="flex items-center gap-3 min-w-0 flex-1">
+                  <span className="w-10 h-10 rounded-[8px] bg-[#080B10]/15 border border-[#080B10]/20 flex items-center justify-center shrink-0 text-[#080B10]">
+                    <Play size={18} className="fill-current rtl:rotate-180" />
+                  </span>
+                  <span className="text-start min-w-0">
+                    <span className="block text-base sm:text-lg font-extrabold leading-tight truncate">
+                      {isRTL ? 'ابدأ اللعب' : t('play')}
+                    </span>
+                    <span className="block text-[11px] font-semibold opacity-80 leading-tight truncate">
+                      {isRTL ? 'أونلاين أو نفس الهاتف' : 'Online or Pass & Play'}
+                    </span>
+                  </span>
+                </span>
+                <ArrowRight size={18} className="shrink-0 rtl:rotate-180 opacity-85" />
+              </TacticalButton>
+
+              <div className="grid grid-cols-2 gap-2 pt-1 border-t border-border/70 text-xs">
+                <div className="flex items-center gap-2 text-text-muted min-w-0">
+                  <Globe size={14} className="text-cyan-text shrink-0" />
+                  <span className="truncate font-semibold">
+                    {isRTL ? 'غرف أونلاين' : 'Online Rooms'}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 text-text-muted min-w-0">
+                  <Smartphone size={14} className="text-primary-text shrink-0" />
+                  <span className="truncate font-semibold">
+                    {isRTL ? 'نفس الجهاز' : 'Shared Device'}
+                  </span>
+                </div>
+              </div>
+            </IntelligencePanel>
+
+            {/* Core Factions & Special Roles Dossier */}
+            <IntelligencePanel className="p-4 flex flex-col justify-between gap-3 flex-1">
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2 text-xs font-bold text-text-main min-w-0">
+                  <Shield size={14} className="text-primary-text shrink-0" />
                   <span className="truncate">{isRTL ? '8 أدوار خاصة' : '8 Special Roles'}</span>
                 </div>
-                <p className="text-[11px] text-text-muted tabular-nums truncate mt-0.5">
+                <span className="text-[11px] font-semibold text-text-muted tabular-nums shrink-0">
                   {isRTL ? '3 – 20 عميلاً' : '3 – 20 Operatives'}
-                </p>
+                </span>
+              </div>
+
+              <div className="grid grid-cols-3 gap-2">
+                <div className="rounded-[10px] bg-bg-card border border-[#668F9A]/35 p-2 flex flex-col items-center text-center gap-1.5">
+                  <img
+                    src={ROLE_PORTRAITS.citizen}
+                    alt="Civilian"
+                    referrerPolicy="no-referrer"
+                    className="w-11 h-11 rounded-[8px] bg-[#0D1219] object-cover border border-[#668F9A]/45"
+                  />
+                  <span className="text-[11px] font-bold text-cyan-text truncate max-w-full">
+                    {isRTL ? 'مدني' : 'Civilian'}
+                  </span>
+                </div>
+
+                <div className="rounded-[10px] bg-bg-card border border-[#A46F44]/35 p-2 flex flex-col items-center text-center gap-1.5">
+                  <img
+                    src={ROLE_PORTRAITS.undercover}
+                    alt="Undercover"
+                    referrerPolicy="no-referrer"
+                    className="w-11 h-11 rounded-[8px] bg-[#0D1219] object-cover border border-[#A46F44]/45"
+                  />
+                  <span className="text-[11px] font-bold text-text-main truncate max-w-full">
+                    {isRTL ? 'متخفٍ' : 'Undercover'}
+                  </span>
+                </div>
+
+                <div className="rounded-[10px] bg-bg-card border border-[#B49A62]/40 p-2 flex flex-col items-center text-center gap-1.5">
+                  <img
+                    src={ROLE_PORTRAITS.mrwhite}
+                    alt="Mr. White"
+                    referrerPolicy="no-referrer"
+                    className="w-11 h-11 rounded-[8px] bg-[#0D1219] object-cover border border-[#B49A62]/50"
+                  />
+                  <span className="text-[11px] font-bold text-primary-text truncate max-w-full">
+                    {isRTL ? 'مستر وايت' : 'Mr. White'}
+                  </span>
+                </div>
               </div>
             </IntelligencePanel>
           </div>

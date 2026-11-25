@@ -261,6 +261,33 @@ body {
   display: none;
 }
 
+.blacksite-hairline {
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, rgba(180, 154, 98, 0.38) 50%, transparent 100%);
+}
+
+.blacksite-hairline-cyan {
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, rgba(102, 143, 154, 0.4) 50%, transparent 100%);
+}
+
+.blacksite-dossier-surface {
+  background-image:
+    radial-gradient(circle at 88% 12%, rgba(180, 154, 98, 0.07) 0%, transparent 44%),
+    radial-gradient(circle at 12% 88%, rgba(102, 143, 154, 0.06) 0%, transparent 44%);
+}
+
+.blacksite-corner-brackets {
+  background-image:
+    linear-gradient(to right, rgba(180, 154, 98, 0.45) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(180, 154, 98, 0.45) 1px, transparent 1px),
+    linear-gradient(to left, rgba(180, 154, 98, 0.45) 1px, transparent 1px),
+    linear-gradient(to top, rgba(180, 154, 98, 0.45) 1px, transparent 1px);
+  background-size: 10px 10px;
+  background-position: 0 0, 0 0, 100% 100%, 100% 100%;
+  background-repeat: no-repeat;
+}
+
 @layer components {
   /* Level 1: Primary Panel / Sheet Surface */
   .blacksite-panel {
@@ -280,7 +307,9 @@ body {
     background: var(--bg-card);
     border: 1px solid var(--border);
     box-shadow: inset 0 1px 0 var(--surface-highlight);
-    transition: background-color 150ms ease, border-color 150ms ease, transform 150ms ease;
+    transition: background-color 150ms cubic-bezier(0.16, 1, 0.3, 1),
+      border-color 150ms cubic-bezier(0.16, 1, 0.3, 1),
+      transform 150ms cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   .blacksite-card-interactive:hover:not(:disabled) {
@@ -301,7 +330,7 @@ body {
   .blacksite-input:focus {
     outline: none;
     border-color: #668F9A;
-    box-shadow: 0 0 0 2px rgba(102, 143, 154, 0.2);
+    box-shadow: 0 0 0 2px rgba(102, 143, 154, 0.22);
   }
 
   .glass-panel {

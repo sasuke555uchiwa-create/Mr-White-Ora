@@ -17,10 +17,11 @@ export const Header: React.FC<HeaderProps> = ({ onHome, showHome }) => {
 
   return (
     <header
-      className="w-full z-20 shrink-0 border-b border-border-strong bg-bg-surface shadow-[inset_0_1px_0_var(--surface-highlight)]"
+      className="relative w-full z-20 shrink-0 border-b border-border-strong bg-bg-surface/95 shadow-[inset_0_1px_0_var(--surface-highlight)]"
       dir={isRTL ? 'rtl' : 'ltr'}
     >
-      <div className="w-full max-w-4xl mx-auto py-2.5 px-4 sm:px-6 flex items-center justify-between gap-3">
+      <div aria-hidden="true" className="blacksite-hairline absolute inset-x-0 bottom-0 pointer-events-none" />
+      <div className="w-full max-w-5xl mx-auto py-2.5 px-4 sm:px-6 flex items-center justify-between gap-3">
         {showHome ? (
           <IconButton
             onClick={onHome}
@@ -31,14 +32,14 @@ export const Header: React.FC<HeaderProps> = ({ onHome, showHome }) => {
             <Home size={19} className="text-primary-text" />
           </IconButton>
         ) : (
-          <div className="w-11" />
+          <div className="w-11 shrink-0" />
         )}
 
         <div className="text-center min-w-0 px-2 flex-1">
           {showHome && (
-            <div className="flex flex-col items-center">
+            <div className="inline-flex items-center justify-center gap-2 max-w-full">
               <h1
-                className={`text-sm sm:text-base font-extrabold text-text-main leading-tight truncate max-w-full ${
+                className={`text-sm sm:text-base font-extrabold text-text-main leading-tight truncate ${
                   isRTL ? 'font-cairo' : 'font-sans tracking-wider'
                 }`}
               >

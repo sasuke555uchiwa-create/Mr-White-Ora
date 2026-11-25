@@ -8,7 +8,12 @@ import { UserCheck, UserX, Users, UserPlus } from 'lucide-react';
 import { getUITranslation } from '../translations';
 import { getSettings } from '../services/storageService';
 import { Avatar } from './Avatar';
-import { IconButton, IntelligencePanel, PlayerIntelligenceCard } from './ui/BlacksiteUI';
+import {
+  IconButton,
+  IntelligencePanel,
+  PlayerIntelligenceCard,
+  ScreenSectionHeader,
+} from './ui/BlacksiteUI';
 
 export const FriendsSection: React.FC = () => {
   const { user } = useAuth();
@@ -139,13 +144,16 @@ export const FriendsSection: React.FC = () => {
 
   return (
     <div className="mt-8 mb-8" dir={isRTL ? 'rtl' : 'ltr'}>
-      <h3
-        className={`text-base font-bold text-text-main mb-4 flex items-center gap-2 ${
-          isRTL ? 'text-right justify-start' : 'text-left justify-start'
-        }`}
-      >
-        <Users className="w-5 h-5 text-cyan-text" /> {getUITranslation(lang, 'friends')}
-      </h3>
+      <ScreenSectionHeader
+        title={getUITranslation(lang, 'friends')}
+        icon={<Users className="w-4 h-4 text-cyan-text" />}
+        action={
+          <span className="text-xs font-mono-code font-bold text-text-muted tabular-nums">
+            {friends.length}
+          </span>
+        }
+        className="mb-4"
+      />
 
       {requests.length > 0 && (
         <div className="mb-6">

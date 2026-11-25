@@ -8,7 +8,6 @@ import { motion, useReducedMotion } from 'framer-motion';
 import { getUITranslation } from '../translations';
 import {
   getRoleAsset,
-  getRoleBadgeIcon,
   getRoleTitle,
   getRoleVisualIdentity,
   getSpecialRoleDescription,
@@ -84,7 +83,6 @@ export const RevealVoteResult: React.FC<RevealVoteResultProps> = ({
   if (!votedPlayer) return null;
 
   const activeSpecial = votedPlayer.specialRole || null;
-  const roleBadgeSrc = getRoleBadgeIcon(votedPlayer.role);
   const rolePortraitSrc = getRoleAsset(votedPlayer.role);
   const roleTitle = getRoleTitle(votedPlayer.role, lang);
   const roleVisual = getRoleVisualIdentity(
@@ -139,47 +137,23 @@ export const RevealVoteResult: React.FC<RevealVoteResultProps> = ({
             className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-[#B49A62]/65 to-transparent"
           />
 
-          <div className="flex items-center justify-between gap-2 mb-3">
+          <div className="flex items-center justify-between gap-2 mb-4 pb-2.5 border-b border-border/70">
             {isSaved ? (
               <ClassifiedStamp tone="cyan">INTERCEPTED</ClassifiedStamp>
             ) : (
               <OperationPhaseBadge phase="verdict" lang={lang} />
             )}
-            <ClassifiedStamp tone={isSaved ? roleVisual.stampTone : roleVisual.stampTone}>
-              {isSaved ? roleVisual.stamp : roleVisual.stamp}
-            </ClassifiedStamp>
-          </div>
-
-          <div className="mx-auto mb-3 relative">
-            <div
-              className={`w-20 h-20 rounded-[14px] bg-[#080B10] border-2 ${roleVisual.frameBorderClass} shadow-lg flex items-center justify-center overflow-hidden`}
-            >
-              <img
-                src={isSaved && blockedBySpecial ? getRoleAsset(blockedBySpecial) : rolePortraitSrc}
-                alt={isSaved && blockedBySpecial ? getRoleTitle(blockedBySpecial, lang) : roleTitle}
-                referrerPolicy="no-referrer"
-                className="w-full h-full object-cover"
-              />
-            </div>
-            {isSaved && (
-              <div className="absolute -bottom-1 -right-1 w-8 h-8 rounded-[8px] bg-[#668F9A] text-[#080B10] border border-border-strong flex items-center justify-center shadow">
-                {blockedBySpecial === 'boomerang' ? (
-                  <RotateCcw size={15} />
-                ) : (
-                  <ShieldCheck size={15} />
-                )}
-              </div>
-            )}
+            <ClassifiedStamp tone={roleVisual.stampTone}>{roleVisual.stamp}</ClassifiedStamp>
           </div>
 
           {tieBroken && (
-            <div className="mb-2 px-3 py-1.5 rounded-[8px] bg-[#B49A62]/12 border border-[#B49A62]/35 text-xs font-semibold text-primary-text">
+            <div className="mb-2.5 px-3 py-1.5 rounded-[8px] bg-[#B49A62]/12 border border-[#B49A62]/35 text-xs font-semibold text-primary-text">
               {t('tieBrokenNotice')}
             </div>
           )}
 
           {bouncedFromName && (
-            <div className="mb-2 px-3 py-1.5 rounded-[8px] bg-[#963F46]/15 border border-[#963F46]/40 text-xs font-semibold text-danger-text">
+            <div className="mb-2.5 px-3 py-1.5 rounded-[8px] bg-[#963F46]/15 border border-[#963F46]/40 text-xs font-semibold text-danger-text">
               {lang === 'ar'
                 ? `ارتد التصويت من ${bouncedFromName} (Mr. Boomerang)!`
                 : `Bounced back from ${bouncedFromName} (Mr. Boomerang)!`}
@@ -190,51 +164,40 @@ export const RevealVoteResult: React.FC<RevealVoteResultProps> = ({
             {getHeadline()}
           </h2>
 
-          {/* Eliminated/Saved Player + Role Badge */}
+          {/* Eliminated/Saved Player + Clean Role Attribution */}
           <div className="mb-4 flex flex-col items-center">
             <motion.div
               initial={prefersReducedMotion ? false : { rotateY: 0 }}
               animate={prefersReducedMotion ? undefined : { rotateY: [0, 90, 0] }}
               transition={{ duration: 0.55, delay: 0.15 }}
-              className="relative"
+              className="p-1.5 rounded-full border border-border-strong bg-bg-card"
             >
-              <Avatar avatar={votedPlayer.avatar} name={votedPlayer.name} size={96} />
-              <div
-                className={`absolute -bottom-2 -right-2 w-10 h-10 rounded-[10px] border border-border-strong shadow-lg flex items-center justify-center overflow-hidden ${
-                  isSaved ? 'bg-[#668F9A] text-[#080B10] p-1' : 'bg-[#080B10]'
-                }`}
-              >
-                {isSaved ? (
-                  blockedBySpecial === 'boomerang' ? (
-                    <RotateCcw size={18} />
-                  ) : (
-                    <ShieldCheck size={18} />
-                  )
-                ) : (
-                  <img
-                    src={roleBadgeSrc}
-                    alt={roleTitle}
-                    referrerPolicy="no-referrer"
-                    className="w-full h-full object-cover"
-                  />
-                )}
-              </div>
+              <Avatar avatar={votedPlayer.avatar} name={votedPlayer.name} size={88} />
             </motion.div>
 
-            <h3 className="text-xl font-bold text-text-main mt-3.5">{votedPlayer.name}</h3>
+            <h3 className="text-xl font-bold text-text-main mt-3">{votedPlayer.name}</h3>
 
             {isSaved ? (
               <motion.div
-                initial={prefersReducedMotion ? false : { opacity: 0, scale: 0.85 }}
+                initial={prefersReducedMotion ? false : { opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: prefersReducedMotion ? 0 : 0.35 }}
-                className="mt-2 px-4 py-1.5 rounded-[8px] text-xs font-bold border flex items-center gap-2 bg-[#668F9A]/15 text-cyan-text border-[#668F9A]/40"
+                transition={{ delay: prefersReducedMotion ? 0 : 0.3 }}
+                className="w-full mt-3 px-3.5 py-2.5 rounded-[10px] text-xs font-bold border flex items-center justify-center gap-2.5 bg-[#668F9A]/15 text-cyan-text border-[#668F9A]/40"
               >
-                {blockedBySpecial === 'boomerang' ? (
-                  <RotateCcw size={14} />
-                ) : (
-                  <ShieldCheck size={14} />
-                )}
+                <div className="w-8 h-8 rounded-[8px] bg-[#080B10] border border-[#668F9A]/45 overflow-hidden flex items-center justify-center shrink-0">
+                  {blockedBySpecial ? (
+                    <img
+                      src={getRoleAsset(blockedBySpecial)}
+                      alt={getRoleTitle(blockedBySpecial, lang)}
+                      referrerPolicy="no-referrer"
+                      className="w-full h-full object-cover"
+                    />
+                  ) : blockedBySpecial === 'boomerang' ? (
+                    <RotateCcw size={15} />
+                  ) : (
+                    <ShieldCheck size={15} />
+                  )}
+                </div>
                 <span>
                   {lang === 'ar'
                     ? 'الدور لا يزال سرياً · مستمر في اللعب'
@@ -243,18 +206,29 @@ export const RevealVoteResult: React.FC<RevealVoteResultProps> = ({
               </motion.div>
             ) : (
               <motion.div
-                initial={prefersReducedMotion ? false : { opacity: 0, scale: 0.85 }}
+                initial={prefersReducedMotion ? false : { opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: prefersReducedMotion ? 0 : 0.35 }}
-                className={`mt-2 px-4 py-1.5 rounded-[8px] text-xs font-bold border flex items-center gap-2 ${roleVisual.tintBgClass} ${roleVisual.titleColorClass}`}
+                transition={{ delay: prefersReducedMotion ? 0 : 0.3 }}
+                className={`w-full mt-3 px-3.5 py-2.5 rounded-[10px] border flex items-center justify-center gap-3 ${roleVisual.tintBgClass}`}
               >
-                <img
-                  src={roleBadgeSrc}
-                  alt={roleTitle}
-                  referrerPolicy="no-referrer"
-                  className="w-4 h-4 rounded-[4px] object-cover"
-                />
-                <span>{roleTitle}</span>
+                <div
+                  className={`w-10 h-10 rounded-[8px] bg-[#080B10] border ${roleVisual.frameBorderClass} overflow-hidden shrink-0`}
+                >
+                  <img
+                    src={rolePortraitSrc}
+                    alt={roleTitle}
+                    referrerPolicy="no-referrer"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div className="text-start min-w-0">
+                  <span className="block text-[10.5px] font-semibold text-text-muted">
+                    {lang === 'ar' ? 'الهوية المكشوفة' : 'Revealed Role'}
+                  </span>
+                  <span className={`block text-sm font-extrabold ${roleVisual.titleColorClass}`}>
+                    {roleTitle}
+                  </span>
+                </div>
               </motion.div>
             )}
 

@@ -27,6 +27,7 @@ import { getUITranslation } from '../translations';
 import { playSound } from '../services/soundService';
 import {
   ClassifiedStamp,
+  DossierHeaderBand,
   IconButton,
   IntelligencePanel,
   ModalShell,
@@ -128,38 +129,34 @@ export const OperationArchiveScreen: React.FC<OperationArchiveScreenProps> = ({
 
   return (
     <div
-      className="flex flex-col w-full max-w-3xl mx-auto px-4 sm:px-6 pt-3 pb-24 space-y-4"
+      className="flex flex-col w-full max-w-4xl mx-auto px-4 sm:px-6 pt-4 pb-24 space-y-4"
       dir={isRTL ? 'rtl' : 'ltr'}
     >
       {/* Header */}
-      <div className="flex items-center justify-between gap-3">
-        <TacticalButton
-          onClick={() => {
-            playSound('click');
-            onBack();
-          }}
-          variant="secondary"
-          size="sm"
-          icon={<ArrowLeft size={16} className="rtl:rotate-180" />}
-        >
-          {t('back')}
-        </TacticalButton>
+      <DossierHeaderBand
+        accent="gold"
+        badge={<ClassifiedStamp tone="gold">ARCHIVE</ClassifiedStamp>}
+        title={t('operationArchive')}
+        subtitle={t('operationArchiveSubtitle')}
+        icon={<Archive size={20} />}
+        action={
+          <TacticalButton
+            onClick={() => {
+              playSound('click');
+              onBack();
+            }}
+            variant="secondary"
+            size="sm"
+            icon={<ArrowLeft size={16} className="rtl:rotate-180" />}
+          >
+            {t('back')}
+          </TacticalButton>
+        }
+      />
 
-        <StatusIndicator tone="gold" icon={<Archive size={13} />}>
-          {t('operationArchive')}
-        </StatusIndicator>
-      </div>
-
-      {/* Intro Banner */}
-      <IntelligencePanel className="p-5 space-y-3.5">
-        <div className="text-start">
-          <h1 className="text-xl sm:text-2xl font-bold text-text-main">
-            {t('operationArchive')}
-          </h1>
-          <p className="text-xs font-medium text-text-muted mt-1">{t('operationArchiveSubtitle')}</p>
-        </div>
-
-        {/* Search + Filters */}
+      {/* Search + Filters */}
+      <IntelligencePanel className="relative overflow-hidden p-4 space-y-3">
+        <div aria-hidden="true" className="blacksite-hairline absolute inset-x-0 top-0 pointer-events-none" />
         <div className="flex flex-col sm:flex-row gap-2.5">
           <div className="relative flex-1">
             <Search

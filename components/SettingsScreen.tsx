@@ -24,7 +24,9 @@ import {
   RefreshCw,
 } from 'lucide-react';
 import {
+  BottomActionBar,
   ClassifiedStamp,
+  DossierHeaderBand,
   IntelligencePanel,
   InteractiveCard,
   ModalShell,
@@ -156,27 +158,26 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
   const grayLabel = isRTL ? 'رمادي داكن' : lang === 'fr' ? 'Gris Tactique' : 'Slate Gray';
 
   return (
-    <div className="flex flex-col h-full overflow-hidden max-w-2xl mx-auto w-full relative">
+    <div className="flex flex-col h-full overflow-hidden max-w-3xl mx-auto w-full relative">
       {toastMsg && (
         <div className="fixed top-16 left-1/2 -translate-x-1/2 z-50 bg-[#3E7B67] text-[#F4F6F8] px-5 py-2.5 rounded-[10px] border border-white/15 shadow-2xl font-bold text-sm">
           {toastMsg}
         </div>
       )}
 
-      <div className="flex-1 overflow-y-auto pt-4 px-4 pb-8 custom-scrollbar">
-        <div className="mb-5 flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="w-10 h-10 rounded-[10px] bg-bg-surface border border-border-strong flex items-center justify-center text-primary-text">
-              <Settings size={20} />
-            </div>
-            <h2 className="text-xl font-extrabold text-text-main">{t('settings')}</h2>
-          </div>
-          <ClassifiedStamp tone="gold">SYS-CONFIG</ClassifiedStamp>
-        </div>
+      <div className="flex-1 overflow-y-auto pt-4 px-4 sm:px-6 pb-8 custom-scrollbar">
+        <DossierHeaderBand
+          accent="gold"
+          className="mb-5"
+          badge={<ClassifiedStamp tone="gold">SYS-CONFIG</ClassifiedStamp>}
+          title={t('settings')}
+          icon={<Settings size={20} />}
+        />
 
         <div className="space-y-4">
           {/* Language Section */}
-          <IntelligencePanel className="p-4 sm:p-5">
+          <IntelligencePanel className="relative overflow-hidden p-4 sm:p-5">
+            <div aria-hidden="true" className="blacksite-hairline absolute inset-x-0 top-0 pointer-events-none" />
             <ScreenSectionHeader
               title={t('language')}
               icon={<Globe size={17} />}
@@ -462,19 +463,21 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
       </div>
 
       {/* Bottom Save & Back CTA */}
-      <div className="px-4 pt-3 pb-[max(0.85rem,env(safe-area-inset-bottom))] bg-bg-surface border-t border-border-strong shrink-0">
-        <TacticalButton
-          variant="primary"
-          size="lg"
-          fullWidth
-          onClick={() => {
-            playSound('click');
-            onBack();
-          }}
-        >
-          {t('saveBack')}
-        </TacticalButton>
-      </div>
+      <BottomActionBar className="mx-0 sm:mx-0 shrink-0">
+        <div className="max-w-md mx-auto">
+          <TacticalButton
+            variant="primary"
+            size="lg"
+            fullWidth
+            onClick={() => {
+              playSound('click');
+              onBack();
+            }}
+          >
+            {t('saveBack')}
+          </TacticalButton>
+        </div>
+      </BottomActionBar>
 
       {/* In-App Confirmation Modal */}
       {pendingConfirm && (

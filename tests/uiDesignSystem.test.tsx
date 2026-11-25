@@ -15,16 +15,24 @@ vi.mock('../services/soundService', () => ({
 }));
 
 import { WelcomeScreen } from '../components/WelcomeScreen';
+import { PlayerSetup } from '../components/PlayerSetup';
+import { GameSettingsScreen } from '../components/GameSettingsScreen';
+import { VotingScreen } from '../components/VotingScreen';
+import { ResultScreen } from '../components/ResultScreen';
+import { ScoreboardScreen } from '../components/ScoreboardScreen';
 import {
   BottomActionBar,
+  DossierHeaderBand,
   IconButton,
   InteractiveCard,
   ModalShell,
   NavButton,
   NavDock,
+  SectionDivider,
   SegmentedControl,
   TacticalButton,
   TacticalInput,
+  TacticalToolbar,
 } from '../components/ui/BlacksiteUI';
 
 const createMemoryStorage = () => {
@@ -43,7 +51,7 @@ const createMemoryStorage = () => {
   };
 };
 
-describe('BLACKSITE Phase 4.1 UI Design System & Home Ergonomics', () => {
+describe('BLACKSITE Phase 4.1 & 4.2 UI Design System & Home Ergonomics', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.stubGlobal('localStorage', createMemoryStorage());
@@ -70,12 +78,22 @@ describe('BLACKSITE Phase 4.1 UI Design System & Home Ergonomics', () => {
 
     render(
       <div>
-        <TacticalButton variant="primary" size="sm">
-          Deploy
-        </TacticalButton>
-        <IconButton aria-label="Options" size="sm">
-          <span>*</span>
-        </IconButton>
+        <DossierHeaderBand
+          title="Operation Setup"
+          subtitle="Configure agents"
+          badge={<span>BRIEFING</span>}
+          action={
+            <TacticalToolbar>
+              <TacticalButton variant="primary" size="sm">
+                Deploy
+              </TacticalButton>
+              <IconButton aria-label="Options" size="sm">
+                <span>*</span>
+              </IconButton>
+            </TacticalToolbar>
+          }
+        />
+        <SectionDivider label="Squad Roster" />
         <InteractiveCard>Option Card</InteractiveCard>
         <TacticalInput placeholder="Callsign" />
         <SegmentedControl
@@ -103,6 +121,8 @@ describe('BLACKSITE Phase 4.1 UI Design System & Home Ergonomics', () => {
       </div>
     );
 
+    expect(screen.getByText('Operation Setup')).toBeTruthy();
+    expect(screen.getByText('Squad Roster')).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Deploy' }).className).toContain('min-h-[44px]');
     expect(screen.getByRole('button', { name: 'Options' }).className).toContain('min-h-[44px]');
     expect(screen.getByRole('button', { name: 'Option Card' }).className).toContain('min-h-[44px]');
@@ -196,5 +216,62 @@ describe('BLACKSITE Phase 4.1 UI Design System & Home Ergonomics', () => {
 
     fireEvent.click(within(rtlDialog).getByRole('button', { name: /عمليات أونلاين/i }));
     expect(handlers.onShowOnline).toHaveBeenCalledTimes(1);
+  });
+
+  it('renders Phase 4.2 transformed Pass & Play and Utility screens cleanly in LTR & RTL', () => {
+    saveSettings({
+      soundVolume: 0,
+      hapticEnabled: false,
+      language: 'en',
+      theme: 'dark',
+    });
+
+    const samplePlayers = [
+      { id: 0, name: 'Alpha', role: 'citizen' as const, isImpostor: false, score: 2, isEliminated: false, avatar: '' },
+      { id: 1, name: 'Bravo', role: 'undercover' as const, isImpostor: true, score: 0, isEliminated: false, avatar: '' },
+      { id: 2, name: 'Charlie', role: 'mrwhite' as const, isImpostor: true, score: 0, isEliminated: true, avatar: '' },
+    ];
+
+    const { unmount: unmountSetup } = render(<PlayerSetup onNext={vi.fn()} onBack={vi.fn()} />);
+    expect(screen.getByRole('button', { name: /Add Player/i })).toBeTruthy();
+    unmountSetup();
+
+    const { unmount: unmountSettings } = render(
+      <GameSettingsScreen playersCount={5} onStart={vi.fn()} onBack={vi.fn()} />
+    );
+    expect(screen.getByText(/Special Roles/i)).toBeTruthy();
+    unmountSettings();
+
+    const { unmount: unmountVoting } = render(
+      <VotingScreen players={samplePlayers} onVoteComplete={vi.fn()} currentRound={1} />
+    );
+    expect(screen.getByText('Alpha')).toBeTruthy();
+    unmountVoting();
+
+    const { unmount: unmountResult } = render(
+      <ResultScreen
+        players={samplePlayers}
+        impostorIndex={2}
+        secretWord="Coffee"
+        undercoverWord="Tea"
+        voteData={{ 0: 2 }}
+        onGameEnd={vi.fn()}
+        onNext={vi.fn()}
+        roundWinner="citizens"
+        winReason="impostor_caught"
+      />
+    );
+    expect(screen.getByText('Coffee')).toBeTruthy();
+    unmountResult();
+
+    saveSettings({
+      soundVolume: 0,
+      hapticEnabled: false,
+      language: 'ar',
+      theme: 'dark',
+    });
+    document.documentElement.dir = 'rtl';
+    render(<ScoreboardScreen onBack={vi.fn()} onOpenArchive={vi.fn()} />);
+    expect(screen.getByText('RANKINGS')).toBeTruthy();
   });
 });

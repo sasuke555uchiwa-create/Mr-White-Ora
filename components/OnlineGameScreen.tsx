@@ -704,7 +704,7 @@ export const OnlineGameScreen: React.FC<OnlineGameScreenProps> = ({
       const spokenThisRoundUids = new Set(roundClues.map((c) => c.uid));
 
       return (
-        <div className="flex flex-col flex-1 w-full max-w-3xl mx-auto px-4 sm:px-6 pt-2 gap-4">
+        <div className="flex flex-col flex-1 w-full max-w-4xl mx-auto px-4 sm:px-6 pt-2 gap-4">
           <div className="flex items-center justify-between gap-2">
             <OperationPhaseBadge phase="active" round={currentRound} lang={settings.language} />
           </div>
@@ -850,7 +850,7 @@ export const OnlineGameScreen: React.FC<OnlineGameScreenProps> = ({
               )}
             </IntelligencePanel>
 
-            <div className="grid grid-cols-2 gap-2.5">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-2 gap-2.5">
               {players.map((p) => {
                 const isSpeaking = p.uid === activeSpeakerUid && !turnsCompleted;
                 const hasSpoken = p.uid ? spokenThisRoundUids.has(p.uid) : false;
@@ -861,27 +861,40 @@ export const OnlineGameScreen: React.FC<OnlineGameScreenProps> = ({
                     className="text-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#668F9A]/70 rounded-[12px]"
                   >
                     <PlayerIntelligenceCard
-                      className={`p-3 flex flex-col items-center relative ${
+                      className={`p-3 flex flex-col items-center ${
                         p.isEliminated
-                          ? 'opacity-45 border-[#963F46]/40'
+                          ? 'opacity-50 border-[#963F46]/40'
                           : isSpeaking
                           ? 'border-[#B49A62] bg-[#B49A62]/10'
                           : 'hover:border-[#668F9A]/50'
                       }`}
                     >
-                      {p.uid === room.hostId && (
-                        <Crown size={13} className="absolute top-2 right-2 text-primary-text" />
-                      )}
-                      {!p.isEliminated && hasSpoken && (
-                        <span className="absolute top-2 left-2 w-5 h-5 rounded-[6px] bg-[#3E7B67]/20 text-emerald-text flex items-center justify-center">
-                          <Check size={12} />
+                      <div className="w-full flex items-center justify-between gap-1 mb-1.5 min-h-[18px]">
+                        <span className="flex items-center gap-1">
+                          {p.uid === room.hostId && (
+                            <Crown size={13} className="text-primary-text" />
+                          )}
                         </span>
-                      )}
+                        {p.isEliminated ? (
+                          <span className="font-mono-code text-[10px] font-bold text-danger-text">
+                            OUT
+                          </span>
+                        ) : isSpeaking ? (
+                          <span className="font-mono-code text-[10px] font-bold text-primary-text">
+                            LIVE
+                          </span>
+                        ) : hasSpoken ? (
+                          <span className="inline-flex items-center gap-0.5 text-[10px] font-bold text-emerald-text">
+                            <Check size={11} />
+                          </span>
+                        ) : null}
+                      </div>
+
                       <div className="relative">
-                        <Avatar avatar={p.avatar} name={p.name} size={48} className="mb-1.5" />
+                        <Avatar avatar={p.avatar} name={p.name} size={46} className="mb-1.5" />
                         {p.isEliminated && (
-                          <div className="absolute inset-0 flex items-center justify-center bg-[#080B10]/65 rounded-[10px]">
-                            <XCircle size={20} className="text-danger-text" />
+                          <div className="absolute inset-0 flex items-center justify-center bg-[#080B10]/65 rounded-full">
+                            <XCircle size={18} className="text-danger-text" />
                           </div>
                         )}
                       </div>
@@ -930,14 +943,15 @@ export const OnlineGameScreen: React.FC<OnlineGameScreenProps> = ({
       const validVoteCount = votedUids.filter((id) => aliveUids.has(id)).length;
 
       return (
-        <div className="flex flex-col items-center flex-1 text-center p-4 pb-24 w-full max-w-2xl mx-auto gap-4">
-          <div className="flex flex-col items-center gap-1.5">
+        <div className="flex flex-col items-center flex-1 text-center p-4 pb-24 w-full max-w-3xl mx-auto gap-4">
+          <IntelligencePanel className="relative overflow-hidden w-full p-4 border-[#963F46]/40 flex flex-col items-center gap-1.5">
+            <div aria-hidden="true" className="blacksite-hairline absolute inset-x-0 top-0 pointer-events-none" />
             <OperationPhaseBadge phase="tribunal" round={currentRound} lang={settings.language} />
             <h2 className="text-xl sm:text-2xl font-bold text-danger-text">{t('votingTime')}</h2>
             <p className="text-xs font-mono-code font-bold text-text-muted tabular-nums">
               {t('votedCount', { count: validVoteCount, total: alivePlayers.length })}
             </p>
-          </div>
+          </IntelligencePanel>
 
           <div className="flex flex-wrap justify-center gap-1.5">
             {alivePlayers.map((p) => {
@@ -1161,7 +1175,7 @@ export const OnlineGameScreen: React.FC<OnlineGameScreenProps> = ({
   return (
     <div className="relative min-h-full w-full flex flex-col">
       {showMatchHud && (
-        <div className="w-full max-w-3xl mx-auto px-4 sm:px-6 pt-3 pb-1 flex items-center justify-between flex-wrap gap-2 z-20">
+        <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 pt-3 pb-1 flex items-center justify-between flex-wrap gap-2 z-20">
           <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
             <StatusIndicator tone="gold">
               {t('roundNumberLabel', { round: currentRound })}
@@ -1178,21 +1192,20 @@ export const OnlineGameScreen: React.FC<OnlineGameScreenProps> = ({
           </div>
 
           <div className="flex items-center gap-2 shrink-0 ms-auto">
-            <IconButton
+            <TacticalButton
               onClick={() => setShowChat(true)}
               variant="secondary"
               size="sm"
               aria-label={t('chat')}
               title={t('chat')}
-              className="relative"
+              icon={<MessageCircle size={15} className="text-cyan-text" />}
             >
-              <MessageCircle size={16} className="text-cyan-text" />
               {room.messages?.length > 0 && (
-                <span className="absolute -top-1 -end-1 min-w-[18px] h-[18px] px-1 rounded-[5px] bg-[#B49A62] text-[#080B10] font-mono-code text-[10px] font-extrabold flex items-center justify-center border border-bg-surface tabular-nums">
+                <span className="px-1.5 py-0.5 rounded-[5px] bg-[#B49A62] text-[#080B10] font-mono-code text-[10px] font-extrabold tabular-nums">
                   {Math.min(99, room.messages.length)}
                 </span>
               )}
-            </IconButton>
+            </TacticalButton>
             {currentPlayer && !currentPlayer.isEliminated && (
               <TacticalButton
                 onClick={() => {
@@ -1221,22 +1234,22 @@ export const OnlineGameScreen: React.FC<OnlineGameScreenProps> = ({
       )}
 
       {!showMatchHud && (
-        <div className="w-full max-w-3xl mx-auto px-4 sm:px-6 pt-3 flex items-center justify-end gap-2 z-20">
-          <IconButton
+        <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 pt-3 flex items-center justify-end gap-2 z-20">
+          <TacticalButton
             onClick={() => setShowChat(true)}
             variant="secondary"
             size="sm"
             aria-label={t('chat')}
             title={t('chat')}
-            className="relative"
+            icon={<MessageCircle size={15} className="text-cyan-text" />}
           >
-            <MessageCircle size={16} className="text-cyan-text" />
+            <span>{t('chat')}</span>
             {room.messages?.length > 0 && (
-              <span className="absolute -top-1 -end-1 min-w-[18px] h-[18px] px-1 rounded-[5px] bg-[#B49A62] text-[#080B10] font-mono-code text-[10px] font-extrabold flex items-center justify-center border border-bg-surface tabular-nums">
+              <span className="px-1.5 py-0.5 rounded-[5px] bg-[#B49A62] text-[#080B10] font-mono-code text-[10px] font-extrabold tabular-nums">
                 {Math.min(99, room.messages.length)}
               </span>
             )}
-          </IconButton>
+          </TacticalButton>
           {phase !== 'RESULT' && (
             <TacticalButton
               onClick={() => setShowLeaveConfirm(true)}
