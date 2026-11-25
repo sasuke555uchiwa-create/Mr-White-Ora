@@ -1,0 +1,54 @@
+name: BLACKSITE Quality Gate
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: quality-gate-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Typecheck, Lint, Unit & Rules Tests, Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: |
+            package-lock.json
+            functions/package-lock.json
+
+      - name: Setup Java 21 for Firestore Emulator
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Install root dependencies
+        run: npm ci
+
+      - name: Install Cloud Functions dependencies
+        run: npm --prefix functions ci
+
+      - name: Build Cloud Functions
+        run: npm --prefix functions run build
+
+      - name: Run Root Quality Gate (typecheck, lint, lint:rules, test:unit, build)
+        run: npm run check
+
+      - name: Run Firestore Security Rules Emulator Tests
+        run: npx --yes firebase-tools emulators:exec --only firestore "npx vitest run firestore.rules.test.ts"

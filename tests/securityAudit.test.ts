@@ -1278,7 +1278,7 @@ describe('P0 & P1 Security Audit Regression Suite', () => {
 
   it('19. Rate limit expiresAt stores Timestamp/Date and scheduled cleanup deletes expired records while keeping active & grace records', async () => {
     const db = new InMemoryFirestore();
-    let currentNow = 1_700_000_000_000;
+    const currentNow = 1_700_000_000_000;
     const deps = { db, now: () => currentNow };
 
     await enforceRateLimit(deps, 'ttl_user', RATE_LIMITS.createRoom);

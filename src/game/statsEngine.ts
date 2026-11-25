@@ -214,7 +214,7 @@ export function computeGameStatistics(params: {
   let localLosses = 0;
   let localBestStreak = 0;
   let localCurrentStreak = 0;
-  let localRoles: Record<string, RoleSessionRecord> = {};
+  let localRoles: Record<string, RoleSessionRecord>;
 
   if (localPlayerFilter !== '__all__' && sessionStats.offlinePlayers[localPlayerFilter]) {
     const pStats = sessionStats.offlinePlayers[localPlayerFilter];
@@ -236,13 +236,13 @@ export function computeGameStatistics(params: {
     localRoles = normalizeRoleMap(sessionStats.offlineRoleStats);
   }
 
-  let played = 0;
-  let wins = 0;
-  let losses = 0;
-  let longestStreak = 0;
-  let currentStreak = 0;
-  let hosted = 0;
-  let activeRoleMap: Record<string, RoleSessionRecord> = {};
+  let played: number;
+  let wins: number;
+  let losses: number;
+  let longestStreak: number;
+  let currentStreak: number;
+  let hosted: number;
+  let activeRoleMap: Record<string, RoleSessionRecord>;
 
   if (filter === 'online') {
     played = onlinePlayed;

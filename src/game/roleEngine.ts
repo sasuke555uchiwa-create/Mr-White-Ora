@@ -34,7 +34,7 @@ export function buildMainRolePool(
   if (playerCount <= 0) return [];
   const maxBad = Math.max(1, Math.floor((playerCount - 1) / 2));
   let safeMrWhite = Math.max(0, Math.min(mrWhiteCount, maxBad));
-  let safeUndercover = Math.max(0, Math.min(undercoverCount, maxBad - safeMrWhite));
+  const safeUndercover = Math.max(0, Math.min(undercoverCount, maxBad - safeMrWhite));
   if (safeMrWhite + safeUndercover === 0 && playerCount >= 3) {
     safeMrWhite = 1;
   }

@@ -91,14 +91,18 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ onBack, onOpenArch
     setSelectedFrame(frame);
     try {
       localStorage.setItem('mrwhite_profile_frame', frame);
-    } catch {}
+    } catch (err) {
+      console.warn('Could not save frame selection:', err);
+    }
   };
 
   const handleSelectDossier = (dossier: keyof typeof COSMETIC_DOSSIERS) => {
     setSelectedDossier(dossier);
     try {
       localStorage.setItem('mrwhite_profile_dossier', dossier);
-    } catch {}
+    } catch (err) {
+      console.warn('Could not save dossier selection:', err);
+    }
   };
 
   React.useEffect(() => {

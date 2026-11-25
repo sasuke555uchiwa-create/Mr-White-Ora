@@ -34,7 +34,6 @@ import {
   IntelligencePanel,
   ModalShell,
   OperationPhaseBadge,
-  StatusIndicator,
   TacticalButton,
 } from './ui/BlacksiteUI';
 
@@ -138,7 +137,7 @@ export const QuestionPhase: React.FC<QuestionPhaseProps> = ({
       let sequence = forceFreshSequence
         ? []
         : expressionSequence.filter((p) => aliveIds.has(p.id));
-      let nextIdx = currentSequenceIndex;
+      let nextIdx: number;
 
       if (sequence.length === 0) {
         const shuffled = [...alivePlayers].sort(() => 0.5 - Math.random());

@@ -18,6 +18,7 @@ import {
   getDocs,
   setDoc,
   updateDoc,
+  deleteDoc,
   collection,
   query,
   where,
@@ -421,5 +422,49 @@ describe('Firestore Security Rules', () => {
       await setDoc(doc(ctx.firestore(), 'admins', 'charlie'), { active: true });
     });
     await assertSucceeds(getDoc(doc(charlieDb, 'matchReports', 'room_private_match_1')));
+  });
+
+  it('DENIES unverified email accounts creating/updating users, direct admins/roomCodes access, non-participant matchReports list, and client deletes', async () => {
+    const unverifiedDb = testEnv
+      .authenticatedContext('dave', { email: 'dave@example.com', email_verified: false })
+      .firestore();
+
+    await assertFails(
+      setDoc(doc(unverifiedDb, 'users', 'dave'), {
+        uid: 'dave',
+        displayName: 'Dave',
+        photoURL: '',
+        xp: 0,
+        level: 1,
+        stats: { wins: 0, hosted: 0, played: 0, longestStreak: 0 },
+        connectedAccounts: { google: true, apple: false },
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      })
+    );
+
+    await assertFails(setDoc(doc(aliceDb(), 'admins', 'alice'), { active: true }));
+    await assertFails(getDocs(collection(aliceDb(), 'admins')));
+    await assertFails(getDoc(doc(aliceDb(), 'roomCodes', '123456')));
+    await assertFails(
+      setDoc(doc(aliceDb(), 'roomCodes', '654321'), { roomId: 'room_private', hostId: 'alice' })
+    );
+
+    const charlieDb = testEnv
+      .authenticatedContext('charlie', { email: 'charlie@example.com', email_verified: true })
+      .firestore();
+    await assertFails(
+      getDocs(
+        query(
+          collection(charlieDb, 'matchReports'),
+          where('participantIds', 'array-contains', 'bob')
+        )
+      )
+    );
+
+    await assertFails(deleteDoc(doc(aliceDb(), 'users', 'alice')));
+    await assertFails(deleteDoc(doc(aliceDb(), 'publicProfiles', 'alice')));
+    await assertFails(deleteDoc(doc(aliceDb(), 'rooms', 'room_private')));
+    await assertFails(deleteDoc(doc(aliceDb(), 'matchReports', 'room_private_match_1')));
   });
 });
