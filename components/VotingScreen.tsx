@@ -9,14 +9,16 @@ import {
   Users,
   Lock,
   Check,
-  Shield,
   HelpCircle,
   MessageSquare,
 } from 'lucide-react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { getUITranslation } from '../translations';
 import { getRoleAsset, getRoleTitle, getRoleVisualIdentity } from '../data/specialRoles';
+import { BLACKSITE_TEXTURES } from '../src/design/assetRegistry';
 import {
+  BlacksiteIcon,
+  BlacksiteScreenBackdrop,
   ClassifiedStamp,
   IntelligencePanel,
   ModalShell,
@@ -161,10 +163,12 @@ export const VotingScreen: React.FC<VotingScreenProps> = ({
 
   return (
     <div className="flex flex-col min-h-full items-center text-center px-4 pt-3 pb-12 relative max-w-4xl mx-auto w-full">
+      <BlacksiteScreenBackdrop bgKey="voting" texture="carbon" />
+      <div className="relative z-10 flex flex-col items-center w-full flex-1">
       {!isSecretGuardedView && (
         <>
           {/* Tribunal Header Panel */}
-          <IntelligencePanel className="relative overflow-hidden w-full p-4 sm:p-5 mb-4 border-[#963F46]/45">
+          <IntelligencePanel className="relative overflow-hidden blacksite-texture-carbon w-full p-4 sm:p-5 mb-4 border-[#963F46]/45">
             <div aria-hidden="true" className="blacksite-hairline absolute inset-x-0 top-0 pointer-events-none" />
             <div className="flex items-center justify-between gap-2 mb-3 pb-2.5 border-b border-border/70">
               <OperationPhaseBadge phase="tribunal" round={currentRound} lang={lang} />
@@ -280,7 +284,7 @@ export const VotingScreen: React.FC<VotingScreenProps> = ({
               <div
                 className={`w-full py-2.5 px-4 rounded-[10px] border text-cyan-text text-xs font-semibold flex items-center justify-center gap-2 ${shieldVisual.tintBgClass}`}
               >
-                <Shield size={15} className="shrink-0" />
+                <BlacksiteIcon name="shieldProtection" size={16} className="shrink-0" />
                 <span>
                   {lang === 'ar'
                     ? 'في التصويت الجماعي: درع Mr. Shield يحمي صاحبه تلقائياً عند استهدافه'
@@ -307,7 +311,7 @@ export const VotingScreen: React.FC<VotingScreenProps> = ({
                 <div className={`border rounded-[12px] p-3.5 text-start ${shieldVisual.tintBgClass}`}>
                   <div className="flex items-center justify-between gap-2 mb-2.5">
                     <div className="flex items-center gap-2 text-cyan-text text-xs font-bold">
-                      <Shield size={15} />
+                      <BlacksiteIcon name="shieldProtection" size={16} />
                       <span>
                         {lang === 'ar'
                           ? 'قدرة Mr. Shield (لمرة واحدة): احمِ لاعباً هذه الجولة'
@@ -408,12 +412,13 @@ export const VotingScreen: React.FC<VotingScreenProps> = ({
                       <div className="w-full mt-2.5 pt-2 border-t border-border/60 flex items-center justify-center gap-1.5">
                         {isGuardedByCurrentShield ? (
                           <span className="inline-flex items-center gap-1 text-cyan-text text-[11px] font-bold">
-                            <Shield size={12} />
+                            <BlacksiteIcon name="shieldProtection" size={13} />
                             <span>{lang === 'ar' ? 'محمي بالدرع' : 'Shielded'}</span>
                           </span>
                         ) : !isSelfInSecret ? (
-                          <span className="text-danger-text text-[11px] font-bold tracking-wide">
-                            {lang === 'ar' ? 'تصويت للاستبعاد' : 'Cast Ballot'}
+                          <span className="inline-flex items-center gap-1.5 text-danger-text text-[11px] font-bold tracking-wide">
+                            <BlacksiteIcon name="secretVote" size={13} />
+                            <span>{lang === 'ar' ? 'تصويت للاستبعاد' : 'Cast Ballot'}</span>
                           </span>
                         ) : (
                           <span className="text-text-muted text-[11px] font-semibold">
@@ -429,6 +434,7 @@ export const VotingScreen: React.FC<VotingScreenProps> = ({
           </div>
         </>
       )}
+      </div>
 
       {/* Opaque Pass Phone Overlay for Secret Ballot */}
       <AnimatePresence>
@@ -590,8 +596,14 @@ export const VotingScreen: React.FC<VotingScreenProps> = ({
           >
             <ModalShell
               ariaLabel={lang === 'ar' ? 'إغلاق صندوق الاقتراع' : 'Ballot Sealed'}
-              className="p-7 text-center flex flex-col items-center gap-3 border-[#B49A62]/45"
+              className="p-7 text-center flex flex-col items-center gap-3 border-[#B49A62]/45 blacksite-texture-carbon"
             >
+              <img
+                src={BLACKSITE_TEXTURES.confidentialStamp}
+                alt=""
+                aria-hidden="true"
+                className="w-28 h-14 object-contain opacity-45"
+              />
               <ClassifiedStamp tone="gold">BALLOT SEALED</ClassifiedStamp>
               <p className="text-sm font-bold text-text-main">
                 {lang === 'ar'

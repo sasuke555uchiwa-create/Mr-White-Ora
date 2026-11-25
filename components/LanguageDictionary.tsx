@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Plus, Trash2, Info, BookOpen, UserCircle, ChevronDown } from 'lucide-react';
+import { Plus, Trash2, Info, BookOpen, UserCircle, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   getCustomWordPairs,
@@ -12,6 +12,8 @@ import { WORD_PAIRS } from '../data/offlineData';
 import { getUITranslation } from '../translations';
 import { useAuth } from '../contexts/AuthContext';
 import {
+  BlacksiteIcon,
+  BlacksiteScreenBackdrop,
   ClassifiedStamp,
   DossierHeaderBand,
   IconButton,
@@ -150,9 +152,12 @@ export const LanguageDictionary: React.FC<LanguageDictionaryProps> = ({ onBack }
 
   return (
     <div className="flex flex-col h-full w-full relative max-w-3xl mx-auto px-4 sm:px-6 pt-4">
+      <BlacksiteScreenBackdrop bgKey="archive" texture="paper" />
+      <div className="relative z-10 flex flex-col flex-1 w-full">
       {/* Header */}
       <DossierHeaderBand
         accent="cyan"
+        texture="paper"
         className="mb-3"
         badge={<ClassifiedStamp tone="cyan">LEXICON</ClassifiedStamp>}
         title={t('gameWords')}
@@ -161,7 +166,7 @@ export const LanguageDictionary: React.FC<LanguageDictionaryProps> = ({ onBack }
         action={
           <TacticalToolbar>
             <IconButton onClick={onBack} aria-label={t('back')} variant="ghost" size="sm">
-              <ArrowLeft className={`w-5 h-5 ${isRTL ? 'rotate-180' : ''}`} />
+              <BlacksiteIcon name="backNav" size={18} rtlFlip />
             </IconButton>
             <IconButton
               variant="primary"
@@ -225,7 +230,7 @@ export const LanguageDictionary: React.FC<LanguageDictionaryProps> = ({ onBack }
 
       {/* Stats Bar */}
       <div className="py-3 grid grid-cols-2 gap-3">
-        <IntelligencePanel className="relative overflow-hidden p-3 flex flex-col items-center justify-center">
+        <IntelligencePanel className="relative overflow-hidden blacksite-texture-paper p-3 flex flex-col items-center justify-center">
           <div aria-hidden="true" className="blacksite-hairline absolute inset-x-0 top-0 pointer-events-none" />
           <span className="text-[11px] font-bold text-text-muted mb-1 flex items-center gap-1.5">
             <BookOpen size={13} className="text-primary-text" />
@@ -323,6 +328,7 @@ export const LanguageDictionary: React.FC<LanguageDictionaryProps> = ({ onBack }
             <p className="text-text-muted font-bold text-sm">{t('preparing')}</p>
           </div>
         )}
+      </div>
       </div>
 
       {/* Add Modal */}

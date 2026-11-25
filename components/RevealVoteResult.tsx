@@ -3,9 +3,10 @@ import { Player } from '../types';
 import { playSound } from '../services/soundService';
 import { getSettings } from '../services/storageService';
 import { Avatar } from './Avatar';
-import { ArrowRight, ShieldCheck, RotateCcw, Sparkles, Heart } from 'lucide-react';
+import { ArrowRight, ShieldCheck, RotateCcw, Heart } from 'lucide-react';
 import { motion, useReducedMotion } from 'framer-motion';
 import { getUITranslation } from '../translations';
+import { BLACKSITE_TEXTURES } from '../src/design/assetRegistry';
 import {
   getRoleAsset,
   getRoleTitle,
@@ -13,6 +14,8 @@ import {
   getSpecialRoleDescription,
 } from '../data/specialRoles';
 import {
+  BlacksiteIcon,
+  BlacksiteScreenBackdrop,
   ClassifiedStamp,
   ModalShell,
   OperationPhaseBadge,
@@ -123,18 +126,25 @@ export const RevealVoteResult: React.FC<RevealVoteResultProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#080B10]/88">
+      <BlacksiteScreenBackdrop bgKey="voting" texture="paper" />
       <motion.div
         initial={prefersReducedMotion ? false : { opacity: 0, scale: 0.94, y: 14 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
-        className="w-full max-w-sm"
+        className="relative z-10 w-full max-w-sm"
       >
         <ModalShell
           ariaLabel={getHeadline()}
-          className={`relative p-6 text-center flex flex-col max-h-[90vh] overflow-y-auto custom-scrollbar ${roleVisual.frameBorderClass}`}
+          className={`relative blacksite-texture-paper p-6 text-center flex flex-col max-h-[90vh] overflow-y-auto custom-scrollbar ${roleVisual.frameBorderClass}`}
         >
           <div
             aria-hidden="true"
             className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-[#B49A62]/65 to-transparent"
+          />
+          <img
+            src={BLACKSITE_TEXTURES.confidentialStamp}
+            alt=""
+            aria-hidden="true"
+            className="pointer-events-none select-none absolute top-11 end-3 w-24 h-12 object-contain opacity-[0.16] -rotate-6"
           />
 
           <div className="flex items-center justify-between gap-2 mb-4 pb-2.5 border-b border-border/70">
@@ -250,7 +260,7 @@ export const RevealVoteResult: React.FC<RevealVoteResultProps> = ({
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-1 text-primary-text font-bold text-xs">
-                      <Sparkles size={12} />
+                      <BlacksiteIcon name="specialAbility" size={13} />
                       <span>{specialTitle}</span>
                     </div>
                     <ClassifiedStamp tone={specialVisual.stampTone}>

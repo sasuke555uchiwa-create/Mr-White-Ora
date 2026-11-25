@@ -9,8 +9,6 @@ import {
 import { motion } from 'framer-motion';
 import {
   Archive,
-  ArrowRight,
-  Edit2,
   Award,
   Flame,
   CheckCircle,
@@ -35,11 +33,14 @@ import { compressAvatarImage } from '../utils/imageUtils';
 import { getLevelProgress } from '../utils/levelUtils';
 import {
   ACHIEVEMENT_CATALOG,
+  BLACKSITE_TEXTURES,
   COSMETIC_COLLECTIBLES,
   COSMETIC_DOSSIERS,
   COSMETIC_FRAMES,
 } from '../src/design/assetRegistry';
 import {
+  BlacksiteIcon,
+  BlacksiteScreenBackdrop,
   ClassifiedDossierPanel,
   ClassifiedStamp,
   DossierHeaderBand,
@@ -183,8 +184,9 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ onBack, onOpenArch
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-[#B49A62]" />
+      <div className="relative min-h-screen flex items-center justify-center">
+        <BlacksiteScreenBackdrop bgKey="profile" texture="carbon" />
+        <div className="relative z-10 animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-[#B49A62]" />
       </div>
     );
   }
@@ -223,10 +225,11 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ onBack, onOpenArch
   if (!user || !profile) {
     return (
       <div
-        className="min-h-screen flex flex-col items-center justify-center p-6 text-center max-w-md mx-auto w-full"
+        className="relative min-h-screen flex flex-col items-center justify-center p-6 text-center max-w-md mx-auto w-full"
         dir={isRTL ? 'rtl' : 'ltr'}
       >
-        <IntelligencePanel className="p-6 w-full space-y-5">
+        <BlacksiteScreenBackdrop bgKey="profile" texture="carbon" />
+        <IntelligencePanel className="relative z-10 p-6 w-full space-y-5 blacksite-texture-carbon">
           <div>
             <ClassifiedStamp tone="gold" className="mb-3">
               OPERATIVE ACCESS
@@ -317,14 +320,18 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ onBack, onOpenArch
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -10 }}
-      className="flex flex-col px-4 sm:px-6 pt-4 max-w-3xl mx-auto w-full pb-24"
+      className="relative flex flex-col px-4 sm:px-6 pt-4 max-w-3xl mx-auto w-full pb-24"
       dir={isRTL ? 'rtl' : 'ltr'}
     >
+      <BlacksiteScreenBackdrop bgKey="profile" texture="carbon" />
+      <div className="relative z-10 flex flex-col w-full flex-1">
       {/* Header */}
       <DossierHeaderBand
         accent="gold"
+        texture="carbon"
         className="mb-5"
         badge={<ClassifiedStamp tone="gold">OPERATIVE FILE</ClassifiedStamp>}
+        icon={<BlacksiteIcon name="profile" size={20} />}
         title={profile.displayName}
         subtitle={
           isRTL
@@ -339,7 +346,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ onBack, onOpenArch
               size="sm"
               aria-label={getUITranslation(lang, 'back')}
             >
-              <ArrowRight className={`w-5 h-5 ${isRTL ? '' : 'rotate-180'}`} />
+              <BlacksiteIcon name="backNav" size={18} rtlFlip />
             </IconButton>
             {onOpenArchive && (
               <TacticalButton
@@ -356,7 +363,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ onBack, onOpenArch
       />
 
       {/* Avatar & Name */}
-      <IntelligencePanel className="relative overflow-hidden p-5 flex flex-col items-center mb-5">
+      <IntelligencePanel className="relative overflow-hidden blacksite-texture-carbon p-5 flex flex-col items-center mb-5">
         <div aria-hidden="true" className="blacksite-hairline-cyan absolute inset-x-0 top-0 pointer-events-none" />
         <Avatar
           avatar={isEditing ? editAvatar : profile.photoURL || ''}
@@ -463,7 +470,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ onBack, onOpenArch
               size="sm"
               aria-label="Edit Profile"
             >
-              <Edit2 className="w-4 h-4" />
+              <BlacksiteIcon name="editPlayer" size={16} />
             </IconButton>
           </div>
         )}
@@ -502,6 +509,12 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ onBack, onOpenArch
           className="absolute inset-0 w-full h-full object-cover opacity-75"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-[#080B10]/95 via-[#080B10]/72 to-[#0D1219]/60" />
+        <img
+          src={BLACKSITE_TEXTURES.dossierOrnament}
+          alt=""
+          aria-hidden="true"
+          className="pointer-events-none select-none absolute top-2.5 inset-x-0 mx-auto w-32 h-5 object-contain opacity-45 z-10"
+        />
 
         <div className="relative z-10 p-5 space-y-4">
           <div className="flex items-center justify-between gap-3">
@@ -716,6 +729,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ onBack, onOpenArch
       <TacticalButton onClick={logOut} variant="danger" size="lg" fullWidth>
         {getUITranslation(lang, 'logOut')}
       </TacticalButton>
+      </div>
     </motion.div>
   );
 };

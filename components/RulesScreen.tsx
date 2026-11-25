@@ -1,6 +1,5 @@
 import React from 'react';
 import {
-  ArrowRight,
   Users,
   Eye,
   MessageCircle,
@@ -8,13 +7,14 @@ import {
   Trophy,
   Star,
   Gamepad2,
-  Sparkles,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { getUITranslation } from '../translations';
 import { getSettings } from '../services/storageService';
 import { SPECIAL_ROLES } from '../data/specialRoles';
 import {
+  BlacksiteIcon,
+  BlacksiteScreenBackdrop,
   BottomActionBar,
   ClassifiedStamp,
   DossierHeaderBand,
@@ -83,16 +83,19 @@ export const RulesScreen: React.FC<RulesScreenProps> = ({ onBack }) => {
   ];
 
   return (
-    <div className="w-full min-h-full flex flex-col px-4 sm:px-6 pt-4 pb-0 max-w-3xl mx-auto">
+    <div className="relative w-full min-h-full flex flex-col px-4 sm:px-6 pt-4 pb-0 max-w-3xl mx-auto">
+      <BlacksiteScreenBackdrop bgKey="archive" texture="paper" />
+      <div className="relative z-10 flex flex-col flex-1 w-full">
       <DossierHeaderBand
         accent="cyan"
+        texture="paper"
         className="mb-5"
         badge={<ClassifiedStamp tone="cyan">FIELD MANUAL</ClassifiedStamp>}
         title={t('gameRules')}
-        icon={<Gamepad2 className="w-5 h-5" />}
+        icon={<BlacksiteIcon name="help" size={20} />}
         action={
           <IconButton onClick={onBack} aria-label={t('back')} variant="secondary">
-            <ArrowRight className="w-5 h-5 ltr:rotate-180" />
+            <BlacksiteIcon name="backNav" size={18} rtlFlip />
           </IconButton>
         }
       />
@@ -125,7 +128,7 @@ export const RulesScreen: React.FC<RulesScreenProps> = ({ onBack }) => {
           <SectionDivider label={t('specialRoles')} className="mb-4" />
           <div className="mb-3">
             <h3 className="text-base sm:text-lg font-extrabold text-text-main flex items-center gap-2">
-              <Sparkles size={18} className="text-primary-text" />
+              <BlacksiteIcon name="specialAbility" size={18} />
               <span>{t('specialRoles')}</span>
             </h3>
             <p className="text-xs text-text-muted mt-0.5 leading-relaxed">
@@ -166,6 +169,7 @@ export const RulesScreen: React.FC<RulesScreenProps> = ({ onBack }) => {
           </TacticalButton>
         </div>
       </BottomActionBar>
+      </div>
     </div>
   );
 };

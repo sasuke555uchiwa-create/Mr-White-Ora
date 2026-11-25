@@ -5,6 +5,10 @@ import { CHARACTER_AVATARS, SPECIAL_ROLES, getRoleAsset, getRoleVisualIdentity }
 import {
   ACHIEVEMENT_ASSETS,
   ACHIEVEMENT_CATALOG,
+  BLACKSITE_ACTION_ICONS,
+  BLACKSITE_BACKGROUNDS,
+  BLACKSITE_NAV_ICONS,
+  BLACKSITE_TEXTURES,
   CATEGORY_COVERS,
   COSMETIC_BADGES,
   COSMETIC_COLLECTIBLES,
@@ -13,9 +17,10 @@ import {
   GAME_MODE_PROPOSALS,
   HERO_ASSETS,
   ROLE_PORTRAITS,
+  SCREEN_BACKGROUND_MAP,
 } from '../src/design/assetRegistry';
 import { SOUND_EFFECT_LIST, SoundType, playSound } from '../services/soundService';
-import { PlayerRole } from '../types';
+import { GamePhase, PlayerRole } from '../types';
 
 const ROOT = process.cwd();
 const PUBLIC_DIR = path.join(ROOT, 'public');
@@ -154,6 +159,90 @@ describe('BLACKSITE Asset Registry & Special Roles Integrity', () => {
         expect(fs.existsSync(onDisk), `Missing avatar asset: ${avatar.src}`).toBe(true);
       }
     }
+  });
+
+  it('validates Phase 4.2 BLACKSITE portrait backgrounds, custom nav icons, action icons, textures, and per-screen lazy integration', () => {
+    // 1. Nine portrait backgrounds (1080x1920 WebP)
+    expect(Object.keys(BLACKSITE_BACKGROUNDS)).toHaveLength(9);
+    for (const bg of Object.values(BLACKSITE_BACKGROUNDS)) {
+      expect(bg.src.startsWith('/assets/blacksite/backgrounds/')).toBe(true);
+      const diskPath = resolvePublicOrRoot(bg.src);
+      expect(fs.existsSync(diskPath), `Missing background asset: ${bg.src}`).toBe(true);
+      expect(fs.statSync(diskPath).size).toBeGreaterThan(1000);
+    }
+
+    // 2. Every GamePhase maps to a valid background key
+    for (const phase of Object.values(GamePhase)) {
+      const bgKey = SCREEN_BACKGROUND_MAP[phase];
+      expect(bgKey, `Missing SCREEN_BACKGROUND_MAP entry for ${phase}`).toBeDefined();
+      expect(BLACKSITE_BACKGROUNDS[bgKey]).toBeDefined();
+    }
+
+    // 3. Custom bottom-nav SVG pairs (inactive + active = 10 files)
+    expect(Object.keys(BLACKSITE_NAV_ICONS)).toHaveLength(5);
+    for (const navPair of Object.values(BLACKSITE_NAV_ICONS)) {
+      for (const svgUrl of [navPair.inactive, navPair.active]) {
+        const diskPath = resolvePublicOrRoot(svgUrl);
+        expect(fs.existsSync(diskPath), `Missing nav icon SVG: ${svgUrl}`).toBe(true);
+        const svgContent = fs.readFileSync(diskPath, 'utf8');
+        expect(svgContent).toContain('<svg');
+        expect(svgContent).toContain('</svg>');
+      }
+    }
+
+    // 4. 16 reusable BLACKSITE action icons
+    expect(Object.keys(BLACKSITE_ACTION_ICONS)).toHaveLength(16);
+    for (const svgUrl of Object.values(BLACKSITE_ACTION_ICONS)) {
+      const diskPath = resolvePublicOrRoot(svgUrl);
+      expect(fs.existsSync(diskPath), `Missing action icon SVG: ${svgUrl}`).toBe(true);
+      const svgContent = fs.readFileSync(diskPath, 'utf8');
+      expect(svgContent).toContain('<svg');
+      expect(svgContent).toContain('</svg>');
+    }
+
+    // 5. 6 tactical textures, stamps & dossier ornaments
+    expect(Object.keys(BLACKSITE_TEXTURES)).toHaveLength(6);
+    for (const svgUrl of Object.values(BLACKSITE_TEXTURES)) {
+      const diskPath = resolvePublicOrRoot(svgUrl);
+      expect(fs.existsSync(diskPath), `Missing texture SVG: ${svgUrl}`).toBe(true);
+      const svgContent = fs.readFileSync(diskPath, 'utf8');
+      expect(svgContent).toContain('<svg');
+      expect(svgContent).toContain('</svg>');
+    }
+
+    // 6. All 21 interactive screen components integrate BlacksiteScreenBackdrop directly
+    const integratedScreens = [
+      'WelcomeScreen.tsx',
+      'PlayerSetup.tsx',
+      'GameSettingsScreen.tsx',
+      'GameRound.tsx',
+      'QuestionPhase.tsx',
+      'DiscussionPhase.tsx',
+      'VotingScreen.tsx',
+      'RevealVoteResult.tsx',
+      'ImpostorGuessScreen.tsx',
+      'ResultScreen.tsx',
+      'ScoreboardScreen.tsx',
+      'OnlineRoomsScreen.tsx',
+      'OnlineLobbyScreen.tsx',
+      'OnlineGameScreen.tsx',
+      'CaseFileScreen.tsx',
+      'OperationArchiveScreen.tsx',
+      'ProfileScreen.tsx',
+      'InventoryScreen.tsx',
+      'LanguageDictionary.tsx',
+      'SettingsScreen.tsx',
+      'RulesScreen.tsx',
+    ];
+    for (const screenFile of integratedScreens) {
+      const filePath = path.join(ROOT, 'components', screenFile);
+      const src = fs.readFileSync(filePath, 'utf8');
+      expect(src, `${screenFile} missing BlacksiteScreenBackdrop`).toContain('BlacksiteScreenBackdrop');
+    }
+
+    // 7. Portrait backgrounds remain lazy-loaded per active screen (not bulk-precached in sw.js)
+    const swSrc = fs.readFileSync(path.join(PUBLIC_DIR, 'sw.js'), 'utf8');
+    expect(swSrc).not.toContain('/assets/blacksite/backgrounds/');
   });
 });
 

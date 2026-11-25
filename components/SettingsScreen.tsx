@@ -24,6 +24,7 @@ import {
   RefreshCw,
 } from 'lucide-react';
 import {
+  BlacksiteScreenBackdrop,
   BottomActionBar,
   ClassifiedStamp,
   DossierHeaderBand,
@@ -159,15 +160,18 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
 
   return (
     <div className="flex flex-col h-full overflow-hidden max-w-3xl mx-auto w-full relative">
+      <BlacksiteScreenBackdrop bgKey="profile" texture="carbon" />
       {toastMsg && (
         <div className="fixed top-16 left-1/2 -translate-x-1/2 z-50 bg-[#3E7B67] text-[#F4F6F8] px-5 py-2.5 rounded-[10px] border border-white/15 shadow-2xl font-bold text-sm">
           {toastMsg}
         </div>
       )}
 
+      <div className="relative z-10 flex flex-col flex-1 overflow-hidden w-full">
       <div className="flex-1 overflow-y-auto pt-4 px-4 sm:px-6 pb-8 custom-scrollbar">
         <DossierHeaderBand
           accent="gold"
+          texture="carbon"
           className="mb-5"
           badge={<ClassifiedStamp tone="gold">SYS-CONFIG</ClassifiedStamp>}
           title={t('settings')}
@@ -176,7 +180,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
 
         <div className="space-y-4">
           {/* Language Section */}
-          <IntelligencePanel className="relative overflow-hidden p-4 sm:p-5">
+          <IntelligencePanel className="relative overflow-hidden blacksite-texture-carbon p-4 sm:p-5">
             <div aria-hidden="true" className="blacksite-hairline absolute inset-x-0 top-0 pointer-events-none" />
             <ScreenSectionHeader
               title={t('language')}
@@ -478,6 +482,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
           </TacticalButton>
         </div>
       </BottomActionBar>
+      </div>
 
       {/* In-App Confirmation Modal */}
       {pendingConfirm && (

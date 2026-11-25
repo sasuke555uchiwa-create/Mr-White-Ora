@@ -9,12 +9,10 @@ import {
 import { playSound } from '../services/soundService';
 import {
   Plus,
-  Trash2,
   Save,
   UserPlus,
   X,
   Check,
-  Pencil,
   Moon,
   Sun,
   Upload,
@@ -27,6 +25,8 @@ import { CHARACTER_AVATARS } from '../data/specialRoles';
 import { compressAvatarImage } from '../utils/imageUtils';
 import { showToast } from '../utils/toast';
 import {
+  BlacksiteIcon,
+  BlacksiteScreenBackdrop,
   BottomActionBar,
   DossierHeaderBand,
   IconButton,
@@ -227,9 +227,12 @@ export const PlayerSetup: React.FC<PlayerSetupProps> = ({
 
   return (
     <div className="flex flex-col min-h-full relative px-4 sm:px-6 pt-3 max-w-3xl mx-auto w-full pb-0">
+      <BlacksiteScreenBackdrop bgKey="setup" texture="map" />
+      <div className="relative z-10 flex flex-col flex-1">
       {/* Header Summary */}
       <DossierHeaderBand
         accent="cyan"
+        texture="map"
         className="mb-4"
         icon={<Users size={20} />}
         title={mode === 'manage' ? t('managePlayers') : t('whoIsPlaying')}
@@ -377,7 +380,7 @@ export const PlayerSetup: React.FC<PlayerSetupProps> = ({
                   title={t('changeAvatar')}
                   aria-label={t('changeAvatar')}
                 >
-                  <Pencil size={15} className="text-primary-text" />
+                  <BlacksiteIcon name="editPlayer" size={16} />
                 </IconButton>
                 {mode === 'manage' && (
                   <IconButton
@@ -395,11 +398,11 @@ export const PlayerSetup: React.FC<PlayerSetupProps> = ({
                   variant="ghost"
                   onClick={() => removePlayerField(index)}
                   disabled={players.length <= 1}
-                  className="hover:text-danger-text hover:bg-[#963F46]/12"
+                  className="hover:bg-[#963F46]/15"
                   title="Remove player"
                   aria-label="Remove player"
                 >
-                  <Trash2 size={16} />
+                  <BlacksiteIcon name="removePlayer" size={16} />
                 </IconButton>
               </div>
             </PlayerIntelligenceCard>
@@ -412,7 +415,7 @@ export const PlayerSetup: React.FC<PlayerSetupProps> = ({
             size="md"
             fullWidth
             onClick={addPlayerField}
-            icon={<Plus size={16} />}
+            icon={<BlacksiteIcon name="addPlayer" size={17} />}
           >
             {t('addPlayer')}
           </TacticalButton>
@@ -546,6 +549,7 @@ export const PlayerSetup: React.FC<PlayerSetupProps> = ({
           </ModalShell>
         </div>
       )}
+      </div>
     </div>
   );
 };

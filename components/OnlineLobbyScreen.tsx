@@ -13,9 +13,7 @@ import {
 } from '../utils/onlineRoomService';
 import { motion } from 'framer-motion';
 import {
-  ArrowRight,
   Users,
-  Play,
   Copy,
   Check,
   Globe,
@@ -39,6 +37,8 @@ import { getUITranslation } from '../translations';
 import { getSettings } from '../services/storageService';
 import { showToast } from '../utils/toast';
 import {
+  BlacksiteIcon,
+  BlacksiteScreenBackdrop,
   BottomActionBar,
   ClassifiedStamp,
   DossierHeaderBand,
@@ -287,8 +287,9 @@ export const OnlineLobbyScreen: React.FC<OnlineLobbyScreenProps> = ({
 
   if (!room) {
     return (
-      <div className="min-h-full flex items-center justify-center">
-        <div className="animate-spin rounded-full h-10 w-10 border-2 border-[#B49A62] border-t-transparent" />
+      <div className="relative min-h-full flex items-center justify-center">
+        <BlacksiteScreenBackdrop bgKey="online" texture="map" />
+        <div className="relative z-10 animate-spin rounded-full h-10 w-10 border-2 border-[#B49A62] border-t-transparent" />
       </div>
     );
   }
@@ -316,9 +317,12 @@ export const OnlineLobbyScreen: React.FC<OnlineLobbyScreenProps> = ({
       exit={{ opacity: 0, y: -6 }}
       className="flex flex-col px-4 sm:px-6 pt-4 max-w-4xl mx-auto w-full relative min-h-full"
     >
+      <BlacksiteScreenBackdrop bgKey="online" texture="map" />
+      <div className="relative z-10 flex flex-col flex-1 w-full">
       {/* Header */}
       <DossierHeaderBand
         accent="gold"
+        texture="map"
         className="mb-4"
         badge={
           <ClassifiedStamp tone="gold">
@@ -327,11 +331,11 @@ export const OnlineLobbyScreen: React.FC<OnlineLobbyScreenProps> = ({
         }
         title={t('waitingRoom')}
         subtitle={`${t('hostLabel')} ${room.hostName}`}
-        icon={<Users className="w-5 h-5" />}
+        icon={<BlacksiteIcon name="onlineMultiplayer" size={20} />}
         action={
           <TacticalToolbar>
             <IconButton onClick={handleLeave} aria-label={t('leaveRoom')} variant="ghost" size="sm">
-              <ArrowRight className={`w-5 h-5 ${isRTL ? '' : 'rotate-180'}`} />
+              <BlacksiteIcon name="backNav" size={18} rtlFlip />
             </IconButton>
             <TacticalButton
               onClick={() => setShowChat(true)}
@@ -352,7 +356,7 @@ export const OnlineLobbyScreen: React.FC<OnlineLobbyScreenProps> = ({
       />
 
       {/* Room Code & Live Settings Card */}
-      <IntelligencePanel className="relative overflow-hidden p-4 sm:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 mb-3">
+      <IntelligencePanel className="relative overflow-hidden blacksite-texture-map p-4 sm:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 mb-3">
         <div aria-hidden="true" className="blacksite-hairline absolute inset-x-0 top-0 pointer-events-none" />
         <div className="flex items-center gap-3">
           <div>
@@ -386,7 +390,7 @@ export const OnlineLobbyScreen: React.FC<OnlineLobbyScreenProps> = ({
           </ClassifiedStamp>
           <StatusIndicator
             tone={room.isPrivate ? 'gold' : 'emerald'}
-            icon={room.isPrivate ? <Lock size={11} /> : <Globe size={11} />}
+            icon={room.isPrivate ? <BlacksiteIcon name="secureRoom" size={12} /> : <Globe size={11} />}
           >
             {room.isPrivate ? t('privateRoom') : t('publicRoom')}
           </StatusIndicator>
@@ -537,7 +541,7 @@ export const OnlineLobbyScreen: React.FC<OnlineLobbyScreenProps> = ({
             disabled={!canStart}
             loading={busyAction}
             onClick={handleStartGame}
-            icon={<Play className="w-4 h-4 fill-current" />}
+            icon={<BlacksiteIcon name="playOperation" size={17} tone="ink" />}
           >
             {playersArr.length < 3
               ? t('needAtLeast3Players')
@@ -558,6 +562,7 @@ export const OnlineLobbyScreen: React.FC<OnlineLobbyScreenProps> = ({
           </TacticalButton>
         )}
       </BottomActionBar>
+      </div>
 
       {/* Live Edit Settings Modal (Host Only) */}
       {showEditSettings && isHost && (

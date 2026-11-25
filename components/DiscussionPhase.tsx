@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { MessageCircle, FastForward, VenetianMask, ShieldAlert } from 'lucide-react';
+import { MessageCircle, VenetianMask } from 'lucide-react';
 import { getUITranslation } from '../translations';
 import { getSettings } from '../services/storageService';
 import { playSound } from '../services/soundService';
 import { Player } from '../types';
 import { Avatar } from './Avatar';
 import {
+  BlacksiteIcon,
+  BlacksiteScreenBackdrop,
   BottomActionBar,
   IntelligencePanel,
   OperationPhaseBadge,
@@ -44,13 +46,15 @@ export const DiscussionPhase: React.FC<DiscussionPhaseProps> = ({ players, onSki
   }, []);
 
   return (
-    <div className="flex flex-col min-h-full items-center px-4 sm:px-6 pt-4 pb-0 max-w-4xl mx-auto w-full">
+    <div className="flex flex-col min-h-full items-center relative px-4 sm:px-6 pt-4 pb-0 max-w-4xl mx-auto w-full">
+      <BlacksiteScreenBackdrop bgKey="discussion" texture="map" />
+      <div className="relative z-10 flex flex-col items-center w-full flex-1">
       <motion.div
         initial={{ scale: 0.96, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         className="w-full max-w-xl mb-6"
       >
-        <IntelligencePanel className="relative overflow-hidden p-5 sm:p-6 flex flex-col items-center text-center border-[#B49A62]/35">
+        <IntelligencePanel className="relative overflow-hidden blacksite-texture-map p-5 sm:p-6 flex flex-col items-center text-center border-[#B49A62]/35">
           <div aria-hidden="true" className="blacksite-hairline absolute inset-x-0 top-0 pointer-events-none" />
           <div className="flex items-center justify-between w-full mb-4 pb-2.5 border-b border-border/70">
             <OperationPhaseBadge phase="briefing" lang={lang} />
@@ -91,7 +95,7 @@ export const DiscussionPhase: React.FC<DiscussionPhaseProps> = ({ players, onSki
                 <span className="text-base font-bold text-text-main font-mono-code tabular-nums">
                   {specialRolesCount > 0 ? specialRolesCount : t('none')}
                 </span>
-                <ShieldAlert size={15} className="text-cyan-text" />
+                <BlacksiteIcon name="specialAbility" size={16} />
               </div>
             </div>
           </div>
@@ -152,12 +156,13 @@ export const DiscussionPhase: React.FC<DiscussionPhaseProps> = ({ players, onSki
             variant="primary"
             size="lg"
             fullWidth
-            trailingIcon={<FastForward size={18} />}
+            trailingIcon={<BlacksiteIcon name="secretVote" size={18} tone="ink" />}
           >
             {t('voteNow')}
           </TacticalButton>
         </div>
       </BottomActionBar>
+      </div>
     </div>
   );
 };

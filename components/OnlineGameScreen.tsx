@@ -33,20 +33,21 @@ import {
   Eye,
   EyeOff,
   LogOut,
-  Clock,
   Send,
   SkipForward,
   Check,
   ShieldAlert,
   Crown,
-  Vote,
   HelpCircle,
 } from 'lucide-react';
 import { getUITranslation } from '../translations';
 import { getSettings, recordOnlineSessionMatch } from '../services/storageService';
 import { showToast } from '../utils/toast';
 import { getPlayerRoundPoints } from '../src/game/winEngine';
+import { BlacksiteBackgroundKey } from '../src/design/assetRegistry';
 import {
+  BlacksiteIcon,
+  BlacksiteScreenBackdrop,
   BottomActionBar,
   ClassifiedStamp,
   IconButton,
@@ -585,7 +586,7 @@ export const OnlineGameScreen: React.FC<OnlineGameScreenProps> = ({
 
       if (isHost) {
         return (
-          <div className="flex flex-col items-center justify-center flex-1 text-center p-6 max-w-md mx-auto w-full">
+          <div className="relative z-10 flex flex-col items-center justify-center flex-1 text-center p-6 max-w-md mx-auto w-full">
             <div className="mb-3">
               <OperationPhaseBadge phase="briefing" round={currentRound} lang={settings.language} />
             </div>
@@ -657,12 +658,12 @@ export const OnlineGameScreen: React.FC<OnlineGameScreenProps> = ({
       const isReady = gameState.readyPlayers?.includes(user.uid);
 
       return (
-        <div className="flex flex-col items-center justify-center flex-1 text-center p-5 max-w-md mx-auto w-full">
+        <div className="relative z-10 flex flex-col items-center justify-center flex-1 text-center p-5 max-w-md mx-auto w-full">
           <div className="mb-3">
             <OperationPhaseBadge phase="briefing" round={currentRound} lang={settings.language} />
           </div>
           <h2 className="text-xl sm:text-2xl font-bold mb-4 text-text-main">{t('yourTurn')}</h2>
-          <IntelligencePanel className="relative p-6 w-full border-[#B49A62]/40 overflow-hidden">
+          <IntelligencePanel className="relative blacksite-texture-paper p-6 w-full border-[#B49A62]/40 overflow-hidden">
             <div
               aria-hidden="true"
               className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-[#B49A62]/70 to-transparent"
@@ -704,7 +705,7 @@ export const OnlineGameScreen: React.FC<OnlineGameScreenProps> = ({
       const spokenThisRoundUids = new Set(roundClues.map((c) => c.uid));
 
       return (
-        <div className="flex flex-col flex-1 w-full max-w-4xl mx-auto px-4 sm:px-6 pt-2 gap-4">
+        <div className="relative z-10 flex flex-col flex-1 w-full max-w-4xl mx-auto px-4 sm:px-6 pt-2 gap-4">
           <div className="flex items-center justify-between gap-2">
             <OperationPhaseBadge phase="active" round={currentRound} lang={settings.language} />
           </div>
@@ -750,7 +751,7 @@ export const OnlineGameScreen: React.FC<OnlineGameScreenProps> = ({
                         : 'bg-bg-card text-primary-text border-border-strong'
                     }`}
                   >
-                    <Clock size={14} />
+                    <BlacksiteIcon name="timer" size={15} />
                     <span>
                       {timeLeftSeconds}
                       {t('secondsShort')}
@@ -921,7 +922,7 @@ export const OnlineGameScreen: React.FC<OnlineGameScreenProps> = ({
                 variant="danger"
                 size="lg"
                 fullWidth
-                icon={<Vote size={18} />}
+                icon={<BlacksiteIcon name="secretVote" size={18} />}
               >
                 {t('endAndVote')}
               </TacticalButton>
@@ -943,8 +944,8 @@ export const OnlineGameScreen: React.FC<OnlineGameScreenProps> = ({
       const validVoteCount = votedUids.filter((id) => aliveUids.has(id)).length;
 
       return (
-        <div className="flex flex-col items-center flex-1 text-center p-4 pb-24 w-full max-w-3xl mx-auto gap-4">
-          <IntelligencePanel className="relative overflow-hidden w-full p-4 border-[#963F46]/40 flex flex-col items-center gap-1.5">
+        <div className="relative z-10 flex flex-col items-center flex-1 text-center p-4 pb-24 w-full max-w-3xl mx-auto gap-4">
+          <IntelligencePanel className="relative overflow-hidden blacksite-texture-carbon w-full p-4 border-[#963F46]/40 flex flex-col items-center gap-1.5">
             <div aria-hidden="true" className="blacksite-hairline absolute inset-x-0 top-0 pointer-events-none" />
             <OperationPhaseBadge phase="tribunal" round={currentRound} lang={settings.language} />
             <h2 className="text-xl sm:text-2xl font-bold text-danger-text">{t('votingTime')}</h2>
@@ -1172,10 +1173,29 @@ export const OnlineGameScreen: React.FC<OnlineGameScreenProps> = ({
     );
   };
 
+  const onlineBgKey: BlacksiteBackgroundKey =
+    phase === 'REVEAL'
+      ? 'briefing'
+      : phase === 'PLAYING'
+      ? 'discussion'
+      : phase === 'VOTING' || phase === 'REVEAL_VOTE_RESULT' || phase === 'IMPOSTOR_GUESS'
+      ? 'voting'
+      : phase === 'RESULT'
+      ? 'results'
+      : 'online';
+
+  const onlineBgTexture: 'paper' | 'map' | 'carbon' =
+    onlineBgKey === 'briefing' || onlineBgKey === 'results'
+      ? 'paper'
+      : onlineBgKey === 'voting'
+      ? 'carbon'
+      : 'map';
+
   return (
     <div className="relative min-h-full w-full flex flex-col">
+      <BlacksiteScreenBackdrop bgKey={onlineBgKey} texture={onlineBgTexture} />
       {showMatchHud && (
-        <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 pt-3 pb-1 flex items-center justify-between flex-wrap gap-2 z-20">
+        <div className="relative z-10 w-full max-w-4xl mx-auto px-4 sm:px-6 pt-3 pb-1 flex items-center justify-between flex-wrap gap-2">
           <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
             <StatusIndicator tone="gold">
               {t('roundNumberLabel', { round: currentRound })}
@@ -1234,7 +1254,7 @@ export const OnlineGameScreen: React.FC<OnlineGameScreenProps> = ({
       )}
 
       {!showMatchHud && (
-        <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 pt-3 flex items-center justify-end gap-2 z-20">
+        <div className="relative z-10 w-full max-w-4xl mx-auto px-4 sm:px-6 pt-3 flex items-center justify-end gap-2">
           <TacticalButton
             onClick={() => setShowChat(true)}
             variant="secondary"

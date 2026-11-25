@@ -3,17 +3,8 @@ import { getSettings, saveSettings } from '../services/storageService';
 import { getUITranslation } from '../translations';
 import {
   Globe,
-  Users,
-  HelpCircle,
   X,
-  Gamepad2,
-  Smartphone,
   Check,
-  Play,
-  Archive,
-  Trophy,
-  BookOpen,
-  Settings as SettingsIcon,
   ArrowRight,
   Shield,
 } from 'lucide-react';
@@ -21,8 +12,16 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
 import { Avatar } from './Avatar';
 import { playSound } from '../services/soundService';
-import { HERO_ASSETS, ROLE_PORTRAITS } from '../src/design/assetRegistry';
 import {
+  BLACKSITE_NAV_ICONS,
+  BLACKSITE_TEXTURES,
+  BlacksiteNavKey,
+  HERO_ASSETS,
+  ROLE_PORTRAITS,
+} from '../src/design/assetRegistry';
+import {
+  BlacksiteIcon,
+  BlacksiteScreenBackdrop,
   ClassifiedStamp,
   IconButton,
   IntelligencePanel,
@@ -33,6 +32,32 @@ import {
   TacticalButton,
   TacticalToolbar,
 } from './ui/BlacksiteUI';
+
+const NavDockCustomIcon: React.FC<{ navKey: BlacksiteNavKey }> = ({ navKey }) => {
+  const pair = BLACKSITE_NAV_ICONS[navKey];
+  return (
+    <span className="relative inline-flex w-6 h-6 items-center justify-center">
+      <img
+        src={pair.inactive}
+        alt=""
+        aria-hidden="true"
+        width={22}
+        height={22}
+        referrerPolicy="no-referrer"
+        className="w-[22px] h-[22px] object-contain transition-opacity duration-150 group-hover:opacity-0"
+      />
+      <img
+        src={pair.active}
+        alt=""
+        aria-hidden="true"
+        width={22}
+        height={22}
+        referrerPolicy="no-referrer"
+        className="w-[22px] h-[22px] object-contain absolute inset-0 m-auto opacity-0 transition-opacity duration-150 group-hover:opacity-100"
+      />
+    </span>
+  );
+};
 
 interface WelcomeScreenProps {
   onStart: () => void;
@@ -100,8 +125,10 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
 
   return (
     <div className="flex flex-col min-h-full w-full relative overflow-x-hidden justify-between select-none">
+      <BlacksiteScreenBackdrop bgKey="home" priority texture="carbon" />
+
       {/* Top Agency Toolbar */}
-      <header className="w-full max-w-5xl mx-auto flex justify-between items-center gap-2.5 px-4 sm:px-6 pt-3.5 sm:pt-4 pb-2 z-30">
+      <header className="w-full max-w-5xl mx-auto flex justify-between items-center gap-2.5 px-4 sm:px-6 pt-3.5 sm:pt-4 pb-2 z-30 relative">
         <button
           type="button"
           onClick={() => {
@@ -137,7 +164,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
             variant="ghost"
             size="sm"
           >
-            <HelpCircle size={18} className="text-cyan-text" />
+            <BlacksiteIcon name="help" size={19} />
           </IconButton>
 
           <div aria-hidden="true" className="w-px h-6 bg-border-strong" />
@@ -202,10 +229,17 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
           {/* Right Command Console + Faction Dossier */}
           <div className="lg:col-span-5 flex flex-col justify-between gap-3.5 sm:gap-4">
             {/* Operation Launch Console */}
-            <IntelligencePanel className="relative overflow-hidden blacksite-dossier-surface p-4 sm:p-5 border-[#B49A62]/35 flex flex-col gap-3.5">
+            <IntelligencePanel className="relative overflow-hidden blacksite-dossier-surface blacksite-texture-carbon p-4 sm:p-5 border-[#B49A62]/35 flex flex-col gap-3.5">
               <div aria-hidden="true" className="blacksite-hairline absolute inset-x-0 top-0 pointer-events-none" />
+              <img
+                src={BLACKSITE_TEXTURES.dossierOrnament}
+                alt=""
+                aria-hidden="true"
+                referrerPolicy="no-referrer"
+                className="pointer-events-none select-none absolute inset-x-3 top-2 w-[calc(100%-1.5rem)] h-6 object-fill opacity-40"
+              />
 
-              <div className="flex items-center justify-between gap-2 text-start">
+              <div className="relative flex items-center justify-between gap-2 text-start">
                 <div className="min-w-0">
                   <p className="text-xs font-bold text-primary-text">
                     {isRTL ? 'مركز العمليات الميدانية' : 'Operation Command'}
@@ -227,11 +261,11 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
                   playSound('pop');
                   setShowPlayOptions(true);
                 }}
-                className="min-h-[62px] px-4 sm:px-5 rounded-[12px] justify-between"
+                className="min-h-[64px] px-4 sm:px-5 rounded-[12px] justify-between"
               >
                 <span className="flex items-center gap-3 min-w-0 flex-1">
-                  <span className="w-10 h-10 rounded-[8px] bg-[#080B10]/15 border border-[#080B10]/20 flex items-center justify-center shrink-0 text-[#080B10]">
-                    <Play size={18} className="fill-current rtl:rotate-180" />
+                  <span className="w-10 h-10 rounded-[8px] bg-[#080B10]/16 border border-[#080B10]/25 flex items-center justify-center shrink-0">
+                    <BlacksiteIcon name="playOperation" size={20} tone="ink" rtlFlip />
                   </span>
                   <span className="text-start min-w-0">
                     <span className="block text-base sm:text-lg font-extrabold leading-tight truncate">
@@ -245,15 +279,15 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
                 <ArrowRight size={18} className="shrink-0 rtl:rotate-180 opacity-85" />
               </TacticalButton>
 
-              <div className="grid grid-cols-2 gap-2 pt-1 border-t border-border/70 text-xs">
+              <div className="grid grid-cols-2 gap-2 pt-1.5 border-t border-border/70 text-xs">
                 <div className="flex items-center gap-2 text-text-muted min-w-0">
-                  <Globe size={14} className="text-cyan-text shrink-0" />
+                  <BlacksiteIcon name="onlineMultiplayer" size={15} />
                   <span className="truncate font-semibold">
                     {isRTL ? 'غرف أونلاين' : 'Online Rooms'}
                   </span>
                 </div>
                 <div className="flex items-center gap-2 text-text-muted min-w-0">
-                  <Smartphone size={14} className="text-primary-text shrink-0" />
+                  <BlacksiteIcon name="passAndPlay" size={15} />
                   <span className="truncate font-semibold">
                     {isRTL ? 'نفس الجهاز' : 'Shared Device'}
                   </span>
@@ -318,11 +352,11 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
       {/* Unified 5-Tab Bottom Navigation Dock */}
       <nav
         aria-label={isRTL ? 'التنقل الرئيسي' : 'Primary navigation'}
-        className="w-full max-w-2xl mx-auto px-3 sm:px-4 pt-2 pb-[max(0.85rem,env(safe-area-inset-bottom))] z-20"
+        className="w-full max-w-2xl mx-auto px-3 sm:px-4 pt-2 pb-[max(0.85rem,env(safe-area-inset-bottom))] z-20 relative"
       >
         <NavDock>
           <NavButton
-            icon={<Archive size={19} />}
+            icon={<NavDockCustomIcon navKey="vault" />}
             label={isRTL ? 'المقتنيات' : 'Vault'}
             onClick={() => {
               playSound('click');
@@ -330,7 +364,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
             }}
           />
           <NavButton
-            icon={<Trophy size={19} />}
+            icon={<NavDockCustomIcon navKey="rankings" />}
             label={isRTL ? 'الترتيب' : 'Ranks'}
             onClick={() => {
               playSound('click');
@@ -338,7 +372,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
             }}
           />
           <NavButton
-            icon={<BookOpen size={19} />}
+            icon={<NavDockCustomIcon navKey="dictionary" />}
             label={isRTL ? 'الكلمات' : 'Words'}
             onClick={() => {
               playSound('click');
@@ -346,7 +380,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
             }}
           />
           <NavButton
-            icon={<Users size={19} />}
+            icon={<NavDockCustomIcon navKey="agents" />}
             label={isRTL ? 'العملاء' : 'Players'}
             onClick={() => {
               playSound('click');
@@ -354,7 +388,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
             }}
           />
           <NavButton
-            icon={<SettingsIcon size={19} />}
+            icon={<NavDockCustomIcon navKey="settings" />}
             label={isRTL ? 'الإعدادات' : 'Settings'}
             onClick={() => {
               playSound('click');
@@ -429,11 +463,8 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
                         : 'Join public or private encrypted rooms over the network.'}
                     </p>
                   </div>
-                  <div className="w-12 h-12 rounded-[10px] bg-[#668F9A]/15 border border-[#668F9A]/40 flex items-center justify-center text-cyan-text shrink-0">
-                    <div className="relative">
-                      <Globe size={24} />
-                      <Gamepad2 size={13} className="absolute -bottom-1 -right-1 text-primary-text" />
-                    </div>
+                  <div className="w-12 h-12 rounded-[10px] bg-[#668F9A]/15 border border-[#668F9A]/40 flex items-center justify-center shrink-0">
+                    <BlacksiteIcon name="onlineMultiplayer" size={24} />
                   </div>
                 </InteractiveCard>
 
@@ -460,11 +491,8 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
                         : 'Pass & play on one shared briefing device in the same room.'}
                     </p>
                   </div>
-                  <div className="w-12 h-12 rounded-[10px] bg-[#B49A62]/15 border border-[#B49A62]/40 flex items-center justify-center text-primary-text shrink-0">
-                    <div className="relative">
-                      <Smartphone size={24} />
-                      <Users size={13} className="absolute -bottom-1 -right-1 text-cyan-text" />
-                    </div>
+                  <div className="w-12 h-12 rounded-[10px] bg-[#B49A62]/15 border border-[#B49A62]/40 flex items-center justify-center shrink-0">
+                    <BlacksiteIcon name="passAndPlay" size={24} />
                   </div>
                 </InteractiveCard>
               </ModalShell>

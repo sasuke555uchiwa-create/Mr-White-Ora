@@ -1,5 +1,89 @@
 import React, { useEffect, useRef } from 'react';
 import { Loader2 } from 'lucide-react';
+import {
+  BLACKSITE_ACTION_ICONS,
+  BLACKSITE_BACKGROUNDS,
+  BlacksiteActionIconKey,
+  BlacksiteBackgroundKey,
+} from '../../src/design/assetRegistry';
+
+export interface BlacksiteIconProps {
+  name?: BlacksiteActionIconKey;
+  src?: string;
+  size?: number;
+  tone?: 'native' | 'ink';
+  rtlFlip?: boolean;
+  className?: string;
+}
+
+export const BlacksiteIcon: React.FC<BlacksiteIconProps> = ({
+  name,
+  src,
+  size = 18,
+  tone = 'native',
+  rtlFlip = false,
+  className = '',
+}) => {
+  const resolvedSrc = src || (name ? BLACKSITE_ACTION_ICONS[name] : '');
+  if (!resolvedSrc) return null;
+  return (
+    <img
+      src={resolvedSrc}
+      alt=""
+      aria-hidden="true"
+      width={size}
+      height={size}
+      draggable={false}
+      referrerPolicy="no-referrer"
+      className={`inline-block shrink-0 object-contain select-none pointer-events-none ${
+        tone === 'ink' ? 'brightness-0 opacity-90' : ''
+      } ${rtlFlip ? 'rtl:-scale-x-100' : ''} ${className}`}
+    />
+  );
+};
+
+export interface BlacksiteScreenBackdropProps {
+  bgKey: BlacksiteBackgroundKey;
+  priority?: boolean;
+  texture?: 'paper' | 'map' | 'carbon' | 'metal';
+}
+
+export const BlacksiteScreenBackdrop: React.FC<BlacksiteScreenBackdropProps> = ({
+  bgKey,
+  priority = false,
+  texture,
+}) => {
+  const bg = BLACKSITE_BACKGROUNDS[bgKey];
+  const textureClass =
+    texture === 'paper'
+      ? 'blacksite-texture-paper opacity-35'
+      : texture === 'map'
+      ? 'blacksite-texture-map opacity-45'
+      : texture === 'carbon'
+      ? 'blacksite-texture-carbon opacity-35'
+      : texture === 'metal'
+      ? 'blacksite-texture-metal opacity-35'
+      : '';
+
+  return (
+    <div
+      aria-hidden="true"
+      data-blacksite-bg={bg.key}
+      className="fixed inset-0 z-0 pointer-events-none select-none overflow-hidden"
+    >
+      <img
+        src={bg.src}
+        alt=""
+        loading={priority ? 'eager' : 'lazy'}
+        decoding="async"
+        referrerPolicy="no-referrer"
+        className="w-full h-full object-cover object-center opacity-80"
+      />
+      <div className="absolute inset-0 blacksite-backdrop-scrim" />
+      {textureClass && <div className={`absolute inset-0 ${textureClass}`} />}
+    </div>
+  );
+};
 
 export type TacticalButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'cyan';
 export type TacticalButtonSize = 'sm' | 'md' | 'lg';
@@ -15,15 +99,15 @@ export interface TacticalButtonProps extends React.ButtonHTMLAttributes<HTMLButt
 
 const BUTTON_VARIANT_STYLES: Record<TacticalButtonVariant, string> = {
   primary:
-    'bg-[#B49A62] hover:bg-[#C2A870] text-[#080B10] border border-[#D8C492]/50 shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_6px_18px_rgba(8,11,16,0.34)]',
+    'blacksite-texture-metal bg-[#B49A62] hover:bg-[#C2A870] text-[#080B10] border border-[#DFCB99]/60 shadow-[inset_0_1px_0_rgba(255,255,255,0.34),inset_0_-2px_0_rgba(8,11,16,0.28),0_8px_22px_rgba(8,11,16,0.42)]',
   cyan:
-    'bg-[#668F9A] hover:bg-[#77A0AB] text-[#080B10] border border-[#96BAC4]/45 shadow-[inset_0_1px_0_rgba(255,255,255,0.18),0_6px_18px_rgba(8,11,16,0.34)]',
+    'blacksite-texture-metal bg-[#668F9A] hover:bg-[#77A0AB] text-[#080B10] border border-[#9CC0CA]/55 shadow-[inset_0_1px_0_rgba(255,255,255,0.28),inset_0_-2px_0_rgba(8,11,16,0.25),0_8px_22px_rgba(8,11,16,0.4)]',
   secondary:
-    'bg-bg-card hover:bg-bg-surface text-text-main border border-border-strong shadow-[inset_0_1px_0_var(--surface-highlight)]',
+    'bg-bg-card hover:bg-bg-surface text-text-main border border-border-strong shadow-[inset_0_1px_0_var(--surface-highlight),0_4px_12px_rgba(4,7,12,0.24)]',
   ghost:
     'bg-transparent hover:bg-bg-card/85 text-text-muted hover:text-text-main border border-transparent',
   danger:
-    'bg-[#963F46] hover:bg-[#A64A52] text-[#F4F6F8] border border-[#BC636B]/45 shadow-[inset_0_1px_0_rgba(255,255,255,0.14),0_6px_18px_rgba(8,11,16,0.34)]',
+    'blacksite-texture-metal bg-[#963F46] hover:bg-[#A64A52] text-[#F4F6F8] border border-[#C16B72]/50 shadow-[inset_0_1px_0_rgba(255,255,255,0.2),inset_0_-2px_0_rgba(8,11,16,0.28),0_8px_22px_rgba(8,11,16,0.42)]',
 };
 
 const BUTTON_SIZE_STYLES: Record<TacticalButtonSize, string> = {
@@ -215,7 +299,7 @@ export const NavDock: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({
   ...props
 }) => (
   <div
-    className={`relative overflow-hidden blacksite-panel rounded-[14px] p-1.5 grid grid-cols-5 gap-1 ${className}`}
+    className={`relative overflow-hidden blacksite-panel blacksite-texture-carbon rounded-[14px] p-1.5 grid grid-cols-5 gap-1 ${className}`}
     {...props}
   >
     <div aria-hidden="true" className="blacksite-hairline absolute inset-x-6 top-0 pointer-events-none" />
@@ -617,6 +701,7 @@ export interface DossierHeaderBandProps {
   badge?: React.ReactNode;
   action?: React.ReactNode;
   accent?: 'gold' | 'cyan' | 'crimson';
+  texture?: 'map' | 'paper' | 'metal' | 'carbon';
   className?: string;
   children?: React.ReactNode;
 }
@@ -633,6 +718,16 @@ const DOSSIER_ICON_TONES: Record<NonNullable<DossierHeaderBandProps['accent']>, 
   crimson: 'bg-[#963F46]/15 border-[#963F46]/40 text-danger-text',
 };
 
+const DOSSIER_TEXTURE_CLASSES: Record<
+  NonNullable<DossierHeaderBandProps['texture']>,
+  string
+> = {
+  map: 'blacksite-texture-map',
+  paper: 'blacksite-texture-paper',
+  metal: 'blacksite-texture-metal',
+  carbon: 'blacksite-texture-carbon',
+};
+
 export const DossierHeaderBand: React.FC<DossierHeaderBandProps> = ({
   title,
   subtitle,
@@ -640,17 +735,18 @@ export const DossierHeaderBand: React.FC<DossierHeaderBandProps> = ({
   badge,
   action,
   accent = 'gold',
+  texture = 'metal',
   className = '',
   children,
 }) => (
   <div
-    className={`relative overflow-hidden rounded-[14px] blacksite-panel blacksite-dossier-surface p-4 sm:p-5 ${DOSSIER_HEADER_ACCENTS[accent]} ${className}`}
+    className={`relative overflow-hidden rounded-[14px] blacksite-panel blacksite-dossier-surface ${DOSSIER_TEXTURE_CLASSES[texture]} p-4 sm:p-5 ${DOSSIER_HEADER_ACCENTS[accent]} ${className}`}
   >
     <div
       aria-hidden="true"
       className={`${accent === 'cyan' ? 'blacksite-hairline-cyan' : 'blacksite-hairline'} absolute inset-x-0 top-0 pointer-events-none`}
     />
-    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+    <div className="relative flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
       <div className="flex items-center gap-3.5 min-w-0">
         {icon && (
           <div
@@ -673,7 +769,7 @@ export const DossierHeaderBand: React.FC<DossierHeaderBandProps> = ({
       </div>
       {action && <div className="flex items-center gap-2 shrink-0 flex-wrap">{action}</div>}
     </div>
-    {children && <div className="mt-3.5 pt-3 border-t border-border/70">{children}</div>}
+    {children && <div className="relative mt-3.5 pt-3 border-t border-border/70">{children}</div>}
   </div>
 );
 

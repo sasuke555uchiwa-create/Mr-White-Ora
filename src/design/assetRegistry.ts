@@ -58,12 +58,170 @@ import dossierClassified from '../assets/mr-white/cosmetics/dossiers/dossier-cla
 import collectibleCipherKey from '../assets/mr-white/cosmetics/collectibles/cipher-key.webp';
 import collectibleAgencySeal from '../assets/mr-white/cosmetics/collectibles/agency-seal.webp';
 
-import { PlayerRole } from '../../types';
+import { GamePhase, PlayerRole } from '../../types';
 
 export const HERO_ASSETS = {
   mainBanner,
   mysteryCardBack,
   tableBackdrop,
+} as const;
+
+export type BlacksiteBackgroundKey =
+  | 'home'
+  | 'setup'
+  | 'briefing'
+  | 'discussion'
+  | 'voting'
+  | 'results'
+  | 'online'
+  | 'archive'
+  | 'profile';
+
+export interface BlacksiteBackgroundMeta {
+  key: BlacksiteBackgroundKey;
+  src: string;
+  tone: 'gold' | 'cyan' | 'crimson' | 'neutral';
+  alt: string;
+}
+
+export const BLACKSITE_BACKGROUNDS: Record<BlacksiteBackgroundKey, BlacksiteBackgroundMeta> = {
+  home: {
+    key: 'home',
+    src: '/assets/blacksite/backgrounds/home-bg.webp',
+    tone: 'gold',
+    alt: 'BLACKSITE intelligence command headquarters',
+  },
+  setup: {
+    key: 'setup',
+    src: '/assets/blacksite/backgrounds/setup-bg.webp',
+    tone: 'gold',
+    alt: 'Classified mission preparation room',
+  },
+  briefing: {
+    key: 'briefing',
+    src: '/assets/blacksite/backgrounds/briefing-bg.webp',
+    tone: 'gold',
+    alt: 'Sealed dossier briefing vault',
+  },
+  discussion: {
+    key: 'discussion',
+    src: '/assets/blacksite/backgrounds/discussion-bg.webp',
+    tone: 'cyan',
+    alt: 'Covert interrogation and investigation room',
+  },
+  voting: {
+    key: 'voting',
+    src: '/assets/blacksite/backgrounds/voting-bg.webp',
+    tone: 'crimson',
+    alt: 'High-tension tribunal chamber',
+  },
+  results: {
+    key: 'results',
+    src: '/assets/blacksite/backgrounds/results-bg.webp',
+    tone: 'gold',
+    alt: 'Official agency debriefing hall',
+  },
+  online: {
+    key: 'online',
+    src: '/assets/blacksite/backgrounds/online-bg.webp',
+    tone: 'cyan',
+    alt: 'Restricted cyber-intelligence operations hub',
+  },
+  archive: {
+    key: 'archive',
+    src: '/assets/blacksite/backgrounds/archive-bg.webp',
+    tone: 'neutral',
+    alt: 'Underground classified archive corridor',
+  },
+  profile: {
+    key: 'profile',
+    src: '/assets/blacksite/backgrounds/profile-bg.webp',
+    tone: 'gold',
+    alt: 'Operative personal locker suite',
+  },
+} as const;
+
+export const SCREEN_BACKGROUND_MAP: Record<GamePhase, BlacksiteBackgroundKey> = {
+  [GamePhase.WELCOME]: 'home',
+  [GamePhase.SETUP]: 'setup',
+  [GamePhase.PLAYERS_LIST]: 'setup',
+  [GamePhase.GAME_SETTINGS]: 'setup',
+  [GamePhase.REVEAL]: 'briefing',
+  [GamePhase.PLAYING]: 'discussion',
+  [GamePhase.DISCUSSION]: 'discussion',
+  [GamePhase.VOTING]: 'voting',
+  [GamePhase.REVEAL_VOTE_RESULT]: 'voting',
+  [GamePhase.IMPOSTOR_GUESS]: 'voting',
+  [GamePhase.RESULT]: 'results',
+  [GamePhase.SCOREBOARD]: 'results',
+  [GamePhase.ONLINE_ROOMS]: 'online',
+  [GamePhase.ONLINE_LOBBY]: 'online',
+  [GamePhase.ONLINE_GAME]: 'online',
+  [GamePhase.CASE_FILE]: 'archive',
+  [GamePhase.OPERATION_ARCHIVE]: 'archive',
+  [GamePhase.DICTIONARY]: 'archive',
+  [GamePhase.RULES]: 'archive',
+  [GamePhase.PROFILE]: 'profile',
+  [GamePhase.INVENTORY]: 'profile',
+  [GamePhase.SETTINGS]: 'profile',
+};
+
+export type BlacksiteNavKey = 'vault' | 'rankings' | 'dictionary' | 'agents' | 'settings';
+
+export const BLACKSITE_NAV_ICONS: Record<
+  BlacksiteNavKey,
+  { inactive: string; active: string }
+> = {
+  vault: {
+    inactive: '/assets/blacksite/icons/navigation/vault.svg',
+    active: '/assets/blacksite/icons/navigation/vault-active.svg',
+  },
+  rankings: {
+    inactive: '/assets/blacksite/icons/navigation/rankings.svg',
+    active: '/assets/blacksite/icons/navigation/rankings-active.svg',
+  },
+  dictionary: {
+    inactive: '/assets/blacksite/icons/navigation/dictionary.svg',
+    active: '/assets/blacksite/icons/navigation/dictionary-active.svg',
+  },
+  agents: {
+    inactive: '/assets/blacksite/icons/navigation/agents.svg',
+    active: '/assets/blacksite/icons/navigation/agents-active.svg',
+  },
+  settings: {
+    inactive: '/assets/blacksite/icons/navigation/settings.svg',
+    active: '/assets/blacksite/icons/navigation/settings-active.svg',
+  },
+} as const;
+
+export const BLACKSITE_ACTION_ICONS = {
+  playOperation: '/assets/blacksite/icons/actions/play-operation.svg',
+  onlineMultiplayer: '/assets/blacksite/icons/actions/online-multiplayer.svg',
+  passAndPlay: '/assets/blacksite/icons/actions/pass-and-play.svg',
+  addPlayer: '/assets/blacksite/icons/actions/add-player.svg',
+  removePlayer: '/assets/blacksite/icons/actions/remove-player.svg',
+  editPlayer: '/assets/blacksite/icons/actions/edit-player.svg',
+  secureRoom: '/assets/blacksite/icons/actions/secure-room.svg',
+  search: '/assets/blacksite/icons/actions/search.svg',
+  backNav: '/assets/blacksite/icons/actions/back-nav.svg',
+  help: '/assets/blacksite/icons/actions/help.svg',
+  profile: '/assets/blacksite/icons/actions/profile.svg',
+  secretVote: '/assets/blacksite/icons/actions/secret-vote.svg',
+  shieldProtection: '/assets/blacksite/icons/actions/shield-protection.svg',
+  specialAbility: '/assets/blacksite/icons/actions/special-ability.svg',
+  timer: '/assets/blacksite/icons/actions/timer.svg',
+  officialVerdict: '/assets/blacksite/icons/actions/official-verdict.svg',
+} as const;
+
+export type BlacksiteActionIconKey = keyof typeof BLACKSITE_ACTION_ICONS;
+
+export const BLACKSITE_TEXTURES = {
+  classifiedPaper: '/assets/blacksite/textures/classified-paper.svg',
+  tacticalMap: '/assets/blacksite/textures/tactical-map.svg',
+  technicalCarbon: '/assets/blacksite/textures/technical-carbon.svg',
+  confidentialStamp: '/assets/blacksite/textures/confidential-stamp.svg',
+  metallicSurface: '/assets/blacksite/textures/metallic-surface.svg',
+  dossierOrnament: '/assets/blacksite/textures/dossier-ornament.svg',
 } as const;
 
 export const ROLE_PORTRAITS: Record<PlayerRole, string> = {

@@ -320,7 +320,7 @@ function AppContent() {
         </div>
       )}
 
-      <main className="w-full flex-1 flex flex-col z-20 relative overflow-y-auto custom-scrollbar overflow-x-hidden">
+      <main className="w-full flex-1 flex flex-col relative overflow-y-auto custom-scrollbar overflow-x-hidden">
         <AnimatePresence mode="wait">
           {phase === GamePhase.WELCOME && (
             <motion.div

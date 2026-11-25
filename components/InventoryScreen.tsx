@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Trophy, ShoppingBag, Check, Sparkles, Clock } from 'lucide-react';
+import { Trophy, ShoppingBag, Check, Clock } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   getScores,
@@ -12,6 +12,8 @@ import { getUITranslation } from '../translations';
 import { playSound } from '../services/soundService';
 import { SHOP_ITEMS, ShopItem, getShopItemField } from '../data/shopItems';
 import {
+  BlacksiteIcon,
+  BlacksiteScreenBackdrop,
   ClassifiedStamp,
   DossierHeaderBand,
   IconButton,
@@ -107,6 +109,7 @@ export const InventoryScreen: React.FC<InventoryScreenProps> = ({ onBack }) => {
 
   return (
     <div className="flex flex-col h-full w-full relative max-w-3xl mx-auto px-4 sm:px-6 pt-4 pb-24">
+      <BlacksiteScreenBackdrop bgKey="profile" texture="carbon" />
       <AnimatePresence>
         {alertMsg && (
           <motion.div
@@ -136,9 +139,11 @@ export const InventoryScreen: React.FC<InventoryScreenProps> = ({ onBack }) => {
         )}
       </AnimatePresence>
 
+      <div className="relative z-10 flex flex-col flex-1 w-full">
       {/* Header */}
       <DossierHeaderBand
         accent="gold"
+        texture="carbon"
         badge={<ClassifiedStamp tone="gold">AGENT VAULT</ClassifiedStamp>}
         title={
           lang === 'ar'
@@ -155,13 +160,13 @@ export const InventoryScreen: React.FC<InventoryScreenProps> = ({ onBack }) => {
         icon={<ShoppingBag className="w-5 h-5" />}
         action={
           <IconButton onClick={onBack} variant="secondary" aria-label={t('back')}>
-            <ArrowLeft className="w-5 h-5 rtl:rotate-180" />
+            <BlacksiteIcon name="backNav" size={18} rtlFlip />
           </IconButton>
         }
       />
 
       {/* Player Selector Panel */}
-      <IntelligencePanel className="relative overflow-hidden mt-4 p-4">
+      <IntelligencePanel className="relative overflow-hidden blacksite-texture-carbon mt-4 p-4">
         <div aria-hidden="true" className="blacksite-hairline absolute inset-x-0 top-0 pointer-events-none" />
         <h4
           className={`text-xs font-bold text-text-muted mb-3 flex items-center gap-1.5 ${
@@ -235,7 +240,7 @@ export const InventoryScreen: React.FC<InventoryScreenProps> = ({ onBack }) => {
       <div className="mt-4 flex-1 overflow-y-auto space-y-4">
         {selectedPlayer === '' ? (
           <div className="h-64 flex flex-col items-center justify-center text-center">
-            <Sparkles className="w-9 h-9 text-primary-text/60 mb-3" />
+            <BlacksiteIcon name="specialAbility" size={34} className="mb-3 opacity-80" />
             <p className="text-text-muted font-semibold text-sm">
               {lang === 'ar'
                 ? 'سجّل نقاطاً في اللعب أولاً لتتمكن من فتح المقتنيات!'
@@ -372,6 +377,7 @@ export const InventoryScreen: React.FC<InventoryScreenProps> = ({ onBack }) => {
             )}
           </div>
         )}
+      </div>
       </div>
     </div>
   );

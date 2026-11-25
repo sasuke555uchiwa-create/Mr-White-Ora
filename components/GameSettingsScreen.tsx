@@ -5,13 +5,10 @@ import {
   Users,
   UserMinus,
   UserPlus,
-  Play,
   MessageSquare,
   HelpCircle,
-  Sparkles,
   Check,
   X,
-  Clock,
   ChevronLeft,
 } from 'lucide-react';
 import { GameMode, GameSettings, SpecialRoleId } from '../types';
@@ -20,6 +17,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { playSound } from '../services/soundService';
 import { CATEGORY_COVERS, ROLE_PORTRAITS } from '../src/design/assetRegistry';
 import {
+  BlacksiteIcon,
+  BlacksiteScreenBackdrop,
   BottomActionBar,
   DossierHeaderBand,
   IconButton,
@@ -175,9 +174,12 @@ export const GameSettingsScreen: React.FC<GameSettingsScreenProps> = ({
 
   return (
     <div className="flex flex-col min-h-full relative px-4 sm:px-6 pt-4 pb-0 max-w-5xl mx-auto w-full">
+      <BlacksiteScreenBackdrop bgKey="setup" texture="map" />
+      <div className="relative z-10 flex flex-col flex-1">
       {/* Top Players Summary Bar */}
       <DossierHeaderBand
         accent="gold"
+        texture="map"
         className="mb-4"
         icon={<Users size={20} />}
         title={`${t('playersLabel')}: ${playersCount}`}
@@ -329,7 +331,7 @@ export const GameSettingsScreen: React.FC<GameSettingsScreenProps> = ({
           >
             <div className="flex items-center justify-between mb-1.5">
               <div className="flex items-center gap-2">
-                <Sparkles size={18} className="text-primary-text" />
+                <BlacksiteIcon name="specialAbility" size={18} />
                 <span className="text-base font-extrabold text-text-main">
                   {t('addSpecialRoles')}
                 </span>
@@ -514,7 +516,7 @@ export const GameSettingsScreen: React.FC<GameSettingsScreenProps> = ({
 
               <div>
                 <h3 className="text-sm font-bold text-text-main mb-2 flex items-center gap-1.5">
-                  <Clock size={14} className="text-primary-text" />
+                  <BlacksiteIcon name="timer" size={15} />
                   <span>{isRTL ? 'مؤقت الجولة' : 'Round Timer'}</span>
                 </h3>
                 <div className="grid grid-cols-4 gap-1.5">
@@ -549,12 +551,13 @@ export const GameSettingsScreen: React.FC<GameSettingsScreenProps> = ({
             size="lg"
             fullWidth
             onClick={handleStart}
-            icon={<Play size={18} className="fill-current rtl:rotate-180" />}
+            icon={<BlacksiteIcon name="playOperation" size={18} tone="ink" rtlFlip />}
           >
             {isRTL ? 'ابدأ المهمة' : t('startGame')}
           </TacticalButton>
         </div>
       </BottomActionBar>
+      </div>
 
       {/* Special Roles Picker Modal */}
       <AnimatePresence>

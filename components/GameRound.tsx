@@ -6,7 +6,6 @@ import {
   HelpCircle,
   Check,
   EyeOff,
-  Sparkles,
   Lock,
   ScanLine,
 } from 'lucide-react';
@@ -21,8 +20,10 @@ import {
   getRoleVisualIdentity,
   getSpecialRoleDescription,
 } from '../data/specialRoles';
-import { HERO_ASSETS } from '../src/design/assetRegistry';
+import { BLACKSITE_TEXTURES, HERO_ASSETS } from '../src/design/assetRegistry';
 import {
+  BlacksiteIcon,
+  BlacksiteScreenBackdrop,
   ClassifiedStamp,
   IntelligencePanel,
   ModalShell,
@@ -160,6 +161,8 @@ export const GameRound: React.FC<GameRoundProps> = ({
 
   return (
     <div className="flex flex-col min-h-full items-center p-4 sm:p-6 animate-fade-in relative max-w-3xl mx-auto w-full">
+      <BlacksiteScreenBackdrop bgKey="briefing" texture="paper" />
+      <div className="relative z-10 flex flex-col items-center w-full flex-1">
       {/* Strictly do not mount sealed cards or any previous reveal information while Secure Device Handoff is active */}
       {!isPassing && (
         <>
@@ -318,6 +321,7 @@ export const GameRound: React.FC<GameRoundProps> = ({
           )}
         </>
       )}
+      </div>
 
       {/* Revealed Classified Dossier Overlay */}
       <AnimatePresence>
@@ -354,16 +358,22 @@ export const GameRound: React.FC<GameRoundProps> = ({
                         ? `الملف السري للاعب ${currentPlayer.name}`
                         : `Classified dossier for ${currentPlayer.name}`
                     }
-                    className={`relative ${dossierBorder} p-6 text-center max-h-[90vh] overflow-y-auto custom-scrollbar`}
+                    className={`relative blacksite-texture-paper ${dossierBorder} p-6 text-center max-h-[90vh] overflow-y-auto custom-scrollbar`}
                   >
-                    {/* Subtle metallic top hairline */}
+                    {/* Subtle metallic top hairline & confidential stamp */}
                     <div
                       aria-hidden="true"
                       className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-[#B49A62]/70 to-transparent"
                     />
+                    <img
+                      src={BLACKSITE_TEXTURES.confidentialStamp}
+                      alt=""
+                      aria-hidden="true"
+                      className="pointer-events-none select-none absolute top-11 end-3 w-24 h-12 object-contain opacity-[0.16] -rotate-6"
+                    />
 
                     {/* Dossier Header */}
-                    <div className="flex items-center justify-between gap-2 mb-4 pb-3 border-b border-border/70">
+                    <div className="relative z-10 flex items-center justify-between gap-2 mb-4 pb-3 border-b border-border/70">
                       <ClassifiedStamp tone="gold">CLASSIFIED</ClassifiedStamp>
                       <div className="flex items-center gap-1.5 min-w-0">
                         <Avatar avatar={currentPlayer.avatar} name={currentPlayer.name} size={22} />
@@ -513,7 +523,7 @@ export const GameRound: React.FC<GameRoundProps> = ({
                             <div className="min-w-0 flex-1">
                               <div className="flex items-center justify-between gap-2 mb-0.5">
                                 <div className="flex items-center gap-1.5 text-primary-text font-bold text-xs min-w-0">
-                                  <Sparkles size={13} className="shrink-0" />
+                                  <BlacksiteIcon name="specialAbility" size={14} className="shrink-0" />
                                   <span className="truncate">
                                     {getRoleTitle(selectedSpecial, lang)}
                                   </span>
@@ -535,7 +545,13 @@ export const GameRound: React.FC<GameRoundProps> = ({
                           variant="primary"
                           size="lg"
                           fullWidth
-                          icon={<Check size={18} strokeWidth={2.5} />}
+                          icon={
+                            currentPlayerIndex === players.length - 1 ? (
+                              <BlacksiteIcon name="playOperation" size={17} tone="ink" />
+                            ) : (
+                              <Check size={18} strokeWidth={2.5} />
+                            )
+                          }
                         >
                           {currentPlayerIndex === players.length - 1
                             ? t('startGame')

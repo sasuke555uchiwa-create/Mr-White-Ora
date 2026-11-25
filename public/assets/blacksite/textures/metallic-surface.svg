@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="120" viewBox="0 0 240 120" fill="none">
+  <defs>
+    <linearGradient id="metalSheen" x1="0" y1="0" x2="240" y2="120" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#ECEFF4" stop-opacity="0.06"/>
+      <stop offset="50%" stop-color="#A8B1BA" stop-opacity="0.015"/>
+      <stop offset="100%" stop-color="#B49A62" stop-opacity="0.05"/>
+    </linearGradient>
+  </defs>
+  <rect width="240" height="120" fill="url(#metalSheen)"/>
+  <path d="M0 24H240M0 48H240M0 72H240M0 96H240" stroke="#ECEFF4" stroke-opacity="0.025" stroke-width="0.75"/>
+  <path d="M0 1H240" stroke="#B49A62" stroke-opacity="0.18" stroke-width="1"/>
+</svg>

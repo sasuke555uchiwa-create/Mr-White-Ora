@@ -8,7 +8,14 @@ import { getSettings } from '../services/storageService';
 import { isMrWhiteGuessMatch } from '../src/game/wordEngine';
 import { ROLE_PORTRAITS } from '../src/design/assetRegistry';
 import { getRoleVisualIdentity } from '../data/specialRoles';
-import { ClassifiedStamp, ModalShell, OperationPhaseBadge, TacticalButton } from './ui/BlacksiteUI';
+import {
+  BlacksiteIcon,
+  BlacksiteScreenBackdrop,
+  ClassifiedStamp,
+  ModalShell,
+  OperationPhaseBadge,
+  TacticalButton,
+} from './ui/BlacksiteUI';
 
 interface ImpostorGuessScreenProps {
   impostor: Player;
@@ -85,14 +92,15 @@ export const ImpostorGuessScreen: React.FC<ImpostorGuessScreenProps> = ({
 
   return (
     <div className="flex flex-col h-full items-center justify-center p-5 animate-fade-in bg-[#080B10]/90 fixed inset-0 z-[100]">
+      <BlacksiteScreenBackdrop bgKey="voting" texture="carbon" />
       <motion.div
         initial={{ scale: 0.94, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
-        className="w-full max-w-sm"
+        className="relative z-10 w-full max-w-sm"
       >
         <ModalShell
           ariaLabel={lang === 'ar' ? 'فرصة تخمين Mr. White' : 'Mr. White Guess Override'}
-          className="relative border-[#B49A62]/50 p-7 text-center flex flex-col items-center"
+          className="relative blacksite-texture-carbon border-[#B49A62]/50 p-7 text-center flex flex-col items-center"
         >
           <div
             aria-hidden="true"
@@ -152,6 +160,7 @@ export const ImpostorGuessScreen: React.FC<ImpostorGuessScreenProps> = ({
                   variant="primary"
                   size="lg"
                   fullWidth
+                  icon={<BlacksiteIcon name="officialVerdict" size={16} tone="ink" />}
                 >
                   {lang === 'ar' ? 'تأكيد التخمين' : t('ok')}
                 </TacticalButton>

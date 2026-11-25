@@ -288,6 +288,56 @@ body {
   background-repeat: no-repeat;
 }
 
+.blacksite-backdrop-scrim {
+  background: linear-gradient(
+    180deg,
+    rgba(8, 11, 16, 0.72) 0%,
+    rgba(13, 18, 25, 0.62) 45%,
+    rgba(8, 11, 16, 0.88) 100%
+  );
+}
+
+.theme-gray .blacksite-backdrop-scrim {
+  background: linear-gradient(
+    180deg,
+    rgba(16, 20, 25, 0.76) 0%,
+    rgba(23, 28, 35, 0.66) 45%,
+    rgba(16, 20, 25, 0.88) 100%
+  );
+}
+
+.theme-light .blacksite-backdrop-scrim {
+  background: linear-gradient(
+    180deg,
+    rgba(243, 245, 248, 0.88) 0%,
+    rgba(232, 236, 239, 0.86) 50%,
+    rgba(232, 236, 239, 0.94) 100%
+  );
+}
+
+.blacksite-texture-carbon {
+  background-image: url('/assets/blacksite/textures/technical-carbon.svg');
+  background-size: 28px 28px;
+}
+
+.blacksite-texture-paper {
+  background-image: url('/assets/blacksite/textures/classified-paper.svg');
+  background-size: 160px 160px;
+}
+
+.blacksite-texture-map {
+  background-image: url('/assets/blacksite/textures/tactical-map.svg');
+  background-size: 320px 200px;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.blacksite-texture-metal {
+  background-image: url('/assets/blacksite/textures/metallic-surface.svg');
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+}
+
 @layer components {
   /* Level 1: Primary Panel / Sheet Surface */
   .blacksite-panel {

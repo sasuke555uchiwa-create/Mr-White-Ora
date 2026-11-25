@@ -6,7 +6,6 @@ import { Avatar } from './Avatar';
 import {
   ArrowDown,
   ArrowRight,
-  Vote,
   RefreshCw,
   MessageSquare,
   HelpCircle,
@@ -16,7 +15,6 @@ import {
   Play,
   Send,
   X,
-  Sparkles,
   Heart,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -29,6 +27,8 @@ import {
 } from '../data/specialRoles';
 import { HERO_ASSETS } from '../src/design/assetRegistry';
 import {
+  BlacksiteIcon,
+  BlacksiteScreenBackdrop,
   BottomActionBar,
   ClassifiedStamp,
   IconButton,
@@ -260,9 +260,11 @@ export const QuestionPhase: React.FC<QuestionPhaseProps> = ({
 
   return (
     <div className="flex flex-col min-h-full items-center animate-fade-in pb-0 relative max-w-4xl mx-auto w-full px-4 sm:px-6 pt-3">
+      <BlacksiteScreenBackdrop bgKey="discussion" texture="map" />
+      <div className="relative z-10 flex flex-col items-center w-full flex-1">
       {/* Tactical Turn Header */}
       <IntelligencePanel
-        className={`w-full px-4 py-4 mb-4 ${
+        className={`w-full px-4 py-4 mb-4 blacksite-texture-map ${
           gameMode === 'question' ? 'border-border-strong' : 'border-[#668F9A]/40'
         }`}
       >
@@ -288,12 +290,13 @@ export const QuestionPhase: React.FC<QuestionPhaseProps> = ({
           </div>
 
           <div className="text-center min-w-0 flex-1">
-            <div className="flex items-center justify-center mb-1">
+            <div className="flex items-center justify-center gap-1.5 mb-1">
               <OperationPhaseBadge
                 phase={gameMode === 'question' ? 'interrogation' : 'active'}
                 round={currentRound}
                 lang={lang}
               />
+              <BlacksiteIcon name="timer" size={14} className="opacity-80" />
             </div>
             <h2 className="text-lg sm:text-xl font-bold text-text-main truncate">
               {gameMode === 'expression'
@@ -314,7 +317,7 @@ export const QuestionPhase: React.FC<QuestionPhaseProps> = ({
             variant="secondary"
             aria-label="Info"
           >
-            <HelpCircle size={18} />
+            <BlacksiteIcon name="help" size={18} />
           </IconButton>
         </div>
 
@@ -354,7 +357,7 @@ export const QuestionPhase: React.FC<QuestionPhaseProps> = ({
                   />
                 ))
               ) : (
-                <Sparkles size={18} className="text-text-muted opacity-50" />
+                <BlacksiteIcon name="specialAbility" size={18} className="opacity-65" />
               )}
             </div>
           </InteractiveCard>
@@ -592,12 +595,13 @@ export const QuestionPhase: React.FC<QuestionPhaseProps> = ({
             onClick={handleFinish}
             variant="danger"
             size="md"
-            icon={<Vote size={16} />}
+            icon={<BlacksiteIcon name="secretVote" size={16} />}
           >
             {lang === 'ar' ? 'تصويت' : 'Vote'}
           </TacticalButton>
         </div>
       </BottomActionBar>
+      </div>
 
       {/* Lovers Mutual Reveal Reminder (Round 1 only, non-spoiling) */}
       <AnimatePresence>
@@ -713,7 +717,7 @@ export const QuestionPhase: React.FC<QuestionPhaseProps> = ({
                     variant="danger"
                     size="lg"
                     fullWidth
-                    icon={<Vote size={18} />}
+                    icon={<BlacksiteIcon name="secretVote" size={18} />}
                   >
                     {t('goToVote')}
                   </TacticalButton>
@@ -1029,7 +1033,7 @@ export const QuestionPhase: React.FC<QuestionPhaseProps> = ({
                         >
                           <div className="flex items-center justify-between gap-2">
                             <div className="flex items-center gap-1.5 font-bold text-primary-text">
-                              <Sparkles size={13} />
+                              <BlacksiteIcon name="specialAbility" size={14} />
                               <span>{getRoleTitle(peekPlayer.specialRole, lang)}</span>
                             </div>
                             <ClassifiedStamp tone={spVisual.stampTone}>

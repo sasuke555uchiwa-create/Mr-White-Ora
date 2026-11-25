@@ -9,11 +9,13 @@ import {
   quickJoinOnlineRoom,
 } from '../utils/onlineRoomService';
 import { motion } from 'framer-motion';
-import { ArrowRight, Search, Plus, Globe, Lock, EyeOff, Eye, Zap, Clock, Minus } from 'lucide-react';
+import { Plus, Globe, Lock, EyeOff, Eye, Zap, Clock, Minus } from 'lucide-react';
 import { Avatar } from './Avatar';
 import { getUITranslation } from '../translations';
 import { showToast } from '../utils/toast';
 import {
+  BlacksiteIcon,
+  BlacksiteScreenBackdrop,
   BottomActionBar,
   ClassifiedStamp,
   DossierHeaderBand,
@@ -144,8 +146,9 @@ export const OnlineRoomsScreen: React.FC<OnlineRoomsScreenProps> = ({
 
   if (!user) {
     return (
-      <div className="min-h-full flex flex-col items-center justify-center p-6 text-center text-text-main">
-        <IntelligencePanel className="max-w-sm w-full p-6 space-y-4">
+      <div className="relative min-h-full flex flex-col items-center justify-center p-6 text-center text-text-main">
+        <BlacksiteScreenBackdrop bgKey="online" texture="map" />
+        <IntelligencePanel className="relative z-10 max-w-sm w-full p-6 space-y-4">
           <h2 className="text-xl font-extrabold">{t('loginRequired')}</h2>
           <p className="text-sm text-text-muted leading-relaxed">{t('mustLoginToPlayOnline')}</p>
           <TacticalButton variant="primary" fullWidth onClick={onBack}>
@@ -220,20 +223,23 @@ export const OnlineRoomsScreen: React.FC<OnlineRoomsScreenProps> = ({
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -6 }}
-      className="flex flex-col px-4 sm:px-6 pt-4 max-w-4xl mx-auto w-full min-h-full"
+      className="relative flex flex-col px-4 sm:px-6 pt-4 max-w-4xl mx-auto w-full min-h-full"
     >
+      <BlacksiteScreenBackdrop bgKey="online" texture="map" />
+      <div className="relative z-10 flex flex-col flex-1 w-full">
       {/* Header */}
       <DossierHeaderBand
         accent="cyan"
+        texture="map"
         className="mb-4"
         badge={<ClassifiedStamp tone="cyan">NET-OPS</ClassifiedStamp>}
         title={t('publicRooms')}
         subtitle={`${rooms.length} ${isRTL ? 'غرفة متاحة' : 'active lobbies'}`}
-        icon={<Globe className="w-5 h-5" />}
+        icon={<BlacksiteIcon name="onlineMultiplayer" size={20} />}
         action={
           <TacticalToolbar>
             <IconButton onClick={onBack} aria-label={t('back')} variant="ghost" size="sm">
-              <ArrowRight className={`w-5 h-5 ${isRTL ? '' : 'rotate-180'}`} />
+              <BlacksiteIcon name="backNav" size={18} rtlFlip />
             </IconButton>
             <TacticalButton
               variant="cyan"
@@ -250,7 +256,7 @@ export const OnlineRoomsScreen: React.FC<OnlineRoomsScreenProps> = ({
       />
 
       {/* Join by 6-digit Code + Filter Tabs */}
-      <IntelligencePanel className="relative overflow-hidden p-3.5 sm:p-4 space-y-3 mb-4">
+      <IntelligencePanel className="relative overflow-hidden blacksite-texture-map p-3.5 sm:p-4 space-y-3 mb-4">
         <div aria-hidden="true" className="blacksite-hairline-cyan absolute inset-x-0 top-0 pointer-events-none" />
         <form
           onSubmit={handleJoinWithCode}
@@ -274,7 +280,7 @@ export const OnlineRoomsScreen: React.FC<OnlineRoomsScreenProps> = ({
             size="md"
             disabled={joining || joinCode.trim().length < 4}
             aria-label={t('joinByCodePlaceholder')}
-            icon={<Search className="w-4 h-4" />}
+            icon={<BlacksiteIcon name="search" size={16} tone="ink" />}
           >
             {isRTL ? 'دخول' : 'Join'}
           </TacticalButton>
@@ -327,7 +333,7 @@ export const OnlineRoomsScreen: React.FC<OnlineRoomsScreenProps> = ({
                       <div className="font-bold text-sm sm:text-base flex items-center gap-1.5 truncate">
                         <span className="truncate">{room.hostName}</span>
                         {(room.hasSecretCode || room.isPrivate) && (
-                          <Lock className="w-3.5 h-3.5 text-primary-text shrink-0" />
+                          <BlacksiteIcon name="secureRoom" size={14} className="shrink-0" />
                         )}
                       </div>
                       <div className="text-xs text-text-muted font-medium flex items-center gap-1.5 flex-wrap mt-0.5">
@@ -388,6 +394,7 @@ export const OnlineRoomsScreen: React.FC<OnlineRoomsScreenProps> = ({
           {t('createNewRoom')}
         </TacticalButton>
       </BottomActionBar>
+      </div>
 
       {/* Create Room Modal */}
       {showCreateModal && (

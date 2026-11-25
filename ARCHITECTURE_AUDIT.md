@@ -90,3 +90,14 @@ Root `package.json` separates verification into independent, composable scripts:
   - Standardized Pass & Play (`PlayerSetup`, `GameSettingsScreen`, `GameRound`, `QuestionPhase`, `DiscussionPhase`, `VotingScreen`, `RevealVoteResult`, `ResultScreen`), Online (`OnlineRoomsScreen`, `OnlineLobbyScreen`, `OnlineGameScreen`), and Utility/Profile (`ProfileScreen`, `FriendsSection`, `LeaderboardSection`, `ScoreboardScreen`, `SettingsScreen`, `InventoryScreen`, `RulesScreen`, `LanguageDictionary`, `OperationArchiveScreen`, `CaseFileScreen`) screens around `DossierHeaderBand`, non-overlapping structured card headers/footers, inline button counters, and `BottomActionBar`.
 - **Verification**: `tests/uiDesignSystem.test.tsx` expanded to validate Phase 4.2 layout primitives (`DossierHeaderBand`, `TacticalToolbar`, `SectionDivider`) and RTL/LTR render integrity across transformed Pass & Play, Online-adjacent, and Utility screens alongside `npm run check`.
 
+### 6.2 Original Visual Asset Library & Direct Screen Integration
+- **41 Original BLACKSITE Assets (`public/assets/blacksite/`)**:
+  - **9 Mobile Portrait Backgrounds (`1080×1920` WebP, 666 KB total)**: `home-bg.webp`, `setup-bg.webp`, `briefing-bg.webp`, `discussion-bg.webp`, `voting-bg.webp`, `results-bg.webp`, `online-bg.webp`, `archive-bg.webp`, `profile-bg.webp`.
+  - **10 Custom Bottom-Nav SVGs**: Inactive & active (`-active.svg`) pairs for `vault`, `rankings`, `dictionary`, `agents`, and `settings`.
+  - **16 Reusable Action Icon SVGs**: Integrated into CTAs, top toolbars, setup controls, secret voting, shield protection, special abilities, countdowns, and official verdict surfaces via `<BlacksiteIcon />`.
+  - **6 Tactical Textures & Stamps**: `classified-paper.svg`, `tactical-map.svg`, `technical-carbon.svg`, `metallic-surface.svg`, `confidential-stamp.svg`, `dossier-ornament.svg`.
+- **Lazy-Loading & Layering Architecture**:
+  - `BlacksiteScreenBackdrop` renders only the currently active screen's background behind a theme-aware `.blacksite-backdrop-scrim` (`z-0`), keeping non-modal content at `z-10` beneath `<Header z-20>` and isolating `fixed inset-0 z-50`/`z-[100]` handoff guards, ballot confirmations, and verdict modals outside `z-10` so privacy screens always cover header controls cleanly.
+  - `public/sw.js` (`blacksite-shell-v11`) caches static assets via stale-while-revalidate on demand rather than precaching all 9 portrait WebPs in `SHELL_ASSETS`.
+  - `tests/pwaAndAssets.test.ts` asserts on-disk integrity for all 41 assets, full `GamePhase` coverage in `SCREEN_BACKGROUND_MAP`, valid SVG markup, and direct `BlacksiteScreenBackdrop` integration across all 21 application screens.
+

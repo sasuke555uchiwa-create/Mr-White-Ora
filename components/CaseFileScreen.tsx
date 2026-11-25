@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import {
-  ArrowLeft,
   Award,
   CheckCircle2,
   Clock,
@@ -12,10 +11,8 @@ import {
   MessageSquare,
   RefreshCw,
   Shield,
-  Sparkles,
   Target,
   Users,
-  Vote,
   Zap,
 } from 'lucide-react';
 import {
@@ -29,9 +26,15 @@ import { getUITranslation } from '../translations';
 import { getLocalCaseFileById, getSettings } from '../services/storageService';
 import { fetchOnlineCaseFile } from '../utils/caseFileService';
 import { getRoleAsset, getRoleTitle } from '../data/specialRoles';
-import { ACHIEVEMENT_ASSETS, CATEGORY_COVERS } from '../src/design/assetRegistry';
+import {
+  ACHIEVEMENT_ASSETS,
+  BLACKSITE_TEXTURES,
+  CATEGORY_COVERS,
+} from '../src/design/assetRegistry';
 import { playSound } from '../services/soundService';
 import {
+  BlacksiteIcon,
+  BlacksiteScreenBackdrop,
   ClassifiedDossierPanel,
   ClassifiedStamp,
   IntelligencePanel,
@@ -156,17 +159,21 @@ export const CaseFileScreen: React.FC<CaseFileScreenProps> = ({
 
   if (loading) {
     return (
-      <div className="min-h-[65vh] flex flex-col items-center justify-center p-6 text-center max-w-2xl mx-auto w-full">
-        <div className="w-10 h-10 border-2 border-[#668F9A] border-t-transparent rounded-full animate-spin mb-4" />
-        <p className="text-sm font-bold text-cyan-text">{t('caseFileLoading')}</p>
+      <div className="relative min-h-[65vh] flex flex-col items-center justify-center p-6 text-center max-w-2xl mx-auto w-full">
+        <BlacksiteScreenBackdrop bgKey="archive" texture="paper" />
+        <div className="relative z-10 flex flex-col items-center">
+          <div className="w-10 h-10 border-2 border-[#668F9A] border-t-transparent rounded-full animate-spin mb-4" />
+          <p className="text-sm font-bold text-cyan-text">{t('caseFileLoading')}</p>
+        </div>
       </div>
     );
   }
 
   if (loadError) {
     return (
-      <div className="min-h-[65vh] flex flex-col items-center justify-center p-6 text-center max-w-md mx-auto w-full">
-        <IntelligencePanel className="border-[#963F46]/40 p-6 w-full space-y-4">
+      <div className="relative min-h-[65vh] flex flex-col items-center justify-center p-6 text-center max-w-md mx-auto w-full">
+        <BlacksiteScreenBackdrop bgKey="archive" texture="paper" />
+        <IntelligencePanel className="relative z-10 border-[#963F46]/40 p-6 w-full space-y-4">
           <p className="text-sm font-bold text-danger-text">{t('caseFileLoadError')}</p>
           <div className="flex gap-3">
             {reportId && (
@@ -191,8 +198,9 @@ export const CaseFileScreen: React.FC<CaseFileScreenProps> = ({
 
   if (!resolvedFile) {
     return (
-      <div className="min-h-[65vh] flex flex-col items-center justify-center p-6 text-center max-w-md mx-auto w-full">
-        <IntelligencePanel className="p-6 w-full space-y-4">
+      <div className="relative min-h-[65vh] flex flex-col items-center justify-center p-6 text-center max-w-md mx-auto w-full">
+        <BlacksiteScreenBackdrop bgKey="archive" texture="paper" />
+        <IntelligencePanel className="relative z-10 p-6 w-full space-y-4">
           <FileText size={32} className="mx-auto text-text-muted" />
           <p className="text-sm font-semibold text-text-muted">{t('caseFileNotFound')}</p>
           <TacticalButton onClick={onBack} variant="secondary" size="md" fullWidth>
@@ -254,9 +262,11 @@ export const CaseFileScreen: React.FC<CaseFileScreenProps> = ({
 
   return (
     <div
-      className="flex flex-col w-full max-w-4xl mx-auto px-4 sm:px-6 pt-3 pb-24 space-y-5"
+      className="relative flex flex-col w-full max-w-4xl mx-auto px-4 sm:px-6 pt-3 pb-24"
       dir={isRTL ? 'rtl' : 'ltr'}
     >
+      <BlacksiteScreenBackdrop bgKey="archive" texture="paper" />
+      <div className="relative z-10 flex flex-col space-y-5 w-full">
       {/* Top Bar */}
       <TacticalToolbar className="w-full justify-between px-2 py-1.5">
         <TacticalButton
@@ -266,7 +276,7 @@ export const CaseFileScreen: React.FC<CaseFileScreenProps> = ({
           }}
           variant="secondary"
           size="sm"
-          icon={<ArrowLeft size={16} className="rtl:rotate-180" />}
+          icon={<BlacksiteIcon name="backNav" size={16} rtlFlip />}
         >
           {t('caseFileBackToMatch')}
         </TacticalButton>
@@ -288,6 +298,12 @@ export const CaseFileScreen: React.FC<CaseFileScreenProps> = ({
           className="absolute inset-0 w-full h-full object-cover opacity-20"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-[#080B10] via-[#0D1219]/88 to-[#080B10]/75" />
+        <img
+          src={BLACKSITE_TEXTURES.confidentialStamp}
+          alt=""
+          aria-hidden="true"
+          className="pointer-events-none select-none absolute top-4 end-4 w-28 h-14 object-contain opacity-[0.16] -rotate-6 z-[5]"
+        />
 
         <div className="relative z-10 p-5 sm:p-6 space-y-4">
           <div className="flex flex-wrap items-center justify-between gap-2">
@@ -326,7 +342,7 @@ export const CaseFileScreen: React.FC<CaseFileScreenProps> = ({
       </motion.section>
 
       {/* 2. OPERATION SUMMARY */}
-      <ClassifiedDossierPanel className="relative overflow-hidden p-5 space-y-4">
+      <ClassifiedDossierPanel className="relative overflow-hidden blacksite-texture-paper p-5 space-y-4">
         <div aria-hidden="true" className="blacksite-hairline absolute inset-x-0 top-0 pointer-events-none" />
         <div
           className={`flex items-center gap-2 text-xs font-bold text-cyan-text ${
@@ -537,7 +553,7 @@ export const CaseFileScreen: React.FC<CaseFileScreenProps> = ({
               !isRTL ? 'uppercase tracking-wider' : ''
             }`}
           >
-            <Vote size={14} />
+            <BlacksiteIcon name="secretVote" size={15} />
             <h2>
               {t('caseSectionTimeline')} · {t('caseSectionVoting')}
             </h2>
@@ -805,14 +821,14 @@ export const CaseFileScreen: React.FC<CaseFileScreenProps> = ({
       </IntelligencePanel>
 
       {/* 7. FINAL VERDICT & DETERMINISTIC AWARDS */}
-      <ClassifiedDossierPanel className="relative overflow-hidden p-5 space-y-4">
+      <ClassifiedDossierPanel className="relative overflow-hidden blacksite-texture-paper p-5 space-y-4">
         <div aria-hidden="true" className="blacksite-hairline absolute inset-x-0 top-0 pointer-events-none" />
         <div
           className={`flex items-center gap-2 text-xs font-bold text-primary-text ${
             !isRTL ? 'uppercase tracking-wider' : ''
           }`}
         >
-          <Sparkles size={14} />
+          <BlacksiteIcon name="officialVerdict" size={15} />
           <h2>{t('caseSectionVerdict')}</h2>
         </div>
 
@@ -880,6 +896,7 @@ export const CaseFileScreen: React.FC<CaseFileScreenProps> = ({
           })}
         </div>
       </ClassifiedDossierPanel>
+      </div>
     </div>
   );
 };

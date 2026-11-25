@@ -104,3 +104,25 @@ Select themes: `.theme-dark` (primary), `.theme-gray` (slate tactical), `.theme-
 - **Flagship Home (`WelcomeScreen.tsx`)**: Responsive `lg:grid-cols-12` composition (`max-w-5xl`) balancing the focal hero emblem & Play CTA with a Command Console mode preview, 3-column framed Core Factions dossier (`/images/1.png`–`4.png`), and the unified 5-tab `NavDock`.
 - **Anchored Bottom Actions**: Setup, settings, active match, scoreboard, debrief, and utility flows terminate cleanly in sticky in-flow `BottomActionBar` containers rather than orphaned buttons.
 
+---
+
+## 8. Phase 4.2 — Original BLACKSITE Visual Asset Library (`public/assets/blacksite/`)
+
+### 8.1 Environmental Screen Backgrounds (`1080×1920` WebP, Lazy-Loaded)
+Registered in `src/design/assetRegistry.ts` (`BLACKSITE_BACKGROUNDS` + `SCREEN_BACKGROUND_MAP`) and rendered via `<BlacksiteScreenBackdrop bgKey=... texture=... />`:
+- `home-bg.webp` (`home`) — `WELCOME`: Obsidian command headquarters with subtle gold telemetry (priority eager on initial load).
+- `setup-bg.webp` (`setup`) — `SETUP`, `PLAYERS_LIST`, `GAME_SETTINGS`: Tactical mission briefing table.
+- `briefing-bg.webp` (`briefing`) — `REVEAL` (Local & Online): Sealed dossier briefing vault.
+- `discussion-bg.webp` (`discussion`) — `PLAYING`, `DISCUSSION` (Local & Online): Interrogation & investigation room.
+- `voting-bg.webp` (`voting`) — `VOTING`, `REVEAL_VOTE_RESULT`, `IMPOSTOR_GUESS` (Local & Online): Alert crimson tribunal chamber.
+- `results-bg.webp` (`results`) — `RESULT`, `SCOREBOARD` (Local & Online): Official agency debriefing hall.
+- `online-bg.webp` (`online`) — `ONLINE_ROOMS`, `ONLINE_LOBBY`, default `ONLINE_GAME`: Cyber-intelligence network hub.
+- `archive-bg.webp` (`archive`) — `CASE_FILE`, `OPERATION_ARCHIVE`, `DICTIONARY`, `RULES`: Underground classified archive corridor.
+- `profile-bg.webp` (`profile`) — `PROFILE`, `INVENTORY`, `SETTINGS`: Operative locker suite.
+
+Only the active screen's background mounts at runtime (`loading="lazy"` except Home hero priority), keeping memory and initial download lean. Contrast scrims (`.blacksite-backdrop-scrim`) adapt cleanly across `.theme-dark`, `.theme-gray`, and `.theme-light` so cards and typography preserve legibility.
+
+### 8.2 Custom BLACKSITE Iconography & Surface Textures
+- **Bottom Navigation Pairs (`public/assets/blacksite/icons/navigation/`)**: 5 bespoke dual-state SVGs (`vault`, `rankings`, `dictionary`, `agents`, `settings`, each with inactive silver outline and `-active.svg` `#B49A62` gold active frame) wired into `NavDock`.
+- **16 Reusable Action Icons (`public/assets/blacksite/icons/actions/`)**: `play-operation`, `online-multiplayer`, `pass-and-play`, `add-player`, `remove-player`, `edit-player`, `secure-room`, `search`, `back-nav`, `help`, `profile`, `secret-vote`, `shield-protection`, `special-ability`, `timer`, and `official-verdict`, rendered cleanly via `<BlacksiteIcon />` (supports `tone="native" | "ink"` and `rtlFlip`).
+- **6 Tactical Textures & Stamps (`public/assets/blacksite/textures/`)**: `classified-paper.svg`, `tactical-map.svg`, `technical-carbon.svg`, `metallic-surface.svg`, `confidential-stamp.svg`, and `dossier-ornament.svg`, applied through `.blacksite-texture-*` CSS utility classes and decorative card overlays.

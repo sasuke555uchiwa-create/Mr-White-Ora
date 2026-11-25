@@ -1,14 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Key, Trophy, Check, Heart, FileText } from 'lucide-react';
+import { Key, Check, Heart, FileText } from 'lucide-react';
 import { Avatar } from './Avatar';
 import { Player } from '../types';
 import { playSound } from '../services/soundService';
 import { getUITranslation } from '../translations';
 import { getSettings } from '../services/storageService';
 import { getRoleAsset, getRoleTitle, getRoleVisualIdentity } from '../data/specialRoles';
+import { BLACKSITE_TEXTURES } from '../src/design/assetRegistry';
 import { getPlayerRoundPoints, resolveWinningFaction } from '../services/gameScoring';
 import {
+  BlacksiteIcon,
+  BlacksiteScreenBackdrop,
   BottomActionBar,
   ClassifiedStamp,
   IntelligencePanel,
@@ -153,12 +156,14 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({
 
   return (
     <div className="flex flex-col min-h-full items-center px-4 sm:px-6 pt-4 pb-0 animate-fade-in relative max-w-4xl mx-auto w-full">
+      <BlacksiteScreenBackdrop bgKey="results" texture="paper" />
+      <div className="relative z-10 flex flex-col items-center w-full flex-1">
       <div className="w-full max-w-2xl flex flex-col items-center text-center mb-6">
         {!winnerSelected && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="w-full mb-4">
-            <IntelligencePanel className="p-4 sm:p-5">
+            <IntelligencePanel className="p-4 sm:p-5 blacksite-texture-paper">
               <h3 className="text-center text-text-main font-bold mb-3 text-base flex items-center justify-center gap-2">
-                <Trophy size={18} className="text-primary-text" />
+                <BlacksiteIcon name="officialVerdict" size={18} />
                 <span>{t('whoIsWinner')}</span>
               </h3>
               <div className="flex gap-2.5">
@@ -208,7 +213,7 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({
               transition={{ delay: 0.12 }}
               className="w-full mb-5"
             >
-              <IntelligencePanel className="relative overflow-hidden border-[#B49A62]/40">
+              <IntelligencePanel className="relative overflow-hidden blacksite-texture-paper border-[#B49A62]/40">
                 <div aria-hidden="true" className="blacksite-hairline absolute inset-x-0 top-0 pointer-events-none" />
 
                 <div className="grid grid-cols-1 sm:grid-cols-12 items-stretch">
@@ -503,6 +508,7 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({
           </div>
         </BottomActionBar>
       )}
+      </div>
 
       {/* Restrained BLACKSITE Classified Verdict Overlay */}
       <AnimatePresence>
@@ -521,8 +527,14 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({
             >
               <ModalShell
                 ariaLabel={getResultTitle()}
-                className="border-[#B49A62]/45 p-4 flex flex-col gap-3.5"
+                className="relative overflow-hidden blacksite-texture-paper border-[#B49A62]/45 p-4 flex flex-col gap-3.5"
               >
+                <img
+                  src={BLACKSITE_TEXTURES.confidentialStamp}
+                  alt=""
+                  aria-hidden="true"
+                  className="pointer-events-none select-none absolute top-11 end-3 w-24 h-12 object-contain opacity-[0.16] -rotate-6 z-10"
+                />
                 <div className="flex items-center justify-between gap-2">
                   <OperationPhaseBadge phase="verdict" lang={lang} />
                   <ClassifiedStamp tone={winningFaction === 'citizens' ? 'cyan' : 'gold'}>

@@ -2,12 +2,10 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Archive,
-  ArrowLeft,
   Clock,
   FolderOpen,
   Globe,
   Info,
-  Search,
   Smartphone,
   Trash2,
   Users,
@@ -26,6 +24,8 @@ import {
 import { getUITranslation } from '../translations';
 import { playSound } from '../services/soundService';
 import {
+  BlacksiteIcon,
+  BlacksiteScreenBackdrop,
   ClassifiedStamp,
   DossierHeaderBand,
   IconButton,
@@ -129,12 +129,15 @@ export const OperationArchiveScreen: React.FC<OperationArchiveScreenProps> = ({
 
   return (
     <div
-      className="flex flex-col w-full max-w-4xl mx-auto px-4 sm:px-6 pt-4 pb-24 space-y-4"
+      className="relative flex flex-col w-full max-w-4xl mx-auto px-4 sm:px-6 pt-4 pb-24"
       dir={isRTL ? 'rtl' : 'ltr'}
     >
+      <BlacksiteScreenBackdrop bgKey="archive" texture="paper" />
+      <div className="relative z-10 flex flex-col space-y-4 w-full">
       {/* Header */}
       <DossierHeaderBand
         accent="gold"
+        texture="paper"
         badge={<ClassifiedStamp tone="gold">ARCHIVE</ClassifiedStamp>}
         title={t('operationArchive')}
         subtitle={t('operationArchiveSubtitle')}
@@ -147,7 +150,7 @@ export const OperationArchiveScreen: React.FC<OperationArchiveScreenProps> = ({
             }}
             variant="secondary"
             size="sm"
-            icon={<ArrowLeft size={16} className="rtl:rotate-180" />}
+            icon={<BlacksiteIcon name="backNav" size={16} rtlFlip />}
           >
             {t('back')}
           </TacticalButton>
@@ -155,13 +158,14 @@ export const OperationArchiveScreen: React.FC<OperationArchiveScreenProps> = ({
       />
 
       {/* Search + Filters */}
-      <IntelligencePanel className="relative overflow-hidden p-4 space-y-3">
+      <IntelligencePanel className="relative overflow-hidden blacksite-texture-paper p-4 space-y-3">
         <div aria-hidden="true" className="blacksite-hairline absolute inset-x-0 top-0 pointer-events-none" />
         <div className="flex flex-col sm:flex-row gap-2.5">
           <div className="relative flex-1">
-            <Search
+            <BlacksiteIcon
+              name="search"
               size={15}
-              className="absolute top-1/2 -translate-y-1/2 start-3.5 text-text-muted pointer-events-none"
+              className="absolute top-1/2 -translate-y-1/2 start-3.5 pointer-events-none opacity-80"
             />
             <TacticalInput
               type="text"
@@ -281,6 +285,7 @@ export const OperationArchiveScreen: React.FC<OperationArchiveScreenProps> = ({
             </motion.div>
           );
         })}
+      </div>
       </div>
 
       {/* Delete Confirmation Modal */}

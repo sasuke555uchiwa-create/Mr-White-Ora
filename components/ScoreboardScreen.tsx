@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { getScores, getSettings, getInventoryMap } from '../services/storageService';
 import { SHOP_ITEMS } from '../data/shopItems';
-import { Medal, TrendingDown, ArrowLeft, Play, Archive } from 'lucide-react';
+import { Medal, TrendingDown, Archive } from 'lucide-react';
 import { getUITranslation } from '../translations';
 import {
+  BlacksiteIcon,
+  BlacksiteScreenBackdrop,
   BottomActionBar,
   ClassifiedStamp,
   DossierHeaderBand,
@@ -48,10 +50,13 @@ export const ScoreboardScreen: React.FC<ScoreboardScreenProps> = ({
 
   return (
     <div className="flex flex-col min-h-full animate-fade-in relative px-4 sm:px-6 pt-4 max-w-3xl mx-auto w-full">
+      <BlacksiteScreenBackdrop bgKey="results" texture="metal" />
+      <div className="relative z-10 flex flex-col flex-1 w-full">
       <div className="w-full max-w-xl mx-auto flex flex-col flex-1">
         {/* Header Banner */}
         <DossierHeaderBand
           accent="gold"
+          texture="metal"
           className="mb-5"
           badge={<ClassifiedStamp tone="gold">RANKINGS</ClassifiedStamp>}
           title={t('playerRanking')}
@@ -155,7 +160,7 @@ export const ScoreboardScreen: React.FC<ScoreboardScreenProps> = ({
                 variant="primary"
                 size="md"
                 className="flex-1"
-                icon={<Play size={16} className="fill-current" />}
+                icon={<BlacksiteIcon name="playOperation" size={16} tone="ink" />}
               >
                 {t('nextRound')}
               </TacticalButton>
@@ -166,12 +171,13 @@ export const ScoreboardScreen: React.FC<ScoreboardScreenProps> = ({
             variant="secondary"
             size="lg"
             fullWidth
-            icon={<ArrowLeft size={16} className="rtl:rotate-180" />}
+            icon={<BlacksiteIcon name="backNav" size={16} rtlFlip />}
           >
             {onNextRound ? t('endGame') : t('back')}
           </TacticalButton>
         </div>
       </BottomActionBar>
+      </div>
     </div>
   );
 };
