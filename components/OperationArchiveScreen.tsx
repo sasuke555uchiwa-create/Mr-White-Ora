@@ -34,6 +34,7 @@ import {
   SegmentedControl,
   StatusIndicator,
   TacticalButton,
+  TacticalInput,
 } from './ui/BlacksiteUI';
 
 interface OperationArchiveScreenProps {
@@ -127,7 +128,7 @@ export const OperationArchiveScreen: React.FC<OperationArchiveScreenProps> = ({
 
   return (
     <div
-      className="flex flex-col w-full max-w-3xl mx-auto px-4 pt-3 pb-24 space-y-4"
+      className="flex flex-col w-full max-w-3xl mx-auto px-4 sm:px-6 pt-3 pb-24 space-y-4"
       dir={isRTL ? 'rtl' : 'ltr'}
     >
       {/* Header */}
@@ -165,12 +166,12 @@ export const OperationArchiveScreen: React.FC<OperationArchiveScreenProps> = ({
               size={15}
               className="absolute top-1/2 -translate-y-1/2 start-3.5 text-text-muted pointer-events-none"
             />
-            <input
+            <TacticalInput
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder={t('searchArchivePlaceholder')}
-              className="w-full min-h-[44px] ps-10 pe-4 rounded-[10px] bg-bg-card border border-border-strong text-sm font-medium text-text-main placeholder:text-text-muted/70 outline-none focus:border-[#668F9A]"
+              className="w-full ps-10 pe-4 placeholder:text-text-muted/70"
             />
           </div>
 
@@ -233,11 +234,12 @@ export const OperationArchiveScreen: React.FC<OperationArchiveScreenProps> = ({
             >
               <PlayerIntelligenceCard className="hover:border-[#668F9A]/50 p-4 flex items-center justify-between gap-3">
                 <button
+                  type="button"
                   onClick={() => {
                     playSound('dossierOpen');
                     onOpenCaseFile(item);
                   }}
-                  className="flex-1 min-w-0 text-start space-y-1.5"
+                  className="flex-1 min-w-0 min-h-[44px] text-start space-y-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#668F9A]/75 rounded-[8px]"
                 >
                   <div className="flex flex-wrap items-center gap-2">
                     <ClassifiedStamp tone="gold">{item.operationCode}</ClassifiedStamp>
@@ -291,12 +293,14 @@ export const OperationArchiveScreen: React.FC<OperationArchiveScreenProps> = ({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-[#080B10]/80 backdrop-blur-sm flex items-center justify-center p-5"
+            onClick={() => setPendingDeleteId(null)}
+            className="fixed inset-0 z-50 bg-[#080B10]/85 flex items-center justify-center p-5"
           >
             <motion.div
               initial={{ scale: 0.94, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.94, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
               className="w-full max-w-sm"
             >
               <ModalShell

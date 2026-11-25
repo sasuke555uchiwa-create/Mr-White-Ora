@@ -27,6 +27,7 @@ import {
   IntelligencePanel,
   ModalShell,
   OperationPhaseBadge,
+  PlayerIntelligenceCard,
   StatusIndicator,
   TacticalButton,
 } from './ui/BlacksiteUI';
@@ -191,7 +192,7 @@ export const GameRound: React.FC<GameRoundProps> = ({
 
           {/* Status Bar */}
           <div className="grid grid-cols-2 gap-3 mb-5 w-full max-w-lg">
-            <IntelligencePanel className="px-3.5 py-3 flex flex-col items-center justify-center">
+            <PlayerIntelligenceCard className="px-3.5 py-3 flex flex-col items-center justify-center">
               <span className="text-[11px] font-semibold text-text-muted mb-1.5">
                 {t('remainingIntruders')}
               </span>
@@ -231,9 +232,9 @@ export const GameRound: React.FC<GameRoundProps> = ({
                   </>
                 )}
               </div>
-            </IntelligencePanel>
+            </PlayerIntelligenceCard>
 
-            <IntelligencePanel className="px-3.5 py-3 flex flex-col items-center justify-center">
+            <PlayerIntelligenceCard className="px-3.5 py-3 flex flex-col items-center justify-center">
               <span className="text-[11px] font-semibold text-text-muted mb-1.5">
                 {t('specialRoles')}
               </span>
@@ -253,7 +254,7 @@ export const GameRound: React.FC<GameRoundProps> = ({
               ) : (
                 <span className="text-xs font-semibold text-text-muted">{t('none')}</span>
               )}
-            </IntelligencePanel>
+            </PlayerIntelligenceCard>
           </div>
 
           {/* Sealed Mystery Card Grid */}
@@ -320,7 +321,7 @@ export const GameRound: React.FC<GameRoundProps> = ({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-[#080B10]/92 backdrop-blur-md flex items-center justify-center p-4"
+            className="fixed inset-0 z-50 bg-[#080B10]/92 flex items-center justify-center p-4"
           >
             <motion.div
               initial={{ scale: 0.95, y: 10, opacity: 0 }}

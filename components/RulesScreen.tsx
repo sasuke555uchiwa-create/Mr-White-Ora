@@ -14,7 +14,12 @@ import { motion } from 'framer-motion';
 import { getUITranslation } from '../translations';
 import { getSettings } from '../services/storageService';
 import { SPECIAL_ROLES } from '../data/specialRoles';
-import { IconButton, IntelligencePanel, TacticalButton } from './ui/BlacksiteUI';
+import {
+  BottomActionBar,
+  IconButton,
+  IntelligencePanel,
+  TacticalButton,
+} from './ui/BlacksiteUI';
 
 interface RulesScreenProps {
   onBack: () => void;
@@ -75,7 +80,7 @@ export const RulesScreen: React.FC<RulesScreenProps> = ({ onBack }) => {
   ];
 
   return (
-    <div className="w-full min-h-full flex flex-col p-4 sm:p-5 max-w-3xl mx-auto">
+    <div className="w-full min-h-full flex flex-col px-4 sm:px-6 pt-4 pb-0 max-w-3xl mx-auto">
       <div className="flex items-center justify-between mb-5">
         <h2 className="text-xl font-extrabold text-text-main">{t('gameRules')}</h2>
         <IconButton onClick={onBack} aria-label={t('back')} variant="secondary">
@@ -83,7 +88,7 @@ export const RulesScreen: React.FC<RulesScreenProps> = ({ onBack }) => {
         </IconButton>
       </div>
 
-      <div className="space-y-3 pb-28">
+      <div className="space-y-3 pb-6">
         {steps.map((step, index) => (
           <motion.div
             key={index}
@@ -143,13 +148,13 @@ export const RulesScreen: React.FC<RulesScreenProps> = ({ onBack }) => {
         </div>
       </div>
 
-      <div className="fixed bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-bg-dark via-bg-dark/95 to-transparent pointer-events-none flex justify-center z-30">
-        <div className="w-full max-w-sm pointer-events-auto">
+      <BottomActionBar className="mt-auto">
+        <div className="w-full max-w-sm mx-auto">
           <TacticalButton variant="primary" size="lg" fullWidth onClick={onBack}>
             {t('gotItPlay')}
           </TacticalButton>
         </div>
-      </div>
+      </BottomActionBar>
     </div>
   );
 };

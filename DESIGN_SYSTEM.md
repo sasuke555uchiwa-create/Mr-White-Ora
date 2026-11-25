@@ -70,3 +70,22 @@ Select themes: `.theme-dark` (primary), `.theme-gray` (slate tactical), `.theme-
 | **The Lovers** (`lovers`) | `#A8826B` | Muted Bronze paired operatives |
 | **Mr. Avenger** (`avenger`) | `#A45A44` | Rust Copper retaliation |
 | **Mr. Meme** (`mr_meme`) | `#7B8794` | Neutral Graphite mime |
+
+---
+
+## 6. Phase 4.1 — 4-Level Component Surface System & Mobile Ergonomics
+
+### Surface Hierarchy (`index.css` & `components/ui/BlacksiteUI.tsx`)
+| Level | Token / Class | Purpose |
+| :--- | :--- | :--- |
+| **Level 0** | `--bg-dark` (`#080B10`) / `--bg-main` (`#0D1219`) | Root canvas, gradient backdrop, solid modal scrims (`bg-[#080B10]/85` without heavy `backdrop-blur`) |
+| **Level 1** | `.blacksite-panel` (`--bg-surface`, `border-border-strong`, `inset` highlight + `--panel-shadow`) | Primary intelligence panels, `IntelligencePanel`, `ClassifiedDossierPanel`, `ModalShell`, `NavDock`, `BottomActionBar` |
+| **Level 2** | `.blacksite-card` / `.blacksite-card-interactive` (`--bg-card`, `--bg-card-hover` on hover) | `PlayerIntelligenceCard`, `InteractiveCard`, `TacticalDataRow`, segmented track active items |
+| **Level 3** | `.blacksite-input` (`--bg-input`) | Recessed input fields (`TacticalInput`) with `min-h-[44px]` and `#668F9A` focus ring |
+
+### Ergonomic & Accessibility Mandates
+- **Touch Targets**: All `TacticalButton` (`sm`/`md` >= `44px`, `lg` >= `52px`), `IconButton` (`44x44px`), `SegmentedControl` tabs (`min-h-[44px]`), `InteractiveCard` (`min-h-[44px]`), and `NavButton` (`min-h-[50px]`) satisfy mobile `>= 44px` hitboxes.
+- **Thumb-Zone Anchors**: Primary navigation uses `NavDock` (`5`-column unified dock on Home) and screen-level confirmations use sticky in-flow `BottomActionBar` with safe-area padding (`env(safe-area-inset-bottom)`).
+- **Zero Floating Clutter**: Eliminate unanchored mini-badges, corner status dots, and `fixed` floating overlays over scrollable player grids; replace with inline badges or structured action rows.
+- **RTL/LTR Parity**: Logical directional spacing (`start`/`end`, `ps-`/`pe-`), RTL keyboard arrow inversion in `SegmentedControl`, and mirrored chevron affordances.
+

@@ -47,6 +47,7 @@ import { getSettings, recordOnlineSessionMatch } from '../services/storageServic
 import { showToast } from '../utils/toast';
 import { getPlayerRoundPoints } from '../src/game/winEngine';
 import {
+  BottomActionBar,
   ClassifiedStamp,
   IconButton,
   IntelligencePanel,
@@ -55,6 +56,7 @@ import {
   PlayerIntelligenceCard,
   StatusIndicator,
   TacticalButton,
+  TacticalInput,
 } from './ui/BlacksiteUI';
 
 interface OnlineClue {
@@ -702,7 +704,7 @@ export const OnlineGameScreen: React.FC<OnlineGameScreenProps> = ({
       const spokenThisRoundUids = new Set(roundClues.map((c) => c.uid));
 
       return (
-        <div className="flex flex-col flex-1 w-full max-w-3xl mx-auto px-4 pb-24 pt-2 gap-4">
+        <div className="flex flex-col flex-1 w-full max-w-3xl mx-auto px-4 sm:px-6 pt-2 gap-4">
           <div className="flex items-center justify-between gap-2">
             <OperationPhaseBadge phase="active" round={currentRound} lang={settings.language} />
           </div>
@@ -775,13 +777,13 @@ export const OnlineGameScreen: React.FC<OnlineGameScreenProps> = ({
                     {t('yourTurnWriteClue')}
                   </p>
                   <div className="flex gap-2">
-                    <input
+                    <TacticalInput
                       type="text"
                       value={clueInput}
                       maxLength={80}
                       onChange={(e) => setClueInput(e.target.value)}
                       placeholder={t('cluePlaceholder')}
-                      className="flex-1 bg-bg-card border border-[#3E7B67]/50 rounded-[10px] px-3.5 py-2.5 text-sm font-medium text-text-main outline-none focus:border-[#3E7B67] min-h-[44px]"
+                      className="flex-1 border-[#3E7B67]/50 focus:border-[#3E7B67]"
                       autoFocus
                     />
                     <TacticalButton
@@ -897,7 +899,7 @@ export const OnlineGameScreen: React.FC<OnlineGameScreenProps> = ({
             </div>
           </div>
 
-          <div className="mt-auto pt-2">
+          <BottomActionBar className="mt-auto">
             {isHost ? (
               <TacticalButton
                 onClick={handleTimeUp}
@@ -911,13 +913,13 @@ export const OnlineGameScreen: React.FC<OnlineGameScreenProps> = ({
                 {t('endAndVote')}
               </TacticalButton>
             ) : (
-              <IntelligencePanel className="p-3.5 text-center">
+              <div className="py-1.5 text-center">
                 <p className="text-cyan-text font-semibold text-xs sm:text-sm">
                   {t('waitingForHostToStartVote')}
                 </p>
-              </IntelligencePanel>
+              </div>
             )}
-          </div>
+          </BottomActionBar>
         </div>
       );
     }
@@ -1159,8 +1161,8 @@ export const OnlineGameScreen: React.FC<OnlineGameScreenProps> = ({
   return (
     <div className="relative min-h-full w-full flex flex-col">
       {showMatchHud && (
-        <div className="w-full max-w-3xl mx-auto px-4 pt-3 pb-1 flex items-center justify-between gap-2 z-20">
-          <div className="flex items-center gap-2 flex-wrap">
+        <div className="w-full max-w-3xl mx-auto px-4 sm:px-6 pt-3 pb-1 flex items-center justify-between flex-wrap gap-2 z-20">
+          <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
             <StatusIndicator tone="gold">
               {t('roundNumberLabel', { round: currentRound })}
             </StatusIndicator>
@@ -1175,7 +1177,22 @@ export const OnlineGameScreen: React.FC<OnlineGameScreenProps> = ({
             </StatusIndicator>
           </div>
 
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex items-center gap-2 shrink-0 ms-auto">
+            <IconButton
+              onClick={() => setShowChat(true)}
+              variant="secondary"
+              size="sm"
+              aria-label={t('chat')}
+              title={t('chat')}
+              className="relative"
+            >
+              <MessageCircle size={16} className="text-cyan-text" />
+              {room.messages?.length > 0 && (
+                <span className="absolute -top-1 -end-1 min-w-[18px] h-[18px] px-1 rounded-[5px] bg-[#B49A62] text-[#080B10] font-mono-code text-[10px] font-extrabold flex items-center justify-center border border-bg-surface tabular-nums">
+                  {Math.min(99, room.messages.length)}
+                </span>
+              )}
+            </IconButton>
             {currentPlayer && !currentPlayer.isEliminated && (
               <TacticalButton
                 onClick={() => {
@@ -1203,36 +1220,42 @@ export const OnlineGameScreen: React.FC<OnlineGameScreenProps> = ({
         </div>
       )}
 
-      {!showMatchHud && phase !== 'RESULT' && (
-        <div className="w-full max-w-3xl mx-auto px-4 pt-3 flex justify-end z-20">
-          <TacticalButton
-            onClick={() => setShowLeaveConfirm(true)}
-            variant="danger"
+      {!showMatchHud && (
+        <div className="w-full max-w-3xl mx-auto px-4 sm:px-6 pt-3 flex items-center justify-end gap-2 z-20">
+          <IconButton
+            onClick={() => setShowChat(true)}
+            variant="secondary"
             size="sm"
-            icon={<LogOut size={14} />}
+            aria-label={t('chat')}
+            title={t('chat')}
+            className="relative"
           >
-            {t('leaveRoom')}
-          </TacticalButton>
+            <MessageCircle size={16} className="text-cyan-text" />
+            {room.messages?.length > 0 && (
+              <span className="absolute -top-1 -end-1 min-w-[18px] h-[18px] px-1 rounded-[5px] bg-[#B49A62] text-[#080B10] font-mono-code text-[10px] font-extrabold flex items-center justify-center border border-bg-surface tabular-nums">
+                {Math.min(99, room.messages.length)}
+              </span>
+            )}
+          </IconButton>
+          {phase !== 'RESULT' && (
+            <TacticalButton
+              onClick={() => setShowLeaveConfirm(true)}
+              variant="danger"
+              size="sm"
+              icon={<LogOut size={14} />}
+            >
+              {t('leaveRoom')}
+            </TacticalButton>
+          )}
         </div>
       )}
 
       <div className="flex-1 flex flex-col">{renderPhase()}</div>
 
-      <button
-        onClick={() => setShowChat(true)}
-        className="fixed bottom-5 left-5 min-h-[50px] min-w-[50px] flex items-center justify-center bg-[#668F9A] text-[#080B10] border border-[#8CB3BE]/50 rounded-[12px] shadow-lg hover:bg-[#77A0AB] transition-colors z-40"
-        aria-label={t('chat')}
-      >
-        <MessageCircle className="w-5 h-5" />
-        {room.messages?.length > 0 && (
-          <span className="absolute -top-1 -right-1 w-3 h-3 bg-[#963F46] rounded-[4px] border border-[#080B10]" />
-        )}
-      </button>
-
       {showWordPeek && currentPlayer && (
         <div
           onClick={() => setShowWordPeek(false)}
-          className="fixed inset-0 z-50 bg-[#080B10]/90 backdrop-blur-md flex items-center justify-center p-5"
+          className="fixed inset-0 z-50 bg-[#080B10]/88 flex items-center justify-center p-5"
         >
           <div onClick={(e) => e.stopPropagation()} className="w-full max-w-sm">
             <ModalShell
@@ -1280,7 +1303,7 @@ export const OnlineGameScreen: React.FC<OnlineGameScreenProps> = ({
       {showLeaveConfirm && (
         <div
           onClick={() => setShowLeaveConfirm(false)}
-          className="fixed inset-0 z-50 bg-[#080B10]/85 backdrop-blur-sm flex items-center justify-center p-5"
+          className="fixed inset-0 z-50 bg-[#080B10]/85 flex items-center justify-center p-5"
         >
           <div onClick={(e) => e.stopPropagation()} className="w-full max-w-sm">
             <ModalShell

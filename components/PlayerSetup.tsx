@@ -27,8 +27,10 @@ import { CHARACTER_AVATARS } from '../data/specialRoles';
 import { compressAvatarImage } from '../utils/imageUtils';
 import { showToast } from '../utils/toast';
 import {
+  BottomActionBar,
   IconButton,
   IntelligencePanel,
+  InteractiveCard,
   ModalShell,
   PlayerIntelligenceCard,
   StatusIndicator,
@@ -223,7 +225,7 @@ export const PlayerSetup: React.FC<PlayerSetupProps> = ({
   );
 
   return (
-    <div className="flex flex-col min-h-full relative px-4 pt-3 max-w-3xl mx-auto w-full pb-28">
+    <div className="flex flex-col min-h-full relative px-4 sm:px-6 pt-3 max-w-3xl mx-auto w-full pb-0">
       {/* Header Summary */}
       <IntelligencePanel className="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5 p-4">
         <div className="flex items-center gap-3">
@@ -264,15 +266,15 @@ export const PlayerSetup: React.FC<PlayerSetupProps> = ({
           </p>
           <div className="flex flex-wrap gap-2">
             {unselectedRecentPlayers.map((player) => (
-              <button
+              <InteractiveCard
                 key={player.name}
                 onClick={() => handleQuickAdd(player)}
-                className="bg-bg-surface hover:bg-bg-card text-text-main px-3 py-1.5 rounded-[8px] text-xs font-bold transition-colors border border-border-strong hover:border-[#668F9A]/60 flex items-center gap-2 min-h-[38px]"
+                className="px-3 py-1.5 rounded-[9px] text-xs font-bold flex items-center gap-2 min-h-[44px]"
               >
-                <Avatar avatar={player.avatar} name={player.name} size={22} />
+                <Avatar avatar={player.avatar} name={player.name} size={24} />
                 <span>{player.name}</span>
                 <Plus size={13} className="text-cyan-text" />
-              </button>
+              </InteractiveCard>
             ))}
           </div>
         </div>
@@ -371,34 +373,36 @@ export const PlayerSetup: React.FC<PlayerSetupProps> = ({
 
               <div className="flex items-center gap-1.5 shrink-0">
                 {mode === 'manage' && (
-                  <button
+                  <IconButton
+                    size="sm"
+                    variant={player.isSleeping ? 'primary' : 'ghost'}
                     onClick={() => toggleSleep(index)}
-                    className={`w-10 h-10 flex items-center justify-center rounded-[8px] transition-colors border ${
-                      player.isSleeping
-                        ? 'text-primary-text bg-[#B49A62]/15 border-[#B49A62]/40'
-                        : 'text-text-muted hover:text-primary-text hover:bg-bg-card border-transparent'
-                    }`}
                     title={player.isSleeping ? t('wakeUp') : t('sleep')}
+                    aria-label={player.isSleeping ? t('wakeUp') : t('sleep')}
                   >
                     {player.isSleeping ? <Sun size={16} /> : <Moon size={16} />}
-                  </button>
+                  </IconButton>
                 )}
-                <button
+                <IconButton
+                  size="sm"
+                  variant="ghost"
                   onClick={() => removePlayerField(index)}
                   disabled={players.length <= 1}
-                  className="w-10 h-10 flex items-center justify-center text-text-muted hover:text-danger-text hover:bg-[#963F46]/12 rounded-[8px] transition-colors disabled:opacity-30"
+                  className="hover:text-danger-text hover:bg-[#963F46]/12"
                   title="Remove player"
+                  aria-label="Remove player"
                 >
                   <Trash2 size={16} />
-                </button>
+                </IconButton>
               </div>
             </PlayerIntelligenceCard>
           );
         })}
 
         <button
+          type="button"
           onClick={addPlayerField}
-          className="w-full min-h-[48px] py-3 border border-dashed border-border-strong text-text-muted rounded-[12px] text-sm font-bold hover:bg-bg-surface/80 hover:text-text-main hover:border-[#668F9A]/60 transition-colors flex items-center justify-center gap-2"
+          className="w-full min-h-[48px] py-3 border border-dashed border-border-strong text-text-muted rounded-[12px] text-sm font-bold hover:bg-bg-surface/80 hover:text-text-main hover:border-[#668F9A]/60 transition-colors flex items-center justify-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#668F9A]/75"
         >
           <Plus size={17} />
           <span>{t('addPlayer')}</span>
@@ -406,8 +410,8 @@ export const PlayerSetup: React.FC<PlayerSetupProps> = ({
       </div>
 
       {/* Bottom Sticky Action */}
-      <div className="fixed bottom-0 left-0 right-0 px-4 py-3 bg-gradient-to-t from-bg-dark via-bg-dark/95 to-transparent z-30 pointer-events-none flex justify-center">
-        <div className="w-full max-w-md pointer-events-auto">
+      <BottomActionBar className="mt-6">
+        <div className="w-full max-w-md mx-auto">
           {mode === 'setup' ? (
             <TacticalButton
               variant="primary"
@@ -431,11 +435,11 @@ export const PlayerSetup: React.FC<PlayerSetupProps> = ({
             </TacticalButton>
           )}
         </div>
-      </div>
+      </BottomActionBar>
 
       {/* Character Avatar Selection Modal */}
       {editingIndex !== null && (
-        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-xs flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 bg-[#080B10]/85 flex items-center justify-center p-4">
           <ModalShell
             maxWidthClass="max-w-md"
             className="p-5 max-h-[88vh] flex flex-col"

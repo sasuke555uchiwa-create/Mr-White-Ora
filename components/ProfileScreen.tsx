@@ -46,6 +46,7 @@ import {
   IntelligencePanel,
   PlayerIntelligenceCard,
   TacticalButton,
+  TacticalInput,
 } from './ui/BlacksiteUI';
 
 interface ProfileScreenProps {
@@ -313,7 +314,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ onBack, onOpenArch
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -10 }}
-      className="flex flex-col p-4 max-w-2xl mx-auto w-full pb-24"
+      className="flex flex-col px-4 sm:px-6 pt-4 max-w-2xl mx-auto w-full pb-24"
       dir={isRTL ? 'rtl' : 'ltr'}
     >
       {/* Header */}
@@ -348,18 +349,21 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ onBack, onOpenArch
           />
           {isEditing ? (
             <div className="relative">
-              <button
+              <IconButton
                 onClick={() => setShowAvatarMenu(!showAvatarMenu)}
-                className="absolute bottom-0 right-0 p-2 bg-[#B49A62] rounded-[8px] border border-[#080B10] text-[#080B10] hover:bg-[#C2A870] transition-colors z-10 min-w-[36px] min-h-[36px] flex items-center justify-center"
+                variant="primary"
+                size="sm"
+                aria-label={getUITranslation(lang, 'uploadImage')}
+                className="absolute bottom-0 end-0 bg-[#B49A62] border-[#080B10] text-[#080B10] hover:bg-[#C2A870] z-10"
               >
                 <Edit2 className="w-4 h-4" />
-              </button>
+              </IconButton>
 
               {showAvatarMenu && (
                 <div
                   className={`absolute top-full mt-2 ${
                     isRTL ? 'left-[-40px]' : 'right-[-40px]'
-                  } w-48 bg-bg-surface border border-border-strong rounded-[12px] shadow-2xl overflow-hidden z-20`}
+                  } w-48 blacksite-panel rounded-[12px] overflow-hidden z-20`}
                 >
                   <button
                     onClick={() => {
@@ -393,13 +397,15 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ onBack, onOpenArch
               )}
             </div>
           ) : (
-            <button
+            <IconButton
               onClick={() => setIsEditing(true)}
-              className="absolute bottom-0 right-0 p-2 bg-bg-surface rounded-[8px] border border-border-strong text-text-main hover:border-[#B49A62] transition-colors min-w-[36px] min-h-[36px] flex items-center justify-center"
+              variant="secondary"
+              size="sm"
+              className="absolute bottom-0 end-0 hover:border-[#B49A62]"
               aria-label="Edit Profile"
             >
               <Edit2 className="w-4 h-4" />
-            </button>
+            </IconButton>
           )}
         </div>
 
@@ -413,11 +419,11 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ onBack, onOpenArch
 
         {isEditing ? (
           <div className="mt-4 flex flex-col items-center gap-3 w-full max-w-xs">
-            <input
+            <TacticalInput
               type="text"
               value={editName}
               onChange={(e) => setEditName(e.target.value)}
-              className="w-full bg-bg-card border border-border-strong rounded-[10px] px-3.5 py-2.5 text-text-main text-center font-bold outline-none focus:border-[#668F9A] min-h-[44px]"
+              className="w-full text-center font-bold"
               placeholder={getUITranslation(lang, 'yourName')}
               maxLength={20}
             />
@@ -448,15 +454,16 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ onBack, onOpenArch
             </div>
           </div>
         ) : (
-          <h2 className="text-xl sm:text-2xl font-bold text-text-main mt-3.5 flex items-center gap-2">
-            {profile.displayName}
-            <button
+          <h2 className="text-xl sm:text-2xl font-bold text-text-main mt-3.5 flex items-center gap-1.5">
+            <span>{profile.displayName}</span>
+            <IconButton
               onClick={() => setIsEditing(true)}
-              className="text-text-muted hover:text-text-main p-1"
+              variant="ghost"
+              size="sm"
               aria-label="Edit Name"
             >
               <Edit2 className="w-4 h-4" />
-            </button>
+            </IconButton>
           </h2>
         )}
       </div>
@@ -549,7 +556,8 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ onBack, onOpenArch
                   type="button"
                   onClick={() => handleSelectFrame(frameKey)}
                   title={frameKey}
-                  className={`w-9 h-9 rounded-[8px] p-1 border transition-colors ${
+                  aria-label={`Frame ${frameKey}`}
+                  className={`w-11 h-11 min-w-[44px] min-h-[44px] rounded-[9px] p-1.5 border transition-colors ${
                     selectedFrame === frameKey
                       ? 'border-[#668F9A] bg-[#668F9A]/20'
                       : 'border-white/20 bg-black/40 opacity-75 hover:opacity-100'
@@ -574,7 +582,8 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ onBack, onOpenArch
                   key={dossierKey}
                   type="button"
                   onClick={() => handleSelectDossier(dossierKey)}
-                  className={`w-11 h-7 rounded-[6px] overflow-hidden border transition-all ${
+                  aria-label={`Dossier ${dossierKey}`}
+                  className={`min-w-[52px] min-h-[44px] h-11 rounded-[8px] overflow-hidden border transition-all ${
                     selectedDossier === dossierKey
                       ? 'border-[#668F9A] ring-1 ring-[#668F9A]'
                       : 'border-white/20 opacity-70 hover:opacity-100'

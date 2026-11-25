@@ -20,8 +20,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { playSound } from '../services/soundService';
 import { CATEGORY_COVERS, ROLE_PORTRAITS } from '../src/design/assetRegistry';
 import {
+  BottomActionBar,
   IconButton,
   IntelligencePanel,
+  InteractiveCard,
   ModalShell,
   SegmentedControl,
   StatusIndicator,
@@ -171,7 +173,7 @@ export const GameSettingsScreen: React.FC<GameSettingsScreenProps> = ({
   ];
 
   return (
-    <div className="flex flex-col min-h-full relative px-4 py-4 max-w-4xl mx-auto w-full pb-28">
+    <div className="flex flex-col min-h-full relative px-4 sm:px-6 pt-4 pb-0 max-w-4xl mx-auto w-full">
       {/* Top Players Summary Bar */}
       <IntelligencePanel className="flex items-center justify-between mb-4 p-3.5">
         <div className="flex items-center gap-3">
@@ -249,15 +251,15 @@ export const GameSettingsScreen: React.FC<GameSettingsScreenProps> = ({
                   </span>
                 </div>
               </div>
-              <div className="flex items-center gap-1 bg-bg-surface p-1 rounded-[8px] border border-border shrink-0">
+              <div className="flex items-center gap-1 bg-bg-main/85 p-1 rounded-[10px] border border-border-strong shrink-0">
                 <button
                   type="button"
                   onClick={() => changeIntruderCount('undercover', -1)}
                   disabled={undercoverCount <= 0}
                   aria-label="Decrease Undercover"
-                  className="w-9 h-9 rounded-[6px] bg-bg-card hover:bg-bg-main text-text-main flex items-center justify-center disabled:opacity-30 transition-colors"
+                  className="w-11 h-11 min-w-[44px] min-h-[44px] rounded-[7px] bg-bg-card hover:bg-bg-surface text-text-main flex items-center justify-center disabled:opacity-30 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#668F9A]/75"
                 >
-                  <UserMinus size={14} />
+                  <UserMinus size={15} />
                 </button>
                 <span className="w-7 text-center text-base font-extrabold text-text-main tabular-nums">
                   {undercoverCount}
@@ -267,9 +269,9 @@ export const GameSettingsScreen: React.FC<GameSettingsScreenProps> = ({
                   onClick={() => changeIntruderCount('undercover', 1)}
                   disabled={undercoverCount >= maxIntruders}
                   aria-label="Increase Undercover"
-                  className="w-9 h-9 rounded-[6px] bg-bg-card hover:bg-bg-main text-text-main flex items-center justify-center disabled:opacity-30 transition-colors"
+                  className="w-11 h-11 min-w-[44px] min-h-[44px] rounded-[7px] bg-bg-card hover:bg-bg-surface text-text-main flex items-center justify-center disabled:opacity-30 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#668F9A]/75"
                 >
-                  <UserPlus size={14} />
+                  <UserPlus size={15} />
                 </button>
               </div>
             </div>
@@ -292,15 +294,15 @@ export const GameSettingsScreen: React.FC<GameSettingsScreenProps> = ({
                   </span>
                 </div>
               </div>
-              <div className="flex items-center gap-1 bg-bg-surface p-1 rounded-[8px] border border-[#B49A62]/30 shrink-0">
+              <div className="flex items-center gap-1 bg-bg-main/85 p-1 rounded-[10px] border border-[#B49A62]/35 shrink-0">
                 <button
                   type="button"
                   onClick={() => changeIntruderCount('mrwhite', -1)}
                   disabled={mrWhiteCount <= 0}
                   aria-label="Decrease Mr. White"
-                  className="w-9 h-9 rounded-[6px] bg-bg-card hover:bg-bg-main text-text-main flex items-center justify-center disabled:opacity-30 transition-colors"
+                  className="w-11 h-11 min-w-[44px] min-h-[44px] rounded-[7px] bg-bg-card hover:bg-bg-surface text-text-main flex items-center justify-center disabled:opacity-30 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#668F9A]/75"
                 >
-                  <UserMinus size={14} />
+                  <UserMinus size={15} />
                 </button>
                 <span className="w-7 text-center text-base font-extrabold text-primary-text tabular-nums">
                   {mrWhiteCount}
@@ -310,9 +312,9 @@ export const GameSettingsScreen: React.FC<GameSettingsScreenProps> = ({
                   onClick={() => changeIntruderCount('mrwhite', 1)}
                   disabled={mrWhiteCount >= maxIntruders}
                   aria-label="Increase Mr. White"
-                  className="w-9 h-9 rounded-[6px] bg-bg-card hover:bg-bg-main text-text-main flex items-center justify-center disabled:opacity-30 transition-colors"
+                  className="w-11 h-11 min-w-[44px] min-h-[44px] rounded-[7px] bg-bg-card hover:bg-bg-surface text-text-main flex items-center justify-center disabled:opacity-30 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#668F9A]/75"
                 >
-                  <UserPlus size={14} />
+                  <UserPlus size={15} />
                 </button>
               </div>
             </div>
@@ -320,11 +322,12 @@ export const GameSettingsScreen: React.FC<GameSettingsScreenProps> = ({
 
           {/* Special Roles Selector Card */}
           <button
+            type="button"
             onClick={() => {
               playSound('click');
               setShowSpecialRolesModal(true);
             }}
-            className="w-full text-start bg-bg-surface border border-border-strong hover:border-[#B49A62]/60 rounded-[14px] p-4 sm:p-5 shadow-[0_12px_32px_rgba(4,7,12,0.28)] transition-colors"
+            className="w-full text-start blacksite-panel hover:border-[#B49A62]/60 rounded-[14px] p-4 sm:p-5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#668F9A]/75 active:scale-[0.995]"
           >
             <div className="flex items-center justify-between mb-1.5">
               <div className="flex items-center gap-2">
@@ -427,13 +430,14 @@ export const GameSettingsScreen: React.FC<GameSettingsScreenProps> = ({
             <div>
               <div className="flex items-center justify-between mb-2">
                 <h3 className="text-sm font-bold text-text-main">{t('gameMode')}</h3>
-                <button
+                <IconButton
+                  size="sm"
+                  variant="ghost"
                   onClick={() => setActiveInfo(activeInfo === 'mode' ? null : 'mode')}
-                  className="text-text-muted hover:text-cyan-text p-1"
                   aria-label="Mode info"
                 >
-                  <HelpCircle size={16} />
-                </button>
+                  <HelpCircle size={17} />
+                </IconButton>
               </div>
               {activeInfo === 'mode' && (
                 <p className="text-xs text-text-muted mb-2.5 bg-bg-card border border-border p-3 rounded-[10px] leading-relaxed">
@@ -466,32 +470,32 @@ export const GameSettingsScreen: React.FC<GameSettingsScreenProps> = ({
               <div>
                 <h3 className="text-sm font-bold text-text-main mb-2">{t('difficulty')}</h3>
                 <div className="grid grid-cols-2 gap-2">
-                  <button
+                  <InteractiveCard
+                    selected={difficulty === 'easy'}
+                    accent="cyan"
                     onClick={() => {
                       playSound('click');
                       setDifficulty('easy');
                     }}
-                    className={`min-h-[44px] py-2 rounded-[10px] border text-xs font-bold transition-colors ${
-                      difficulty === 'easy'
-                        ? 'bg-[#668F9A]/15 border-[#668F9A] text-cyan-text'
-                        : 'bg-bg-card border-border text-text-muted hover:text-text-main'
+                    className={`py-2 text-xs font-bold ${
+                      difficulty === 'easy' ? 'text-cyan-text' : 'text-text-muted'
                     }`}
                   >
                     {t('difficultyEasy')}
-                  </button>
-                  <button
+                  </InteractiveCard>
+                  <InteractiveCard
+                    selected={difficulty === 'hard'}
+                    accent="crimson"
                     onClick={() => {
                       playSound('click');
                       setDifficulty('hard');
                     }}
-                    className={`min-h-[44px] py-2 rounded-[10px] border text-xs font-bold transition-colors ${
-                      difficulty === 'hard'
-                        ? 'bg-[#963F46]/18 border-[#963F46] text-danger-text'
-                        : 'bg-bg-card border-border text-text-muted hover:text-text-main'
+                    className={`py-2 text-xs font-bold ${
+                      difficulty === 'hard' ? 'text-danger-text' : 'text-text-muted'
                     }`}
                   >
                     {t('difficultyHard')}
-                  </button>
+                  </InteractiveCard>
                 </div>
                 <p className="text-[11px] text-text-muted mt-1.5 leading-snug">
                   {difficulty === 'hard' ? t('difficultyHardDesc') : t('difficultyEasyDesc')}
@@ -505,20 +509,20 @@ export const GameSettingsScreen: React.FC<GameSettingsScreenProps> = ({
                 </h3>
                 <div className="grid grid-cols-4 gap-1.5">
                   {[30, 45, 90, 120].map((sec) => (
-                    <button
+                    <InteractiveCard
                       key={sec}
+                      selected={turnDurationSeconds === sec}
+                      accent="gold"
                       onClick={() => {
                         playSound('click');
                         setTurnDurationSeconds(sec);
                       }}
-                      className={`min-h-[44px] py-2 rounded-[10px] border text-xs font-bold font-mono-code tabular-nums transition-colors ${
-                        turnDurationSeconds === sec
-                          ? 'bg-[#B49A62]/15 border-[#B49A62] text-primary-text'
-                          : 'bg-bg-card border-border text-text-muted hover:text-text-main'
+                      className={`py-2 text-xs font-bold font-mono-code tabular-nums ${
+                        turnDurationSeconds === sec ? 'text-primary-text' : 'text-text-muted'
                       }`}
                     >
                       {sec}s
-                    </button>
+                    </InteractiveCard>
                   ))}
                 </div>
               </div>
@@ -528,19 +532,19 @@ export const GameSettingsScreen: React.FC<GameSettingsScreenProps> = ({
       </div>
 
       {/* Bottom Start CTA */}
-      <div className="fixed bottom-0 left-0 right-0 px-4 py-3 bg-gradient-to-t from-bg-dark via-bg-dark/95 to-transparent pointer-events-none flex justify-center z-30">
-        <div className="w-full max-w-md pointer-events-auto">
+      <BottomActionBar className="mt-6">
+        <div className="w-full max-w-md mx-auto">
           <TacticalButton
             variant="primary"
             size="lg"
             fullWidth
             onClick={handleStart}
-            icon={<Play size={18} className="fill-current" />}
+            icon={<Play size={18} className="fill-current rtl:rotate-180" />}
           >
             {isRTL ? 'ابدأ المهمة' : t('startGame')}
           </TacticalButton>
         </div>
-      </div>
+      </BottomActionBar>
 
       {/* Special Roles Picker Modal */}
       <AnimatePresence>
@@ -550,7 +554,7 @@ export const GameSettingsScreen: React.FC<GameSettingsScreenProps> = ({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setShowSpecialRolesModal(false)}
-            className="fixed inset-0 z-50 bg-black/75 backdrop-blur-xs flex items-end sm:items-center justify-center sm:p-5"
+            className="fixed inset-0 z-50 bg-[#080B10]/85 flex items-end sm:items-center justify-center sm:p-5"
           >
             <motion.div
               initial={{ y: 24, opacity: 0 }}

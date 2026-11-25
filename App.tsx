@@ -312,8 +312,8 @@ function AppContent() {
       )}
 
       {(offline.isLoading || onlineBusy) && (
-        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-bg-surface border border-border-strong rounded-[14px] px-8 py-6 text-center shadow-2xl">
+        <div className="fixed inset-0 z-50 bg-[#080B10]/85 flex items-center justify-center p-4">
+          <div className="blacksite-panel rounded-[14px] px-8 py-6 text-center">
             <div className="w-9 h-9 border-[3px] border-[#B49A62] border-t-transparent rounded-full animate-spin mx-auto mb-3" />
             <p className="text-sm font-bold text-text-main">{t('preparing')}</p>
           </div>
@@ -790,7 +790,7 @@ function AppContent() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-xs p-5"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-[#080B10]/85 p-5"
           >
             <motion.div
               initial={{ scale: 0.96, opacity: 0, y: 8 }}
@@ -835,7 +835,7 @@ function AppContent() {
                           playSound('abilityActivate');
                           offline.resolveTieWithJustice(cand.id);
                         }}
-                        className="p-3 rounded-[10px] bg-bg-card hover:bg-[#3E7B67]/15 border border-border hover:border-[#3E7B67]/50 flex flex-col items-center gap-2 transition-colors min-h-[44px]"
+                        className="p-3 rounded-[10px] blacksite-card-interactive hover:bg-[#3E7B67]/15 hover:border-[#3E7B67]/50 flex flex-col items-center gap-2 min-h-[44px]"
                       >
                         <Avatar avatar={cand.avatar} name={cand.name} size={52} />
                         <span className="text-sm font-bold text-text-main truncate max-w-full">
@@ -858,7 +858,7 @@ function AppContent() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-xs p-5"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-[#080B10]/85 p-5"
           >
             <motion.div
               initial={{ scale: 0.96, opacity: 0, y: 8 }}
@@ -902,7 +902,7 @@ function AppContent() {
                           playSound('abilityActivate');
                           offline.handleBoomerangTargetPick(target.id);
                         }}
-                        className="p-2.5 rounded-[10px] bg-bg-card hover:bg-[#963F46]/15 border border-border hover:border-[#963F46]/50 flex flex-col items-center gap-1.5 transition-colors min-h-[44px]"
+                        className="p-2.5 rounded-[10px] blacksite-card-interactive hover:bg-[#963F46]/15 hover:border-[#963F46]/50 flex flex-col items-center gap-1.5 min-h-[44px]"
                       >
                         <Avatar avatar={target.avatar} name={target.name} size={46} />
                         <span className="text-xs font-bold text-text-main truncate max-w-full">
@@ -924,7 +924,7 @@ function AppContent() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-xs p-5"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-[#080B10]/85 p-5"
           >
             <motion.div
               initial={{ scale: 0.96, opacity: 0, y: 8 }}
@@ -968,7 +968,7 @@ function AppContent() {
                           playSound('abilityActivate');
                           offline.handleAvengerTargetPick(target.id);
                         }}
-                        className="p-2.5 rounded-[10px] bg-bg-card hover:bg-[#A45A44]/15 border border-border hover:border-[#A45A44]/50 flex flex-col items-center gap-1.5 transition-colors min-h-[44px]"
+                        className="p-2.5 rounded-[10px] blacksite-card-interactive hover:bg-[#A45A44]/15 hover:border-[#A45A44]/50 flex flex-col items-center gap-1.5 min-h-[44px]"
                       >
                         <Avatar avatar={target.avatar} name={target.name} size={46} />
                         <span className="text-xs font-bold text-text-main truncate max-w-full">
@@ -990,7 +990,7 @@ function AppContent() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-xs p-6"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-[#080B10]/85 p-6"
           >
             <motion.div
               initial={{ scale: 0.96, opacity: 0, y: 8 }}

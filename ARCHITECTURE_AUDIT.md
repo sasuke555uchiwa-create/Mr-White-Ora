@@ -64,3 +64,18 @@ Root `package.json` separates verification into independent, composable scripts:
 | **Local Emulator Prerequisite** | `firebase` CLI is installed, but headless containers without a Java JRE cannot boot the Firestore Emulator for `npm run test:firestore`. | Wired `.github/workflows/quality.yml` with `actions/setup-java@v4` (Temurin Java 21) so `firestore.rules.test.ts` executes automatically in CI on every push/PR to `main`. |
 | **Regression Coverage** | `useOfflineMatch` special-role flows, Case File / Archive UI contracts, PWA precache / `assetRegistry` integrity, and Web Audio sound branches lacked automated regression gates. | Added `tests/gameplayRegression.test.tsx`, `tests/caseFileArchiveValidation.test.tsx`, `tests/securityRegression.test.ts`, `tests/pwaAndAssets.test.ts`, and targeted `deleteDoc`/unverified-user/list denials in `firestore.rules.test.ts`. |
 
+---
+
+## 5. Phase 4.1: Visual Foundation & Premium UI Refinement
+
+### 5.1 Unified Surface System & Component Primitives
+- **Tokenized 4-Level Depth (`index.css`)**: Added `--bg-card-hover`, `--bg-input`, `--surface-highlight`, and `--panel-shadow` across `.theme-dark`, `.theme-gray`, and `.theme-light`, paired with `.blacksite-panel`, `.blacksite-card`, `.blacksite-card-interactive`, and `.blacksite-input`.
+- **Standardized Primitives (`components/ui/BlacksiteUI.tsx`)**:
+  - Added `NavDock`, `NavButton`, `InteractiveCard`, `TacticalInput`, and `BottomActionBar`.
+  - Upgraded `TacticalButton` (`sm`/`md` `min-h-[44px]`, `lg` `min-h-[52px]`), `IconButton` (`44x44px`), and `SegmentedControl` (`min-h-[44px]` with RTL/LTR keyboard navigation).
+- **Screen-Wide Refinement**: Applied consistent `BottomActionBar`, `InteractiveCard`, `TacticalInput`, solid `#080B10/85` modal scrims (removing heavy `backdrop-blur`), `>= 44px` touch targets, and logical RTL/LTR alignment across Home (`WelcomeScreen`), Pass & Play (`PlayerSetup`, `GameSettingsScreen`, `GameRound`, `QuestionPhase`, `DiscussionPhase`, `VotingScreen`, `RevealVoteResult`, `ImpostorGuessScreen`, `ResultScreen`), Online (`OnlineRoomsScreen`, `OnlineLobbyScreen`, `OnlineGameScreen`, `ChatBox`, `PlayerStatsModal`), Archive & Rules (`CaseFileScreen`, `OperationArchiveScreen`, `RulesScreen`, `LanguageDictionary`), and Account/Settings (`ProfileScreen`, `GameStatistics`, `SettingsScreen`, `InventoryScreen`, `Header`, `App.tsx`).
+
+### 5.2 Preserved Invariants & Verification Coverage
+- **Zero Gameplay/Security Mutation**: Role distribution, scoring formulas, special-role resolution, Cloud Functions handlers, `firestore.rules`, and localization dictionaries remain functionally unchanged.
+- **UI Design System Regression Gate**: Added `tests/uiDesignSystem.test.tsx` verifying Home layout regions in Arabic RTL and English LTR, `BlacksiteUI` accessibility roles/touch-target classes, and `SegmentedControl` RTL/LTR keyboard handling alongside all 9 Phase 4 Vitest suites.
+

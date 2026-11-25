@@ -26,6 +26,7 @@ import {
 import {
   ClassifiedStamp,
   IntelligencePanel,
+  InteractiveCard,
   ModalShell,
   ScreenSectionHeader,
   TacticalButton,
@@ -185,13 +186,13 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
               {LANGUAGES.map((langItem) => {
                 const active = settings.language === langItem.id;
                 return (
-                  <button
+                  <InteractiveCard
                     key={langItem.id}
+                    selected={active}
+                    accent="gold"
                     onClick={() => handleLanguageChange(langItem.id)}
-                    className={`min-h-[48px] py-2.5 px-3 rounded-[10px] font-bold transition-colors flex items-center justify-between gap-2 border ${
-                      active
-                        ? 'bg-[#B49A62]/15 border-[#B49A62] text-text-main'
-                        : 'bg-bg-card/80 text-text-muted hover:text-text-main border-border'
+                    className={`min-h-[48px] py-2.5 px-3 font-bold flex items-center justify-between gap-2 ${
+                      active ? 'text-text-main' : 'text-text-muted'
                     }`}
                   >
                     <span className="text-xs sm:text-sm truncate">
@@ -205,7 +206,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
                     >
                       {langItem.symbol}
                     </span>
-                  </button>
+                  </InteractiveCard>
                 );
               })}
             </div>
@@ -231,18 +232,18 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
               ].map((item) => {
                 const active = settings.theme === item.id;
                 return (
-                  <button
+                  <InteractiveCard
                     key={item.id}
+                    selected={active}
+                    accent="gold"
                     onClick={() => handleThemeChange(item.id)}
-                    className={`p-3 rounded-[10px] border flex flex-col items-center gap-2 transition-colors min-h-[76px] ${
-                      active
-                        ? 'border-[#B49A62] bg-[#B49A62]/12 text-text-main'
-                        : 'border-border bg-bg-card/70 text-text-muted hover:text-text-main'
+                    className={`p-3 flex flex-col items-center justify-center gap-2 min-h-[76px] ${
+                      active ? 'text-text-main' : 'text-text-muted'
                     }`}
                   >
                     <div className={`w-8 h-8 rounded-[8px] border shadow-inner ${item.swatch}`} />
                     <span className="text-xs font-bold text-center">{item.label}</span>
-                  </button>
+                  </InteractiveCard>
                 );
               })}
             </div>
@@ -268,20 +269,20 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
                   settings.buttonColor === btnColor.id ||
                   (!settings.buttonColor && btnColor.id === 'default');
                 return (
-                  <button
+                  <InteractiveCard
                     key={btnColor.id}
+                    selected={isSelected}
+                    accent="gold"
                     onClick={() => handleButtonColorChange(btnColor.id as any)}
-                    className={`py-2.5 px-2 rounded-[10px] font-bold transition-colors flex flex-col items-center justify-center gap-1.5 border min-h-[60px] ${
-                      isSelected
-                        ? 'bg-bg-card border-[#B49A62] text-text-main'
-                        : 'bg-bg-card/60 text-text-muted hover:text-text-main border-border'
+                    className={`py-2.5 px-2 font-bold flex flex-col items-center justify-center gap-1.5 min-h-[60px] ${
+                      isSelected ? 'text-text-main' : 'text-text-muted'
                     }`}
                   >
                     <div
                       className={`w-5 h-5 rounded-[6px] ${btnColor.color} border border-white/20`}
                     />
                     <span className="text-xs truncate max-w-full">{btnColor.name}</span>
-                  </button>
+                  </InteractiveCard>
                 );
               })}
             </div>
@@ -321,14 +322,14 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
 
             <div className="flex items-center justify-between mb-5">
               <span className="text-sm font-bold text-text-muted">{t('vibration')}</span>
-              <label className="relative inline-flex items-center cursor-pointer">
+              <label className="relative inline-flex items-center justify-end cursor-pointer min-w-[44px] min-h-[44px]">
                 <input
                   type="checkbox"
                   checked={settings.hapticEnabled}
                   onChange={handleHapticChange}
                   className="sr-only peer"
                 />
-                <div className="w-11 h-6 bg-bg-card rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-[#080B10] after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-[#ECEFF4] after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#B49A62] border border-border-strong" />
+                <div className="w-11 h-6 bg-bg-card rounded-full relative peer peer-checked:after:translate-x-full peer-checked:after:border-[#080B10] after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-[#ECEFF4] after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#B49A62] border border-border-strong" />
               </label>
             </div>
 
@@ -345,15 +346,16 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
                   {SOUND_EFFECT_LIST.length} SFX
                 </span>
               </div>
-              <div className="flex flex-wrap gap-1.5">
+              <div className="flex flex-wrap gap-2">
                 {SOUND_EFFECT_LIST.map((sfx) => {
                   const isPlaying = activePreviewSound === sfx.id;
                   const label =
                     isRTL ? sfx.labels.ar : lang === 'fr' ? sfx.labels.fr : sfx.labels.en;
                   return (
-                    <button
+                    <InteractiveCard
                       key={sfx.id}
-                      type="button"
+                      selected={isPlaying}
+                      accent="cyan"
                       onClick={() => {
                         setActivePreviewSound(sfx.id);
                         playSound(sfx.id);
@@ -361,14 +363,12 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
                           setActivePreviewSound((curr) => (curr === sfx.id ? null : curr));
                         }, 360);
                       }}
-                      className={`px-3 py-1.5 rounded-[8px] text-xs font-bold border transition-colors min-h-[36px] ${
-                        isPlaying
-                          ? 'bg-[#668F9A] text-[#080B10] border-[#8CB3BE]'
-                          : 'bg-bg-card text-text-muted hover:text-text-main border-border hover:border-[#668F9A]/50'
+                      className={`px-3.5 py-2 rounded-[9px] text-xs font-bold ${
+                        isPlaying ? 'text-cyan-text' : 'text-text-muted'
                       }`}
                     >
                       {label}
-                    </button>
+                    </InteractiveCard>
                   );
                 })}
               </div>
@@ -462,7 +462,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
       </div>
 
       {/* Bottom Save & Back CTA */}
-      <div className="p-4 bg-bg-dark/90 backdrop-blur-xs border-t border-border shrink-0">
+      <div className="px-4 pt-3 pb-[max(0.85rem,env(safe-area-inset-bottom))] bg-bg-surface border-t border-border-strong shrink-0">
         <TacticalButton
           variant="primary"
           size="lg"
@@ -478,13 +478,17 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
 
       {/* In-App Confirmation Modal */}
       {pendingConfirm && (
-        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-xs flex items-center justify-center p-5">
-          <ModalShell
-            maxWidthClass="max-w-sm"
-            className="p-6 text-center"
-            onClose={() => setPendingConfirm(null)}
-            ariaLabel={t('alert')}
-          >
+        <div
+          onClick={() => setPendingConfirm(null)}
+          className="fixed inset-0 z-50 bg-[#080B10]/85 flex items-center justify-center p-5"
+        >
+          <div onClick={(e) => e.stopPropagation()} className="w-full max-w-sm">
+            <ModalShell
+              maxWidthClass="max-w-sm"
+              className="p-6 text-center"
+              onClose={() => setPendingConfirm(null)}
+              ariaLabel={t('alert')}
+            >
             <h3 className="text-lg font-extrabold text-text-main mb-2">{t('alert')}</h3>
             <p className="text-sm font-medium text-text-muted mb-6 leading-relaxed">
               {pendingConfirm === 'scores' ? t('confirmResetScores') : t('confirmResetApp')}
@@ -505,7 +509,8 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
                 {t('confirm')}
               </TacticalButton>
             </div>
-          </ModalShell>
+              </ModalShell>
+          </div>
         </div>
       )}
     </div>

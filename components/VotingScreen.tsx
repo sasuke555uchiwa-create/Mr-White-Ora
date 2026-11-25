@@ -210,7 +210,7 @@ export const VotingScreen: React.FC<VotingScreenProps> = ({
           {/* Status Row */}
           <div className="w-full mb-4">
             <div className="grid grid-cols-2 gap-3">
-              <IntelligencePanel className="p-3 flex items-center justify-between">
+              <PlayerIntelligenceCard className="p-3 flex items-center justify-between">
                 <span className="text-xs font-semibold text-text-muted">{t('specialRoles')}</span>
                 <div className="flex items-center gap-1">
                   {activeSpecials.length > 0 ? (
@@ -227,9 +227,9 @@ export const VotingScreen: React.FC<VotingScreenProps> = ({
                     <span className="text-xs font-semibold text-text-muted">{t('none')}</span>
                   )}
                 </div>
-              </IntelligencePanel>
+              </PlayerIntelligenceCard>
 
-              <IntelligencePanel className="p-3 flex items-center justify-between">
+              <PlayerIntelligenceCard className="p-3 flex items-center justify-between">
                 <span className="text-xs font-semibold text-text-muted">
                   {t('remainingIntruders')}
                 </span>
@@ -269,7 +269,7 @@ export const VotingScreen: React.FC<VotingScreenProps> = ({
                     </>
                   )}
                 </div>
-              </IntelligencePanel>
+              </PlayerIntelligenceCard>
             </div>
           </div>
 
@@ -320,7 +320,7 @@ export const VotingScreen: React.FC<VotingScreenProps> = ({
                           playSound('click');
                           setShieldedTargetId(null);
                         }}
-                        className="text-xs font-bold text-danger-text hover:underline min-h-[36px] px-2"
+                        className="text-xs font-bold text-danger-text hover:underline min-h-[44px] px-2.5"
                       >
                         {lang === 'ar' ? 'إلغاء' : 'Clear'}
                       </button>
@@ -337,7 +337,7 @@ export const VotingScreen: React.FC<VotingScreenProps> = ({
                             playSound(isGuarded ? 'click' : 'abilityActivate');
                             setShieldedTargetId(isGuarded ? null : target.id);
                           }}
-                          className={`min-h-[44px] sm:min-h-[40px] px-3 py-1.5 rounded-[8px] border text-xs font-bold flex items-center gap-1.5 shrink-0 transition-colors ${
+                          className={`min-h-[44px] px-3 py-1.5 rounded-[8px] border text-xs font-bold flex items-center gap-1.5 shrink-0 transition-colors ${
                             isGuarded
                               ? 'bg-[#668F9A] text-[#080B10] border-[#8CB3BE]/50'
                               : 'bg-bg-surface text-text-main border-border'
@@ -412,8 +412,8 @@ export const VotingScreen: React.FC<VotingScreenProps> = ({
                       </div>
 
                       {!isSelfInSecret && (
-                        <span className="mt-2 px-2.5 py-0.5 rounded-[6px] bg-[#963F46]/15 border border-[#963F46]/40 text-danger-text text-[11px] font-bold">
-                          {lang === 'ar' ? 'استبعاد' : 'Eliminate'}
+                        <span className="mt-2 text-danger-text text-[11px] font-bold tracking-wide">
+                          {lang === 'ar' ? 'تصويت للاستبعاد' : 'Cast Ballot'}
                         </span>
                       )}
                     </PlayerIntelligenceCard>
@@ -510,7 +510,7 @@ export const VotingScreen: React.FC<VotingScreenProps> = ({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-[#080B10]/88 backdrop-blur-md p-5"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-[#080B10]/88 p-5"
           >
             <motion.div
               initial={{ scale: 0.94, opacity: 0 }}
@@ -581,7 +581,7 @@ export const VotingScreen: React.FC<VotingScreenProps> = ({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-bg-dark/96 backdrop-blur-md flex items-center justify-center p-5"
+            className="fixed inset-0 z-50 bg-bg-dark/96 flex items-center justify-center p-5"
           >
             <ModalShell
               ariaLabel={lang === 'ar' ? 'إغلاق صندوق الاقتراع' : 'Ballot Sealed'}

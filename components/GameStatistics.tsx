@@ -369,7 +369,7 @@ export const GameStatistics: React.FC<GameStatisticsProps> = ({
           <button
             type="button"
             onClick={() => setLocalPlayerFilter('__all__')}
-            className={`min-h-[36px] px-3 py-1 rounded-[8px] text-xs font-bold whitespace-nowrap shrink-0 border transition-colors ${
+            className={`min-h-[44px] px-3.5 py-2 rounded-[9px] text-xs font-bold whitespace-nowrap shrink-0 border transition-colors ${
               localPlayerFilter === '__all__'
                 ? 'bg-[#668F9A]/15 border-[#668F9A] text-cyan-text'
                 : 'bg-bg-surface border-border text-text-muted hover:text-text-main'
@@ -382,7 +382,7 @@ export const GameStatistics: React.FC<GameStatisticsProps> = ({
               key={name}
               type="button"
               onClick={() => setLocalPlayerFilter(name)}
-              className={`min-h-[36px] px-3 py-1 rounded-[8px] text-xs font-bold whitespace-nowrap shrink-0 border transition-colors ${
+              className={`min-h-[44px] px-3.5 py-2 rounded-[9px] text-xs font-bold whitespace-nowrap shrink-0 border transition-colors ${
                 localPlayerFilter === name
                   ? 'bg-[#668F9A]/15 border-[#668F9A] text-cyan-text'
                   : 'bg-bg-surface border-border text-text-muted hover:text-text-main'
@@ -538,7 +538,7 @@ export const GameStatistics: React.FC<GameStatisticsProps> = ({
                       <button
                         type="button"
                         onClick={() => setConfirmReset(true)}
-                        className="min-h-[36px] px-2.5 py-1 rounded-[8px] text-xs font-semibold text-text-muted hover:text-danger-text flex items-center gap-1 transition-colors"
+                        className="min-h-[44px] px-3 py-1.5 rounded-[9px] text-xs font-semibold text-text-muted hover:text-danger-text flex items-center gap-1.5 transition-colors"
                       >
                         <RotateCcw className="w-3.5 h-3.5" />
                         <span>{copy.resetLocal}</span>
@@ -548,14 +548,14 @@ export const GameStatistics: React.FC<GameStatisticsProps> = ({
                         <button
                           type="button"
                           onClick={handleConfirmResetLocal}
-                          className="min-h-[36px] px-2.5 py-1 rounded-[8px] text-xs font-bold bg-[#963F46]/15 text-danger-text border border-[#963F46]/40"
+                          className="min-h-[44px] px-3 py-1.5 rounded-[9px] text-xs font-bold bg-[#963F46]/15 text-danger-text border border-[#963F46]/40"
                         >
                           {copy.confirmReset}
                         </button>
                         <button
                           type="button"
                           onClick={() => setConfirmReset(false)}
-                          className="min-h-[36px] px-2.5 py-1 rounded-[8px] text-xs font-semibold text-text-muted hover:text-text-main"
+                          className="min-h-[44px] px-3 py-1.5 rounded-[9px] text-xs font-semibold text-text-muted hover:text-text-main"
                         >
                           {copy.cancel}
                         </button>

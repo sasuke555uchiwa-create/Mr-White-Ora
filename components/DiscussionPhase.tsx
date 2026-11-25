@@ -7,6 +7,7 @@ import { playSound } from '../services/soundService';
 import { Player } from '../types';
 import { Avatar } from './Avatar';
 import {
+  BottomActionBar,
   IntelligencePanel,
   OperationPhaseBadge,
   PlayerIntelligenceCard,
@@ -135,20 +136,22 @@ export const DiscussionPhase: React.FC<DiscussionPhaseProps> = ({ players, onSki
         </div>
       </div>
 
-      <div className="w-full max-w-md mt-auto pt-2">
-        <TacticalButton
-          onClick={() => {
-            playSound('click');
-            onSkip();
-          }}
-          variant="primary"
-          size="lg"
-          fullWidth
-          trailingIcon={<FastForward size={18} />}
-        >
-          {t('voteNow')}
-        </TacticalButton>
-      </div>
+      <BottomActionBar className="self-stretch mt-auto">
+        <div className="w-full max-w-md mx-auto">
+          <TacticalButton
+            onClick={() => {
+              playSound('click');
+              onSkip();
+            }}
+            variant="primary"
+            size="lg"
+            fullWidth
+            trailingIcon={<FastForward size={18} />}
+          >
+            {t('voteNow')}
+          </TacticalButton>
+        </div>
+      </BottomActionBar>
     </div>
   );
 };

@@ -15,21 +15,21 @@ export interface TacticalButtonProps extends React.ButtonHTMLAttributes<HTMLButt
 
 const BUTTON_VARIANT_STYLES: Record<TacticalButtonVariant, string> = {
   primary:
-    'bg-[#B49A62] hover:bg-[#C2A870] text-[#080B10] border border-[#D4BE8A]/45 shadow-[0_6px_18px_rgba(8,11,16,0.35)]',
+    'bg-[#B49A62] hover:bg-[#C2A870] text-[#080B10] border border-[#D8C492]/50 shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_6px_18px_rgba(8,11,16,0.34)]',
   cyan:
-    'bg-[#668F9A] hover:bg-[#77A0AB] text-[#080B10] border border-[#8CB3BE]/45 shadow-[0_6px_18px_rgba(8,11,16,0.35)]',
+    'bg-[#668F9A] hover:bg-[#77A0AB] text-[#080B10] border border-[#96BAC4]/45 shadow-[inset_0_1px_0_rgba(255,255,255,0.18),0_6px_18px_rgba(8,11,16,0.34)]',
   secondary:
-    'bg-bg-card hover:bg-bg-surface text-text-main border border-border-strong shadow-xs',
+    'bg-bg-card hover:bg-bg-surface text-text-main border border-border-strong shadow-[inset_0_1px_0_var(--surface-highlight)]',
   ghost:
-    'bg-transparent hover:bg-bg-card/80 text-text-muted hover:text-text-main border border-transparent hover:border-border',
+    'bg-transparent hover:bg-bg-card/85 text-text-muted hover:text-text-main border border-transparent',
   danger:
-    'bg-[#963F46] hover:bg-[#A64A52] text-[#F4F6F8] border border-[#B85C64]/45 shadow-[0_6px_18px_rgba(8,11,16,0.35)]',
+    'bg-[#963F46] hover:bg-[#A64A52] text-[#F4F6F8] border border-[#BC636B]/45 shadow-[inset_0_1px_0_rgba(255,255,255,0.14),0_6px_18px_rgba(8,11,16,0.34)]',
 };
 
 const BUTTON_SIZE_STYLES: Record<TacticalButtonSize, string> = {
-  sm: 'min-h-[44px] sm:min-h-[40px] px-3.5 py-2 text-xs gap-1.5 rounded-[8px]',
+  sm: 'min-h-[44px] px-3.5 py-2 text-xs gap-1.5 rounded-[9px]',
   md: 'min-h-[44px] px-4 py-2.5 text-sm gap-2 rounded-[10px]',
-  lg: 'min-h-[50px] px-5 py-3 text-[15px] gap-2.5 rounded-[10px]',
+  lg: 'min-h-[52px] px-5 py-3 text-[15px] gap-2.5 rounded-[10px]',
 };
 
 export const TacticalButton: React.FC<TacticalButtonProps> = ({
@@ -45,18 +45,33 @@ export const TacticalButton: React.FC<TacticalButtonProps> = ({
   type = 'button',
   ...props
 }) => {
+  const hasComplexChildren =
+    React.Children.count(children) > 1 || React.isValidElement(children);
+
   return (
     <button
       type={type}
       disabled={disabled || loading}
-      className={`inline-flex items-center justify-center font-bold tracking-normal transition-all duration-150 active:scale-[0.985] disabled:opacity-45 disabled:cursor-not-allowed disabled:active:scale-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#668F9A]/70 select-none ${
+      className={`inline-flex items-center justify-center font-bold tracking-normal transition-all duration-150 active:translate-y-[0.5px] active:scale-[0.985] disabled:opacity-45 disabled:cursor-not-allowed disabled:active:translate-y-0 disabled:active:scale-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#668F9A]/75 select-none ${
         BUTTON_VARIANT_STYLES[variant]
       } ${BUTTON_SIZE_STYLES[size]} ${fullWidth ? 'w-full' : ''} ${className}`}
       {...props}
     >
-      {loading ? <Loader2 size={16} className="animate-spin shrink-0" /> : icon && <span className="shrink-0 flex items-center">{icon}</span>}
-      {children !== undefined && children !== null && <span className="truncate">{children}</span>}
-      {!loading && trailingIcon && <span className="shrink-0 flex items-center">{trailingIcon}</span>}
+      {loading ? (
+        <Loader2 size={16} className="animate-spin shrink-0" />
+      ) : (
+        icon && <span className="shrink-0 flex items-center">{icon}</span>
+      )}
+      {children !== undefined &&
+        children !== null &&
+        (hasComplexChildren ? (
+          <span className="min-w-0 flex-1 flex items-center justify-center gap-2">{children}</span>
+        ) : (
+          <span className="truncate">{children}</span>
+        ))}
+      {!loading && trailingIcon && (
+        <span className="shrink-0 flex items-center">{trailingIcon}</span>
+      )}
     </button>
   );
 };
@@ -67,8 +82,10 @@ export interface IconButtonProps extends React.ButtonHTMLAttributes<HTMLButtonEl
 }
 
 const ICON_BUTTON_VARIANTS: Record<NonNullable<IconButtonProps['variant']>, string> = {
-  secondary: 'bg-bg-surface hover:bg-bg-card text-text-main border border-border-strong',
-  ghost: 'bg-transparent hover:bg-bg-card/80 text-text-muted hover:text-text-main border border-transparent hover:border-border',
+  secondary:
+    'bg-bg-surface hover:bg-bg-card text-text-main border border-border-strong shadow-[inset_0_1px_0_var(--surface-highlight)]',
+  ghost:
+    'bg-transparent hover:bg-bg-card/85 text-text-muted hover:text-text-main border border-transparent',
   danger: 'bg-[#963F46]/15 hover:bg-[#963F46]/25 text-danger-text border border-[#963F46]/35',
   primary: 'bg-[#B49A62]/15 hover:bg-[#B49A62]/25 text-primary-text border border-[#B49A62]/40',
 };
@@ -83,12 +100,12 @@ export const IconButton: React.FC<IconButtonProps> = ({
 }) => {
   const dims =
     size === 'sm'
-      ? 'w-11 h-11 min-w-[44px] min-h-[44px] sm:w-10 sm:h-10 sm:min-w-[40px] sm:min-h-[40px] rounded-[8px]'
+      ? 'w-11 h-11 min-w-[44px] min-h-[44px] rounded-[9px]'
       : 'w-11 h-11 min-w-[44px] min-h-[44px] rounded-[10px]';
   return (
     <button
       type={type}
-      className={`inline-flex items-center justify-center transition-colors active:scale-[0.97] disabled:opacity-45 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#668F9A]/70 shrink-0 ${dims} ${ICON_BUTTON_VARIANTS[variant]} ${className}`}
+      className={`inline-flex items-center justify-center transition-all duration-150 active:scale-[0.97] disabled:opacity-45 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#668F9A]/75 shrink-0 ${dims} ${ICON_BUTTON_VARIANTS[variant]} ${className}`}
       {...props}
     >
       {children}
@@ -159,7 +176,7 @@ export function SegmentedControl<T extends string>({
   return (
     <div
       ref={containerRef}
-      className={`inline-flex items-center bg-bg-card/90 border border-border rounded-[10px] p-1 gap-1 ${className}`}
+      className={`inline-flex items-center bg-bg-main/85 border border-border-strong rounded-[10px] p-1 gap-1 ${className}`}
       role="tablist"
       aria-label={ariaLabel}
     >
@@ -175,11 +192,11 @@ export function SegmentedControl<T extends string>({
             disabled={opt.disabled}
             onClick={() => onChange(opt.value)}
             onKeyDown={(e) => handleKeyDown(e, idx)}
-            className={`flex-1 inline-flex items-center justify-center gap-1.5 font-bold whitespace-nowrap shrink-0 transition-all rounded-[7px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#668F9A]/70 disabled:opacity-40 disabled:cursor-not-allowed ${
-              size === 'sm' ? 'min-h-[44px] sm:min-h-[38px] px-2.5 text-xs' : 'min-h-[44px] px-3 text-xs sm:text-sm'
+            className={`flex-1 inline-flex items-center justify-center gap-1.5 font-bold whitespace-nowrap shrink-0 transition-all rounded-[7px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#668F9A]/75 disabled:opacity-40 disabled:cursor-not-allowed ${
+              size === 'sm' ? 'min-h-[44px] px-2.5 text-xs' : 'min-h-[44px] px-3 text-xs sm:text-sm'
             } ${
               active
-                ? 'bg-bg-surface text-text-main border border-border-strong shadow-xs'
+                ? 'bg-bg-card text-text-main border border-border-strong shadow-[inset_0_1px_0_var(--surface-highlight)]'
                 : 'text-text-muted hover:text-text-main border border-transparent'
             }`}
           >
@@ -191,6 +208,19 @@ export function SegmentedControl<T extends string>({
     </div>
   );
 }
+
+export const NavDock: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({
+  className = '',
+  children,
+  ...props
+}) => (
+  <div
+    className={`blacksite-panel rounded-[14px] p-1.5 grid grid-cols-5 gap-1 ${className}`}
+    {...props}
+  >
+    {children}
+  </div>
+);
 
 export interface NavButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   icon: React.ReactNode;
@@ -209,17 +239,29 @@ export const NavButton: React.FC<NavButtonProps> = ({
   return (
     <button
       type={type}
-      className={`group flex flex-col items-center justify-center gap-1 min-h-[48px] px-1.5 py-2 rounded-[10px] border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#668F9A]/70 ${
+      className={`group relative flex flex-col items-center justify-center gap-1 min-h-[50px] px-0.5 sm:px-1.5 py-2 rounded-[10px] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#668F9A]/75 active:scale-[0.97] ${
         active
-          ? 'bg-bg-card border-[#B49A62]/45 text-text-main'
-          : 'bg-bg-surface/85 border-border hover:border-border-strong hover:bg-bg-card text-text-muted hover:text-text-main'
+          ? 'bg-bg-card text-text-main'
+          : 'bg-transparent hover:bg-bg-card/65 text-text-muted hover:text-text-main'
       } ${className}`}
       {...props}
     >
-      <span className={`transition-colors ${active ? 'text-[#B49A62]' : 'text-text-muted group-hover:text-text-main'}`}>
+      {active && (
+        <span
+          aria-hidden="true"
+          className="absolute top-1 w-4 h-[2px] rounded-full bg-[#B49A62]"
+        />
+      )}
+      <span
+        className={`transition-colors ${
+          active ? 'text-[#B49A62]' : 'text-text-muted group-hover:text-primary-text'
+        }`}
+      >
         {icon}
       </span>
-      <span className="text-[11px] font-bold leading-tight truncate max-w-full">{label}</span>
+      <span className="text-[10.5px] sm:text-[11px] font-bold leading-tight whitespace-nowrap text-center">
+        {label}
+      </span>
     </button>
   );
 };
@@ -229,10 +271,7 @@ export const IntelligencePanel: React.FC<React.HTMLAttributes<HTMLDivElement>> =
   children,
   ...props
 }) => (
-  <div
-    className={`rounded-[14px] bg-bg-surface border border-border-strong shadow-[0_12px_32px_rgba(4,7,12,0.28)] ${className}`}
-    {...props}
-  >
+  <div className={`rounded-[14px] blacksite-panel ${className}`} {...props}>
     {children}
   </div>
 );
@@ -243,7 +282,7 @@ export const ClassifiedDossierPanel: React.FC<React.HTMLAttributes<HTMLDivElemen
   ...props
 }) => (
   <div
-    className={`rounded-[16px] bg-bg-surface border border-[#B49A62]/35 shadow-[0_18px_44px_rgba(4,7,12,0.42)] ${className}`}
+    className={`rounded-[16px] bg-bg-surface border border-[#B49A62]/35 shadow-[inset_0_1px_0_var(--surface-highlight),0_18px_44px_rgba(4,7,12,0.42)] ${className}`}
     {...props}
   >
     {children}
@@ -255,12 +294,43 @@ export const PlayerIntelligenceCard: React.FC<React.HTMLAttributes<HTMLDivElemen
   children,
   ...props
 }) => (
-  <div
-    className={`rounded-[12px] bg-bg-card/85 border border-border transition-colors ${className}`}
+  <div className={`rounded-[12px] blacksite-card ${className}`} {...props}>
+    {children}
+  </div>
+);
+
+export interface InteractiveCardProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  selected?: boolean;
+  accent?: 'gold' | 'cyan' | 'crimson' | 'emerald' | 'neutral';
+}
+
+const INTERACTIVE_ACCENT_SELECTED: Record<NonNullable<InteractiveCardProps['accent']>, string> = {
+  gold: 'bg-[#B49A62]/12 border-[#B49A62] text-text-main',
+  cyan: 'bg-[#668F9A]/14 border-[#668F9A] text-text-main',
+  crimson: 'bg-[#963F46]/15 border-[#963F46] text-text-main',
+  emerald: 'bg-[#3E7B67]/15 border-[#3E7B67] text-text-main',
+  neutral: 'bg-bg-card border-border-strong text-text-main',
+};
+
+export const InteractiveCard: React.FC<InteractiveCardProps> = ({
+  selected = false,
+  accent = 'neutral',
+  className = '',
+  children,
+  type = 'button',
+  ...props
+}) => (
+  <button
+    type={type}
+    className={`rounded-[12px] min-h-[44px] transition-all duration-150 active:scale-[0.985] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#668F9A]/75 disabled:opacity-45 disabled:cursor-not-allowed ${
+      selected
+        ? `border ${INTERACTIVE_ACCENT_SELECTED[accent]} shadow-[inset_0_1px_0_var(--surface-highlight)]`
+        : 'blacksite-card-interactive text-text-main'
+    } ${className}`}
     {...props}
   >
     {children}
-  </div>
+  </button>
 );
 
 export const TacticalDataRow: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({
@@ -269,7 +339,25 @@ export const TacticalDataRow: React.FC<React.HTMLAttributes<HTMLDivElement>> = (
   ...props
 }) => (
   <div
-    className={`rounded-[10px] bg-bg-card/80 border border-border px-3.5 py-2.5 flex items-center justify-between gap-3 ${className}`}
+    className={`rounded-[10px] blacksite-card px-3.5 py-2.5 flex items-center justify-between gap-3 ${className}`}
+    {...props}
+  >
+    {children}
+  </div>
+);
+
+export const TacticalInput: React.FC<React.InputHTMLAttributes<HTMLInputElement>> = ({
+  className = '',
+  ...props
+}) => <input className={`blacksite-input px-3.5 py-2.5 text-sm font-medium ${className}`} {...props} />;
+
+export const BottomActionBar: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({
+  className = '',
+  children,
+  ...props
+}) => (
+  <div
+    className={`sticky bottom-0 z-20 -mx-4 sm:-mx-6 px-4 sm:px-6 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] bg-bg-surface/95 border-t border-border-strong shadow-[0_-10px_28px_rgba(4,7,12,0.34)] ${className}`}
     {...props}
   >
     {children}

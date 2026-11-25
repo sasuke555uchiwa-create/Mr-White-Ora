@@ -39,9 +39,11 @@ import { getUITranslation } from '../translations';
 import { getSettings } from '../services/storageService';
 import { showToast } from '../utils/toast';
 import {
+  BottomActionBar,
   ClassifiedStamp,
   IconButton,
   IntelligencePanel,
+  InteractiveCard,
   ModalShell,
   PlayerIntelligenceCard,
   StatusIndicator,
@@ -310,7 +312,7 @@ export const OnlineLobbyScreen: React.FC<OnlineLobbyScreenProps> = ({
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -6 }}
-      className="flex flex-col p-4 max-w-3xl mx-auto w-full pb-24 relative min-h-full"
+      className="flex flex-col px-4 sm:px-6 pt-4 max-w-3xl mx-auto w-full relative min-h-full"
     >
       {/* Header */}
       <div className="flex items-center justify-between mb-5">
@@ -333,7 +335,9 @@ export const OnlineLobbyScreen: React.FC<OnlineLobbyScreenProps> = ({
         >
           <MessageCircle className="w-5 h-5" />
           {room.messages?.length > 0 && (
-            <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-[#B49A62] rounded-full" />
+            <span className="absolute -top-1 -end-1 min-w-[18px] h-[18px] px-1 rounded-[5px] bg-[#B49A62] text-[#080B10] font-mono-code text-[10px] font-extrabold flex items-center justify-center border border-bg-surface tabular-nums">
+              {Math.min(99, room.messages.length)}
+            </span>
           )}
         </IconButton>
       </div>
@@ -417,50 +421,19 @@ export const OnlineLobbyScreen: React.FC<OnlineLobbyScreenProps> = ({
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
           {playersArr.map((player: any) => {
             const isCardHost = player.uid === room.hostId;
+            const hasActions = (isHost && !isCardHost) || player.uid !== user?.uid;
             return (
               <PlayerIntelligenceCard
                 key={player.uid}
                 className="p-3.5 flex flex-col items-center text-center relative overflow-hidden bg-bg-surface border-border-strong"
               >
                 {isCardHost && (
-                  <div className="absolute top-0 right-0 bg-[#B49A62] text-[#080B10] text-[10px] font-extrabold px-2 py-0.5 rounded-bl-[8px] z-10">
+                  <div className="absolute top-0 end-0 bg-[#B49A62] text-[#080B10] text-[10px] font-extrabold px-2 py-0.5 rounded-es-[8px] z-10">
                     {t('host')}
                   </div>
                 )}
 
-                {isHost && !isCardHost && (
-                  <div className="absolute top-1.5 right-1.5 flex items-center gap-1 z-10">
-                    <button
-                      onClick={() => handlePromoteHost(player)}
-                      className="min-h-[34px] min-w-[34px] flex items-center justify-center bg-[#B49A62]/15 text-primary-text rounded-[8px] hover:bg-[#B49A62] hover:text-[#080B10] transition-colors border border-[#B49A62]/35"
-                      title={t('promoteToHost')}
-                      aria-label={t('promoteToHost')}
-                    >
-                      <Crown className="w-3.5 h-3.5" />
-                    </button>
-                    <button
-                      onClick={() => handleKickPlayer(player.uid)}
-                      className="min-h-[34px] min-w-[34px] flex items-center justify-center bg-[#963F46]/15 text-danger-text rounded-[8px] hover:bg-[#963F46] hover:text-[#F4F6F8] transition-colors border border-[#963F46]/40"
-                      title={t('kickPlayer')}
-                      aria-label={t('kickPlayer')}
-                    >
-                      <X className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                )}
-
-                {player.uid !== user?.uid && (
-                  <button
-                    onClick={() => handleSendFriendRequest(player.uid)}
-                    className="absolute top-1.5 left-1.5 min-h-[34px] min-w-[34px] flex items-center justify-center bg-[#668F9A]/15 text-cyan-text rounded-[8px] hover:bg-[#668F9A] hover:text-[#080B10] transition-colors z-10 border border-[#668F9A]/35"
-                    title={t('sendFriendRequest')}
-                    aria-label={t('sendFriendRequest')}
-                  >
-                    <UserPlus className="w-3.5 h-3.5" />
-                  </button>
-                )}
-
-                <div className="mt-4">
+                <div className="mt-2">
                   <Avatar
                     avatar={player.avatar}
                     name={player.name}
@@ -480,6 +453,45 @@ export const OnlineLobbyScreen: React.FC<OnlineLobbyScreenProps> = ({
                     }
                   />
                 </div>
+
+                {hasActions && (
+                  <div className="mt-2.5 pt-2 border-t border-border w-full flex items-center justify-center gap-1.5">
+                    {player.uid !== user?.uid && (
+                      <IconButton
+                        onClick={() => handleSendFriendRequest(player.uid)}
+                        variant="secondary"
+                        size="sm"
+                        className="text-cyan-text border-[#668F9A]/35 hover:bg-[#668F9A] hover:text-[#080B10]"
+                        title={t('sendFriendRequest')}
+                        aria-label={t('sendFriendRequest')}
+                      >
+                        <UserPlus className="w-4 h-4" />
+                      </IconButton>
+                    )}
+                    {isHost && !isCardHost && (
+                      <>
+                        <IconButton
+                          onClick={() => handlePromoteHost(player)}
+                          variant="primary"
+                          size="sm"
+                          title={t('promoteToHost')}
+                          aria-label={t('promoteToHost')}
+                        >
+                          <Crown className="w-4 h-4" />
+                        </IconButton>
+                        <IconButton
+                          onClick={() => handleKickPlayer(player.uid)}
+                          variant="danger"
+                          size="sm"
+                          title={t('kickPlayer')}
+                          aria-label={t('kickPlayer')}
+                        >
+                          <X className="w-4 h-4" />
+                        </IconButton>
+                      </>
+                    )}
+                  </div>
+                )}
               </PlayerIntelligenceCard>
             );
           })}
@@ -497,7 +509,7 @@ export const OnlineLobbyScreen: React.FC<OnlineLobbyScreenProps> = ({
       </div>
 
       {/* Action Buttons */}
-      <div className="mt-auto">
+      <BottomActionBar className="mt-auto">
         {isHost ? (
           <TacticalButton
             variant="primary"
@@ -526,14 +538,18 @@ export const OnlineLobbyScreen: React.FC<OnlineLobbyScreenProps> = ({
             {meReady ? t('cancelReady') : t('imReady')}
           </TacticalButton>
         )}
-      </div>
+      </BottomActionBar>
 
       {/* Live Edit Settings Modal (Host Only) */}
       {showEditSettings && isHost && (
-        <div className="fixed inset-0 bg-black/75 backdrop-blur-xs flex items-center justify-center p-4 z-50 overflow-y-auto">
+        <div
+          onClick={() => setShowEditSettings(false)}
+          className="fixed inset-0 bg-[#080B10]/85 flex items-center justify-center p-4 z-50 overflow-y-auto"
+        >
           <motion.div
             initial={{ opacity: 0, scale: 0.96 }}
             animate={{ opacity: 1, scale: 1 }}
+            onClick={(e) => e.stopPropagation()}
             className="w-full max-w-md my-auto"
           >
             <ModalShell
@@ -551,34 +567,34 @@ export const OnlineLobbyScreen: React.FC<OnlineLobbyScreenProps> = ({
                   <label className="block text-xs font-bold text-text-muted mb-1.5">
                     {t('numberOfPlayers')}
                   </label>
-                  <div className="flex items-center justify-between bg-bg-card border border-border rounded-[10px] p-1.5">
-                    <button
-                      type="button"
+                  <div className="flex items-center justify-between blacksite-card rounded-[10px] p-1.5">
+                    <IconButton
                       onClick={() =>
                         setEditDraft((prev) => ({
                           ...prev,
                           maxPlayers: Math.max(Math.max(3, playersArr.length), prev.maxPlayers - 1),
                         }))
                       }
-                      className="min-h-[44px] min-w-[44px] rounded-[8px] bg-bg-surface hover:bg-bg-main flex items-center justify-center border border-border"
+                      variant="secondary"
+                      aria-label="Decrease players"
                     >
                       <Minus size={16} />
-                    </button>
+                    </IconButton>
                     <span className="text-xl font-extrabold font-mono-code tabular-nums text-text-main">
                       {editDraft.maxPlayers}
                     </span>
-                    <button
-                      type="button"
+                    <IconButton
                       onClick={() =>
                         setEditDraft((prev) => ({
                           ...prev,
                           maxPlayers: Math.min(10, prev.maxPlayers + 1),
                         }))
                       }
-                      className="min-h-[44px] min-w-[44px] rounded-[8px] bg-bg-surface hover:bg-bg-main flex items-center justify-center border border-border"
+                      variant="secondary"
+                      aria-label="Increase players"
                     >
                       <Plus size={16} />
-                    </button>
+                    </IconButton>
                   </div>
                 </div>
 
@@ -593,18 +609,17 @@ export const OnlineLobbyScreen: React.FC<OnlineLobbyScreenProps> = ({
                       { code: 'fr', label: t('french') },
                       { code: 'es', label: t('spanish') },
                     ].map((item) => (
-                      <button
+                      <InteractiveCard
                         key={item.code}
-                        type="button"
+                        selected={editDraft.language === item.code}
+                        accent="gold"
                         onClick={() => setEditDraft({ ...editDraft, language: item.code })}
-                        className={`min-h-[44px] rounded-[10px] font-bold text-xs border ${
-                          editDraft.language === item.code
-                            ? 'bg-[#B49A62]/15 text-primary-text border-[#B49A62]'
-                            : 'bg-bg-card text-text-muted border-border'
+                        className={`font-bold text-xs ${
+                          editDraft.language === item.code ? 'text-primary-text' : 'text-text-muted'
                         }`}
                       >
                         {item.label}
-                      </button>
+                      </InteractiveCard>
                     ))}
                   </div>
                 </div>
@@ -615,18 +630,17 @@ export const OnlineLobbyScreen: React.FC<OnlineLobbyScreenProps> = ({
                   </label>
                   <div className="grid grid-cols-2 gap-2">
                     {(['standard', 'animals', 'food', 'places', 'objects'] as const).map((cat) => (
-                      <button
+                      <InteractiveCard
                         key={cat}
-                        type="button"
+                        selected={editDraft.category === cat}
+                        accent="cyan"
                         onClick={() => setEditDraft({ ...editDraft, category: cat })}
-                        className={`min-h-[44px] px-3 rounded-[10px] font-bold text-xs border truncate ${
-                          editDraft.category === cat
-                            ? 'bg-[#668F9A]/15 text-cyan-text border-[#668F9A]'
-                            : 'bg-bg-card text-text-muted border-border'
+                        className={`px-3 font-bold text-xs truncate ${
+                          editDraft.category === cat ? 'text-cyan-text' : 'text-text-muted'
                         } ${cat === 'standard' ? 'col-span-2' : ''}`}
                       >
                         {categoryLabels[cat]}
-                      </button>
+                      </InteractiveCard>
                     ))}
                   </div>
                 </div>
@@ -636,30 +650,28 @@ export const OnlineLobbyScreen: React.FC<OnlineLobbyScreenProps> = ({
                     {t('difficulty')}
                   </label>
                   <div className="flex gap-2">
-                    <button
-                      type="button"
+                    <InteractiveCard
+                      selected={editDraft.difficulty === 'easy'}
+                      accent="cyan"
                       onClick={() => setEditDraft({ ...editDraft, difficulty: 'easy' })}
-                      className={`flex-1 min-h-[44px] rounded-[10px] font-bold text-xs flex items-center justify-center gap-1.5 border ${
-                        editDraft.difficulty === 'easy'
-                          ? 'bg-[#668F9A]/15 text-cyan-text border-[#668F9A]'
-                          : 'bg-bg-card text-text-muted border-border'
+                      className={`flex-1 font-bold text-xs flex items-center justify-center gap-1.5 ${
+                        editDraft.difficulty === 'easy' ? 'text-cyan-text' : 'text-text-muted'
                       }`}
                     >
                       <Eye size={14} />
                       {t('difficultyEasy')}
-                    </button>
-                    <button
-                      type="button"
+                    </InteractiveCard>
+                    <InteractiveCard
+                      selected={editDraft.difficulty === 'hard'}
+                      accent="crimson"
                       onClick={() => setEditDraft({ ...editDraft, difficulty: 'hard' })}
-                      className={`flex-1 min-h-[44px] rounded-[10px] font-bold text-xs flex items-center justify-center gap-1.5 border ${
-                        editDraft.difficulty === 'hard'
-                          ? 'bg-[#963F46]/18 text-danger-text border-[#963F46]'
-                          : 'bg-bg-card text-text-muted border-border'
+                      className={`flex-1 font-bold text-xs flex items-center justify-center gap-1.5 ${
+                        editDraft.difficulty === 'hard' ? 'text-danger-text' : 'text-text-muted'
                       }`}
                     >
                       <EyeOff size={14} />
                       {t('difficultyHard')}
-                    </button>
+                    </InteractiveCard>
                   </div>
                 </div>
 
@@ -669,19 +681,20 @@ export const OnlineLobbyScreen: React.FC<OnlineLobbyScreenProps> = ({
                   </label>
                   <div className="grid grid-cols-4 gap-2">
                     {[30, 45, 60, 90].map((sec) => (
-                      <button
+                      <InteractiveCard
                         key={sec}
-                        type="button"
+                        selected={editDraft.turnDurationSeconds === sec}
+                        accent="gold"
                         onClick={() => setEditDraft({ ...editDraft, turnDurationSeconds: sec })}
-                        className={`min-h-[44px] rounded-[10px] font-mono-code font-bold text-xs tabular-nums border ${
+                        className={`font-mono-code font-bold text-xs tabular-nums ${
                           editDraft.turnDurationSeconds === sec
-                            ? 'bg-[#B49A62]/15 text-primary-text border-[#B49A62]'
-                            : 'bg-bg-card text-text-muted border-border'
+                            ? 'text-primary-text'
+                            : 'text-text-muted'
                         }`}
                       >
                         {sec}
                         {t('secondsShort')}
-                      </button>
+                      </InteractiveCard>
                     ))}
                   </div>
                 </div>
@@ -691,30 +704,28 @@ export const OnlineLobbyScreen: React.FC<OnlineLobbyScreenProps> = ({
                     {t('roomType')}
                   </label>
                   <div className="flex gap-2">
-                    <button
-                      type="button"
+                    <InteractiveCard
+                      selected={!editDraft.isPrivate}
+                      accent="emerald"
                       onClick={() => setEditDraft({ ...editDraft, isPrivate: false })}
-                      className={`flex-1 min-h-[44px] rounded-[10px] font-bold text-xs flex items-center justify-center gap-1.5 border ${
-                        !editDraft.isPrivate
-                          ? 'bg-[#3E7B67]/18 text-emerald-text border-[#3E7B67]'
-                          : 'bg-bg-card text-text-muted border-border'
+                      className={`flex-1 font-bold text-xs flex items-center justify-center gap-1.5 ${
+                        !editDraft.isPrivate ? 'text-emerald-text' : 'text-text-muted'
                       }`}
                     >
                       <Globe size={14} />
                       {t('public')}
-                    </button>
-                    <button
-                      type="button"
+                    </InteractiveCard>
+                    <InteractiveCard
+                      selected={editDraft.isPrivate}
+                      accent="gold"
                       onClick={() => setEditDraft({ ...editDraft, isPrivate: true })}
-                      className={`flex-1 min-h-[44px] rounded-[10px] font-bold text-xs flex items-center justify-center gap-1.5 border ${
-                        editDraft.isPrivate
-                          ? 'bg-[#B49A62]/15 text-primary-text border-[#B49A62]'
-                          : 'bg-bg-card text-text-muted border-border'
+                      className={`flex-1 font-bold text-xs flex items-center justify-center gap-1.5 ${
+                        editDraft.isPrivate ? 'text-primary-text' : 'text-text-muted'
                       }`}
                     >
                       <Lock size={14} />
                       {t('private')}
-                    </button>
+                    </InteractiveCard>
                   </div>
                 </div>
               </div>

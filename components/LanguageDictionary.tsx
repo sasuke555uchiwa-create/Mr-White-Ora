@@ -14,9 +14,11 @@ import { useAuth } from '../contexts/AuthContext';
 import {
   IconButton,
   IntelligencePanel,
+  InteractiveCard,
   ModalShell,
   StatusIndicator,
   TacticalButton,
+  TacticalInput,
 } from './ui/BlacksiteUI';
 
 interface LanguageDictionaryProps {
@@ -146,7 +148,7 @@ export const LanguageDictionary: React.FC<LanguageDictionaryProps> = ({ onBack }
   return (
     <div className="flex flex-col h-full w-full relative max-w-2xl mx-auto">
       {/* Header */}
-      <div className="p-4 flex items-center justify-between border-b border-border bg-bg-surface/80 backdrop-blur-xs sticky top-0 z-20">
+      <div className="p-4 flex items-center justify-between border-b border-border-strong bg-bg-surface sticky top-0 z-20">
         <div className="flex items-center gap-3 min-w-0">
           <IconButton onClick={onBack} aria-label={t('back')} variant="secondary">
             <ArrowLeft className={`w-5 h-5 ${isRTL ? 'rotate-180' : ''}`} />
@@ -175,8 +177,9 @@ export const LanguageDictionary: React.FC<LanguageDictionaryProps> = ({ onBack }
           return (
             <button
               key={langItem.code}
+              type="button"
               onClick={() => setSelectedLanguage(langItem.code)}
-              className={`min-h-[40px] px-3 py-1.5 rounded-[10px] border flex items-center gap-2 transition-colors shrink-0 ${
+              className={`min-h-[44px] px-3 py-1.5 rounded-[10px] border flex items-center gap-2 transition-colors shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#668F9A]/75 ${
                 active
                   ? 'bg-[#B49A62]/15 border-[#B49A62] text-text-main'
                   : 'bg-bg-surface border-border text-text-muted hover:text-text-main'
@@ -199,8 +202,9 @@ export const LanguageDictionary: React.FC<LanguageDictionaryProps> = ({ onBack }
         {CATEGORIES.map((cat) => (
           <button
             key={cat}
+            type="button"
             onClick={() => setSelectedCategory(cat)}
-            className={`min-h-[36px] px-3 py-1 rounded-[8px] text-xs font-bold transition-colors shrink-0 border ${
+            className={`min-h-[44px] px-3 py-1.5 rounded-[8px] text-xs font-bold transition-colors shrink-0 border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#668F9A]/75 ${
               selectedCategory === cat
                 ? 'bg-[#668F9A]/15 border-[#668F9A] text-cyan-text'
                 : 'bg-bg-surface border-border text-text-muted hover:text-text-main'
@@ -222,25 +226,33 @@ export const LanguageDictionary: React.FC<LanguageDictionaryProps> = ({ onBack }
             {baseCount}
           </span>
         </IntelligencePanel>
-        <IntelligencePanel className="p-3 flex flex-col items-center justify-center relative">
-          <span className="text-[11px] font-bold text-text-muted mb-1 flex items-center gap-1.5">
-            <UserCircle size={13} className="text-cyan-text" />
-            {t('myWordsCount')}
-          </span>
-          <span className="text-xl font-extrabold text-cyan-text font-mono-code tabular-nums">
-            {myCount}
-          </span>
-
-          {myCount > 0 && (
-            <button
-              onClick={handleJumpToMyWords}
-              className="absolute -bottom-2 right-2 bg-[#668F9A] text-[#080B10] rounded-[8px] p-1.5 shadow-md active:scale-95 transition-transform"
-              title={t('jumpToMyWords')}
-            >
-              <ChevronDown size={14} />
-            </button>
-          )}
-        </IntelligencePanel>
+        {myCount > 0 ? (
+          <InteractiveCard
+            onClick={handleJumpToMyWords}
+            title={t('jumpToMyWords')}
+            accent="cyan"
+            className="p-3 flex flex-col items-center justify-center border-[#668F9A]/35"
+          >
+            <span className="text-[11px] font-bold text-text-muted mb-1 flex items-center gap-1.5">
+              <UserCircle size={13} className="text-cyan-text" />
+              <span>{t('myWordsCount')}</span>
+              <ChevronDown size={13} className="text-cyan-text" />
+            </span>
+            <span className="text-xl font-extrabold text-cyan-text font-mono-code tabular-nums">
+              {myCount}
+            </span>
+          </InteractiveCard>
+        ) : (
+          <IntelligencePanel className="p-3 flex flex-col items-center justify-center">
+            <span className="text-[11px] font-bold text-text-muted mb-1 flex items-center gap-1.5">
+              <UserCircle size={13} className="text-cyan-text" />
+              {t('myWordsCount')}
+            </span>
+            <span className="text-xl font-extrabold text-cyan-text font-mono-code tabular-nums">
+              {myCount}
+            </span>
+          </IntelligencePanel>
+        )}
       </div>
 
       {/* Word List */}
@@ -281,13 +293,15 @@ export const LanguageDictionary: React.FC<LanguageDictionaryProps> = ({ onBack }
               </StatusIndicator>
 
               {!pair.isBase ? (
-                <button
+                <IconButton
                   onClick={() => handleDeleteCustom(pair.id)}
-                  className="p-2 text-danger-text hover:bg-[#963F46]/15 rounded-[8px] transition-colors"
+                  variant="danger"
+                  size="sm"
+                  aria-label="Delete"
                   title="Delete"
                 >
                   <Trash2 className="w-4 h-4" />
-                </button>
+                </IconButton>
               ) : (
                 <Info className="w-4 h-4 text-text-muted/40 shrink-0" />
               )}
@@ -309,7 +323,7 @@ export const LanguageDictionary: React.FC<LanguageDictionaryProps> = ({ onBack }
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/75 backdrop-blur-xs"
+              className="fixed inset-0 bg-[#080B10]/85"
               onClick={() => setIsAdding(false)}
             />
             <motion.div
@@ -335,18 +349,17 @@ export const LanguageDictionary: React.FC<LanguageDictionaryProps> = ({ onBack }
                     </label>
                     <div className="grid grid-cols-2 gap-1.5">
                       {(['standard', 'animals', 'food', 'places', 'objects'] as const).map((cat) => (
-                        <button
+                        <InteractiveCard
                           key={cat}
-                          type="button"
+                          selected={newCategory === cat}
+                          accent="cyan"
                           onClick={() => setNewCategory(cat)}
-                          className={`min-h-[40px] py-2 px-2 rounded-[8px] text-xs font-bold border transition-colors ${
-                            newCategory === cat
-                              ? 'bg-[#668F9A]/15 border-[#668F9A] text-cyan-text'
-                              : 'bg-bg-card border-border text-text-muted'
+                          className={`py-2 px-2 text-xs font-bold ${
+                            newCategory === cat ? 'text-cyan-text' : 'text-text-muted'
                           } ${cat === 'standard' ? 'col-span-2' : ''}`}
                         >
                           {categoryLabels[cat]}
-                        </button>
+                        </InteractiveCard>
                       ))}
                     </div>
                   </div>
@@ -354,11 +367,11 @@ export const LanguageDictionary: React.FC<LanguageDictionaryProps> = ({ onBack }
                     <label className="text-xs font-bold text-text-muted mb-1.5 block">
                       {t('wordIs')}
                     </label>
-                    <input
+                    <TacticalInput
                       type="text"
                       value={newWord1}
                       onChange={(e) => setNewWord1(e.target.value)}
-                      className="w-full bg-bg-card border border-border-strong rounded-[10px] py-3 px-4 font-bold text-center text-text-main focus:border-[#668F9A] transition-colors outline-none"
+                      className="w-full py-3 px-4 font-bold text-center"
                       placeholder="..."
                     />
                   </div>
@@ -366,11 +379,11 @@ export const LanguageDictionary: React.FC<LanguageDictionaryProps> = ({ onBack }
                     <label className="text-xs font-bold text-text-muted mb-1.5 block">
                       {t('wordIs')}
                     </label>
-                    <input
+                    <TacticalInput
                       type="text"
                       value={newWord2}
                       onChange={(e) => setNewWord2(e.target.value)}
-                      className="w-full bg-bg-card border border-border-strong rounded-[10px] py-3 px-4 font-bold text-center text-text-main focus:border-[#668F9A] transition-colors outline-none"
+                      className="w-full py-3 px-4 font-bold text-center"
                       placeholder="..."
                     />
                   </div>

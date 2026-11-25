@@ -14,12 +14,15 @@ import { Avatar } from './Avatar';
 import { getUITranslation } from '../translations';
 import { showToast } from '../utils/toast';
 import {
+  BottomActionBar,
   ClassifiedStamp,
   IconButton,
   IntelligencePanel,
+  InteractiveCard,
   ModalShell,
   SegmentedControl,
   TacticalButton,
+  TacticalInput,
 } from './ui/BlacksiteUI';
 
 interface Room {
@@ -215,10 +218,10 @@ export const OnlineRoomsScreen: React.FC<OnlineRoomsScreenProps> = ({
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -6 }}
-      className="flex flex-col p-4 max-w-3xl mx-auto w-full pb-24 min-h-full"
+      className="flex flex-col px-4 sm:px-6 pt-4 max-w-3xl mx-auto w-full min-h-full"
     >
       {/* Header */}
-      <div className="flex items-center justify-between gap-3 mb-4">
+      <div className="flex items-center justify-between gap-2.5 mb-4">
         <IconButton onClick={onBack} aria-label={t('back')} variant="secondary">
           <ArrowRight className={`w-5 h-5 ${isRTL ? '' : 'rotate-180'}`} />
         </IconButton>
@@ -240,9 +243,9 @@ export const OnlineRoomsScreen: React.FC<OnlineRoomsScreenProps> = ({
       {/* Join by 6-digit Code */}
       <form
         onSubmit={handleJoinWithCode}
-        className="rounded-[12px] bg-bg-surface border border-border-strong p-1.5 flex items-center gap-2 mb-3"
+        className="rounded-[12px] blacksite-panel p-1.5 flex items-center gap-2 mb-3"
       >
-        <input
+        <TacticalInput
           type="text"
           inputMode="numeric"
           maxLength={6}
@@ -252,7 +255,7 @@ export const OnlineRoomsScreen: React.FC<OnlineRoomsScreenProps> = ({
             setJoinCode(e.target.value.replace(/\D/g, ''));
             if (joinError) setJoinError(null);
           }}
-          className="flex-1 bg-transparent text-text-main px-3 py-2 font-mono-code font-bold tracking-widest tabular-nums placeholder:tracking-normal placeholder:font-sans placeholder:font-medium placeholder:text-text-muted/70 outline-none text-start"
+          className="flex-1 px-3 py-2 font-mono-code font-bold tracking-widest tabular-nums placeholder:tracking-normal placeholder:font-sans placeholder:font-medium placeholder:text-text-muted/70 text-start"
         />
         <IconButton
           type="submit"
@@ -272,11 +275,11 @@ export const OnlineRoomsScreen: React.FC<OnlineRoomsScreenProps> = ({
         options={filterTabs}
         value={activeFilter}
         onChange={setActiveFilter}
-        className="w-full mb-5"
+        className="w-full mb-4"
       />
 
       {/* Rooms List */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6 flex-1 content-start">
         {loading ? (
           <div className="sm:col-span-2 flex justify-center py-12">
             <div className="animate-spin rounded-full h-8 w-8 border-2 border-[#B49A62] border-t-transparent" />
@@ -297,15 +300,12 @@ export const OnlineRoomsScreen: React.FC<OnlineRoomsScreenProps> = ({
             const turnDuration = room.turnDurationSeconds || 45;
 
             return (
-              <button
+              <InteractiveCard
                 key={room.id}
+                accent="cyan"
                 onClick={() => onJoinRoom(room.id)}
                 disabled={isFull}
-                className={`w-full rounded-[12px] bg-bg-surface border border-border-strong text-text-main p-4 flex flex-col justify-between gap-3 transition-colors text-start ${
-                  isFull
-                    ? 'opacity-55 cursor-not-allowed'
-                    : 'hover:border-[#668F9A]/60 hover:bg-bg-card/60 active:scale-[0.99]'
-                }`}
+                className="w-full p-4 flex flex-col justify-between gap-3 text-start hover:border-[#668F9A]/60"
               >
                 <div className="flex items-center justify-between gap-3 w-full">
                   <div className="flex items-center gap-3 min-w-0">
@@ -335,7 +335,7 @@ export const OnlineRoomsScreen: React.FC<OnlineRoomsScreenProps> = ({
                   <div className="flex items-center gap-2">
                     <div className="flex -space-x-2 rtl:space-x-reverse">
                       {(room.players || []).slice(0, 4).map((p: any, idx: number) => (
-                        <div key={p.uid || idx} className="rounded-full ring-2 ring-bg-surface">
+                        <div key={p.uid || idx} className="rounded-full ring-2 ring-bg-card">
                           <Avatar avatar={p.avatar} name={p.name} size={24} />
                         </div>
                       ))}
@@ -357,14 +357,14 @@ export const OnlineRoomsScreen: React.FC<OnlineRoomsScreenProps> = ({
                     {currentCount}/{maxPlayers}
                   </div>
                 </div>
-              </button>
+              </InteractiveCard>
             );
           })
         )}
       </div>
 
       {/* Create Room Button */}
-      <div className="mt-auto">
+      <BottomActionBar className="mt-auto">
         <TacticalButton
           variant="primary"
           size="lg"
@@ -374,14 +374,18 @@ export const OnlineRoomsScreen: React.FC<OnlineRoomsScreenProps> = ({
         >
           {t('createNewRoom')}
         </TacticalButton>
-      </div>
+      </BottomActionBar>
 
       {/* Create Room Modal */}
       {showCreateModal && (
-        <div className="fixed inset-0 bg-black/75 backdrop-blur-xs flex items-center justify-center p-4 z-50 overflow-y-auto">
+        <div
+          onClick={() => setShowCreateModal(false)}
+          className="fixed inset-0 bg-[#080B10]/85 flex items-center justify-center p-4 z-50 overflow-y-auto"
+        >
           <motion.div
             initial={{ opacity: 0, scale: 0.96 }}
             animate={{ opacity: 1, scale: 1 }}
+            onClick={(e) => e.stopPropagation()}
             className="w-full max-w-md my-auto"
           >
             <ModalShell
@@ -400,36 +404,34 @@ export const OnlineRoomsScreen: React.FC<OnlineRoomsScreenProps> = ({
                   <label className="block text-xs font-bold text-text-muted mb-2">
                     {t('numberOfPlayers')}
                   </label>
-                  <div className="flex items-center justify-between bg-bg-card border border-border rounded-[10px] p-1.5">
-                    <button
-                      type="button"
+                  <div className="flex items-center justify-between blacksite-card rounded-[10px] p-1.5">
+                    <IconButton
                       onClick={() =>
                         setNewRoomSettings((prev) => ({
                           ...prev,
                           maxPlayers: Math.max(3, prev.maxPlayers - 1),
                         }))
                       }
-                      className="min-h-[44px] min-w-[44px] rounded-[8px] bg-bg-surface hover:bg-bg-main flex items-center justify-center text-text-main border border-border"
+                      variant="secondary"
                       aria-label="Decrease players"
                     >
                       <Minus size={16} />
-                    </button>
+                    </IconButton>
                     <span className="text-xl font-extrabold font-mono-code tabular-nums text-text-main">
                       {newRoomSettings.maxPlayers}
                     </span>
-                    <button
-                      type="button"
+                    <IconButton
                       onClick={() =>
                         setNewRoomSettings((prev) => ({
                           ...prev,
                           maxPlayers: Math.min(10, prev.maxPlayers + 1),
                         }))
                       }
-                      className="min-h-[44px] min-w-[44px] rounded-[8px] bg-bg-surface hover:bg-bg-main flex items-center justify-center text-text-main border border-border"
+                      variant="secondary"
                       aria-label="Increase players"
                     >
                       <Plus size={16} />
-                    </button>
+                    </IconButton>
                   </div>
                 </div>
 
@@ -445,18 +447,19 @@ export const OnlineRoomsScreen: React.FC<OnlineRoomsScreenProps> = ({
                       { code: 'fr', label: t('french') },
                       { code: 'es', label: t('spanish') },
                     ].map((item) => (
-                      <button
+                      <InteractiveCard
                         key={item.code}
-                        type="button"
+                        selected={newRoomSettings.language === item.code}
+                        accent="gold"
                         onClick={() => setNewRoomSettings({ ...newRoomSettings, language: item.code })}
-                        className={`min-h-[44px] py-2 rounded-[10px] font-bold text-xs sm:text-sm transition-colors border ${
+                        className={`py-2 px-3 font-bold text-xs sm:text-sm ${
                           newRoomSettings.language === item.code
-                            ? 'bg-[#B49A62]/15 text-primary-text border-[#B49A62]'
-                            : 'bg-bg-card text-text-muted border-border hover:text-text-main'
+                            ? 'text-primary-text'
+                            : 'text-text-muted'
                         }`}
                       >
                         {item.label}
-                      </button>
+                      </InteractiveCard>
                     ))}
                   </div>
                 </div>
@@ -468,18 +471,17 @@ export const OnlineRoomsScreen: React.FC<OnlineRoomsScreenProps> = ({
                   </label>
                   <div className="grid grid-cols-2 gap-2">
                     {(['standard', 'animals', 'food', 'places', 'objects'] as const).map((cat) => (
-                      <button
+                      <InteractiveCard
                         key={cat}
-                        type="button"
+                        selected={newRoomSettings.category === cat}
+                        accent="cyan"
                         onClick={() => setNewRoomSettings({ ...newRoomSettings, category: cat })}
-                        className={`min-h-[44px] py-2 px-3 rounded-[10px] font-bold text-xs transition-colors border truncate ${
-                          newRoomSettings.category === cat
-                            ? 'bg-[#668F9A]/15 text-cyan-text border-[#668F9A]'
-                            : 'bg-bg-card text-text-muted border-border hover:text-text-main'
+                        className={`py-2 px-3 font-bold text-xs truncate ${
+                          newRoomSettings.category === cat ? 'text-cyan-text' : 'text-text-muted'
                         } ${cat === 'standard' ? 'col-span-2' : ''}`}
                       >
                         {categoryLabels[cat]}
-                      </button>
+                      </InteractiveCard>
                     ))}
                   </div>
                 </div>
@@ -490,30 +492,32 @@ export const OnlineRoomsScreen: React.FC<OnlineRoomsScreenProps> = ({
                     {t('difficulty')}
                   </label>
                   <div className="flex gap-2">
-                    <button
-                      type="button"
+                    <InteractiveCard
+                      selected={newRoomSettings.difficulty === 'easy'}
+                      accent="cyan"
                       onClick={() => setNewRoomSettings({ ...newRoomSettings, difficulty: 'easy' })}
-                      className={`flex-1 min-h-[44px] py-2 rounded-[10px] font-bold text-xs transition-colors flex items-center justify-center gap-1.5 border ${
+                      className={`flex-1 py-2 px-3 font-bold text-xs flex items-center justify-center gap-1.5 ${
                         newRoomSettings.difficulty === 'easy'
-                          ? 'bg-[#668F9A]/15 text-cyan-text border-[#668F9A]'
-                          : 'bg-bg-card text-text-muted border-border hover:text-text-main'
+                          ? 'text-cyan-text'
+                          : 'text-text-muted'
                       }`}
                     >
                       <Eye size={14} />
                       <span>{t('difficultyEasy')}</span>
-                    </button>
-                    <button
-                      type="button"
+                    </InteractiveCard>
+                    <InteractiveCard
+                      selected={newRoomSettings.difficulty === 'hard'}
+                      accent="crimson"
                       onClick={() => setNewRoomSettings({ ...newRoomSettings, difficulty: 'hard' })}
-                      className={`flex-1 min-h-[44px] py-2 rounded-[10px] font-bold text-xs transition-colors flex items-center justify-center gap-1.5 border ${
+                      className={`flex-1 py-2 px-3 font-bold text-xs flex items-center justify-center gap-1.5 ${
                         newRoomSettings.difficulty === 'hard'
-                          ? 'bg-[#963F46]/18 text-danger-text border-[#963F46]'
-                          : 'bg-bg-card text-text-muted border-border hover:text-text-main'
+                          ? 'text-danger-text'
+                          : 'text-text-muted'
                       }`}
                     >
                       <EyeOff size={14} />
                       <span>{t('difficultyHard')}</span>
-                    </button>
+                    </InteractiveCard>
                   </div>
                 </div>
 
@@ -524,21 +528,22 @@ export const OnlineRoomsScreen: React.FC<OnlineRoomsScreenProps> = ({
                   </label>
                   <div className="grid grid-cols-4 gap-2">
                     {[30, 45, 60, 90].map((sec) => (
-                      <button
+                      <InteractiveCard
                         key={sec}
-                        type="button"
+                        selected={newRoomSettings.turnDurationSeconds === sec}
+                        accent="gold"
                         onClick={() =>
                           setNewRoomSettings({ ...newRoomSettings, turnDurationSeconds: sec })
                         }
-                        className={`min-h-[44px] rounded-[10px] font-mono-code font-bold text-xs tabular-nums border transition-colors ${
+                        className={`font-mono-code font-bold text-xs tabular-nums ${
                           newRoomSettings.turnDurationSeconds === sec
-                            ? 'bg-[#B49A62]/15 text-primary-text border-[#B49A62]'
-                            : 'bg-bg-card text-text-muted border-border hover:text-text-main'
+                            ? 'text-primary-text'
+                            : 'text-text-muted'
                         }`}
                       >
                         {sec}
                         {t('secondsShort')}
-                      </button>
+                      </InteractiveCard>
                     ))}
                   </div>
                 </div>
@@ -549,34 +554,32 @@ export const OnlineRoomsScreen: React.FC<OnlineRoomsScreenProps> = ({
                     {t('roomType')}
                   </label>
                   <div className="flex gap-2">
-                    <button
-                      type="button"
+                    <InteractiveCard
+                      selected={!newRoomSettings.isPrivate}
+                      accent="emerald"
                       onClick={() => setNewRoomSettings({ ...newRoomSettings, isPrivate: false })}
-                      className={`flex-1 min-h-[44px] py-2 rounded-[10px] font-bold transition-colors flex items-center justify-center gap-2 border text-xs sm:text-sm ${
-                        !newRoomSettings.isPrivate
-                          ? 'bg-[#3E7B67]/18 text-emerald-text border-[#3E7B67]'
-                          : 'bg-bg-card text-text-muted border-border hover:text-text-main'
+                      className={`flex-1 py-2 font-bold flex items-center justify-center gap-2 text-xs sm:text-sm ${
+                        !newRoomSettings.isPrivate ? 'text-emerald-text' : 'text-text-muted'
                       }`}
                     >
                       <Globe size={15} />
                       {t('public')}
-                    </button>
-                    <button
-                      type="button"
+                    </InteractiveCard>
+                    <InteractiveCard
+                      selected={newRoomSettings.isPrivate}
+                      accent="gold"
                       onClick={() => setNewRoomSettings({ ...newRoomSettings, isPrivate: true })}
-                      className={`flex-1 min-h-[44px] py-2 rounded-[10px] font-bold transition-colors flex items-center justify-center gap-2 border text-xs sm:text-sm ${
-                        newRoomSettings.isPrivate
-                          ? 'bg-[#B49A62]/15 text-primary-text border-[#B49A62]'
-                          : 'bg-bg-card text-text-muted border-border hover:text-text-main'
+                      className={`flex-1 py-2 font-bold flex items-center justify-center gap-2 text-xs sm:text-sm ${
+                        newRoomSettings.isPrivate ? 'text-primary-text' : 'text-text-muted'
                       }`}
                     >
                       <Lock size={15} />
                       {t('private')}
-                    </button>
+                    </InteractiveCard>
                   </div>
                 </div>
 
-                <p className="text-xs text-text-muted bg-bg-card border border-border rounded-[10px] px-3.5 py-2.5 leading-relaxed">
+                <p className="text-xs text-text-muted blacksite-card rounded-[10px] px-3.5 py-2.5 leading-relaxed">
                   {t('onlineClassicRolesNote')}
                 </p>
               </div>

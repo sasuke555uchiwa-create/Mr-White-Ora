@@ -476,7 +476,7 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#080B10]/88 backdrop-blur-md p-5"
+            className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#080B10]/88 p-5"
           >
             <motion.div
               initial={{ scale: 0.94, opacity: 0 }}

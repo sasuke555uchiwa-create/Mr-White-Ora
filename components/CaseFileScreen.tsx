@@ -253,7 +253,7 @@ export const CaseFileScreen: React.FC<CaseFileScreenProps> = ({
 
   return (
     <div
-      className="flex flex-col w-full max-w-4xl mx-auto px-4 pt-3 pb-24 space-y-5"
+      className="flex flex-col w-full max-w-4xl mx-auto px-4 sm:px-6 pt-3 pb-24 space-y-5"
       dir={isRTL ? 'rtl' : 'ltr'}
     >
       {/* Top Bar */}
@@ -545,11 +545,12 @@ export const CaseFileScreen: React.FC<CaseFileScreenProps> = ({
               {rounds.map((r, idx) => (
                 <button
                   key={r.roundNumber}
+                  type="button"
                   onClick={() => {
                     playSound('click');
                     setSelectedRoundIdx(idx);
                   }}
-                  className={`min-h-[38px] px-3 py-1.5 rounded-[8px] font-mono-code text-xs font-bold transition-colors tabular-nums border ${
+                  className={`min-h-[44px] px-3 py-1.5 rounded-[8px] font-mono-code text-xs font-bold transition-colors tabular-nums border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#668F9A]/75 ${
                     idx === selectedRoundIdx
                       ? 'bg-[#668F9A] text-[#080B10] border-[#8CB3BE]/50'
                       : 'bg-bg-card text-text-muted hover:text-text-main border-border'

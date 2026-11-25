@@ -5,7 +5,7 @@ import { handleFirestoreError, OperationType } from '../utils/firestoreErrorHand
 import { appendRoomChatMessage, OnlineChatMessage } from '../utils/onlineRoomService';
 import { getUITranslation } from '../translations';
 import { getSettings } from '../services/storageService';
-import { IconButton, TacticalButton } from './ui/BlacksiteUI';
+import { IconButton, TacticalButton, TacticalInput } from './ui/BlacksiteUI';
 
 interface ChatBoxProps {
   roomId: string;
@@ -69,7 +69,7 @@ export const ChatBox: React.FC<ChatBoxProps> = ({
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: '100%' }}
           transition={{ duration: 0.2 }}
-          className="fixed inset-0 z-50 bg-bg-main/98 backdrop-blur-md flex flex-col"
+          className="fixed inset-0 z-50 bg-bg-main flex flex-col"
           dir={isRTL ? 'rtl' : 'ltr'}
         >
           <div className="px-4 py-3.5 bg-bg-surface border-b border-border-strong flex items-center justify-between">
@@ -136,28 +136,30 @@ export const ChatBox: React.FC<ChatBoxProps> = ({
             <div ref={chatEndRef} />
           </div>
 
-          <form
-            onSubmit={handleSendMessage}
-            className="p-3.5 bg-bg-surface border-t border-border-strong flex gap-2.5 max-w-2xl w-full mx-auto"
-          >
-            <input
-              type="text"
-              value={messageText}
-              maxLength={200}
-              onChange={(e) => setMessageText(e.target.value)}
-              placeholder={getUITranslation(lang, 'typeMessage')}
-              className="flex-1 bg-bg-card border border-border-strong rounded-[10px] px-3.5 py-2.5 text-text-main font-medium focus:outline-none focus:border-[#668F9A] min-h-[44px]"
-            />
-            <TacticalButton
-              type="submit"
-              disabled={!messageText.trim() || sending}
-              loading={sending}
-              variant="cyan"
-              size="md"
-              aria-label={getUITranslation(lang, 'sendClue')}
-              icon={<Send className={`w-4 h-4 ${isRTL ? 'rotate-180' : ''}`} />}
-            />
-          </form>
+          <div className="w-full bg-bg-surface border-t border-border-strong px-4 pt-3 pb-[max(0.875rem,env(safe-area-inset-bottom))]">
+            <form
+              onSubmit={handleSendMessage}
+              className="flex gap-2.5 max-w-2xl w-full mx-auto"
+            >
+              <TacticalInput
+                type="text"
+                value={messageText}
+                maxLength={200}
+                onChange={(e) => setMessageText(e.target.value)}
+                placeholder={getUITranslation(lang, 'typeMessage')}
+                className="flex-1"
+              />
+              <TacticalButton
+                type="submit"
+                disabled={!messageText.trim() || sending}
+                loading={sending}
+                variant="cyan"
+                size="md"
+                aria-label={getUITranslation(lang, 'sendClue')}
+                icon={<Send className={`w-4 h-4 ${isRTL ? 'rotate-180' : ''}`} />}
+              />
+            </form>
+          </div>
         </motion.div>
       )}
     </AnimatePresence>

@@ -29,12 +29,16 @@ import {
 } from '../data/specialRoles';
 import { HERO_ASSETS } from '../src/design/assetRegistry';
 import {
+  BottomActionBar,
   ClassifiedStamp,
   IconButton,
   IntelligencePanel,
+  InteractiveCard,
   ModalShell,
   OperationPhaseBadge,
+  PlayerIntelligenceCard,
   TacticalButton,
+  TacticalInput,
 } from './ui/BlacksiteUI';
 
 interface QuestionPhaseProps {
@@ -255,7 +259,7 @@ export const QuestionPhase: React.FC<QuestionPhaseProps> = ({
       : null;
 
   return (
-    <div className="flex flex-col min-h-full items-center animate-fade-in pb-28 relative max-w-4xl mx-auto w-full px-4 pt-3">
+    <div className="flex flex-col min-h-full items-center animate-fade-in pb-0 relative max-w-4xl mx-auto w-full px-4 sm:px-6 pt-3">
       {/* Tactical Turn Header */}
       <IntelligencePanel
         className={`w-full px-4 py-4 mb-4 ${
@@ -324,9 +328,9 @@ export const QuestionPhase: React.FC<QuestionPhaseProps> = ({
       {/* Status Row: Active Special Powers + Remaining Infiltrators */}
       <div className="w-full mb-4">
         <div className="grid grid-cols-2 gap-3">
-          <button
+          <InteractiveCard
             onClick={() => activeSpecials.length > 0 && setShowSpecialRolesModal(true)}
-            className="rounded-[14px] bg-bg-surface border border-border-strong p-3 flex items-center justify-between shadow-sm hover:border-[#668F9A]/50 transition-colors text-start min-h-[56px]"
+            className="rounded-[12px] p-3 flex items-center justify-between text-start min-h-[56px]"
           >
             <div>
               <span className="text-[11px] font-semibold text-text-muted block">
@@ -353,9 +357,9 @@ export const QuestionPhase: React.FC<QuestionPhaseProps> = ({
                 <Sparkles size={18} className="text-text-muted opacity-50" />
               )}
             </div>
-          </button>
+          </InteractiveCard>
 
-          <IntelligencePanel className="p-3 flex items-center justify-between min-h-[56px]">
+          <PlayerIntelligenceCard className="p-3 flex items-center justify-between min-h-[56px]">
             <div className="text-start">
               <span className="text-[11px] font-semibold text-text-muted block">
                 {t('remainingIntruders')}
@@ -405,7 +409,7 @@ export const QuestionPhase: React.FC<QuestionPhaseProps> = ({
                 </>
               )}
             </div>
-          </IntelligencePanel>
+          </PlayerIntelligenceCard>
         </div>
       </div>
 
@@ -523,7 +527,7 @@ export const QuestionPhase: React.FC<QuestionPhaseProps> = ({
         )}
 
         <div className="flex gap-2">
-          <input
+          <TacticalInput
             type="text"
             value={clueInput}
             onChange={(e) => setClueInput(e.target.value)}
@@ -535,7 +539,7 @@ export const QuestionPhase: React.FC<QuestionPhaseProps> = ({
                 ? `اكتب وصف ${activeSpeaker?.name || ''} (اختياري)...`
                 : `Log ${activeSpeaker?.name || ''}'s clue (optional)...`
             }
-            className="flex-1 bg-bg-card border border-border-strong rounded-[10px] px-3.5 py-2.5 text-sm font-medium text-text-main placeholder-text-muted outline-none focus:border-[#668F9A] min-h-[44px]"
+            className="flex-1"
           />
           <TacticalButton
             onClick={handleSaveClueAndNext}
@@ -551,7 +555,7 @@ export const QuestionPhase: React.FC<QuestionPhaseProps> = ({
       </IntelligencePanel>
 
       {/* Bottom Action Dock */}
-      <div className="fixed bottom-0 left-0 right-0 z-30 bg-bg-surface/95 backdrop-blur-xl border-t border-border-strong px-4 py-3">
+      <BottomActionBar className="self-stretch mt-auto">
         <div className="max-w-4xl mx-auto flex items-center justify-between gap-2.5">
           <div className="relative shrink-0">
             <IconButton
@@ -594,7 +598,7 @@ export const QuestionPhase: React.FC<QuestionPhaseProps> = ({
             {lang === 'ar' ? 'تصويت' : 'Vote'}
           </TacticalButton>
         </div>
-      </div>
+      </BottomActionBar>
 
       {/* Lovers Mutual Reveal Reminder (Round 1 only, non-spoiling) */}
       <AnimatePresence>
@@ -603,7 +607,7 @@ export const QuestionPhase: React.FC<QuestionPhaseProps> = ({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-[#080B10]/85 backdrop-blur-md p-5"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-[#080B10]/85 p-5"
           >
             <motion.div
               initial={{ scale: 0.94, opacity: 0 }}
@@ -683,7 +687,7 @@ export const QuestionPhase: React.FC<QuestionPhaseProps> = ({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-[#080B10]/85 backdrop-blur-md p-5"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-[#080B10]/85 p-5"
           >
             <motion.div
               initial={{ scale: 0.94, opacity: 0 }}
@@ -738,7 +742,7 @@ export const QuestionPhase: React.FC<QuestionPhaseProps> = ({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setShowLogModal(false)}
-            className="fixed inset-0 z-50 bg-[#080B10]/80 backdrop-blur-md flex items-center justify-center p-5"
+            className="fixed inset-0 z-50 bg-[#080B10]/85 flex items-center justify-center p-5"
           >
             <motion.div
               initial={{ scale: 0.94, opacity: 0 }}
@@ -814,7 +818,7 @@ export const QuestionPhase: React.FC<QuestionPhaseProps> = ({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setShowSpecialRolesModal(false)}
-            className="fixed inset-0 z-50 bg-[#080B10]/80 backdrop-blur-md flex items-center justify-center p-5"
+            className="fixed inset-0 z-50 bg-[#080B10]/85 flex items-center justify-center p-5"
           >
             <motion.div
               initial={{ scale: 0.94, opacity: 0 }}
@@ -890,7 +894,7 @@ export const QuestionPhase: React.FC<QuestionPhaseProps> = ({
               setIsPeekHandoffConfirmed(false);
               setIsPeekingWord(false);
             }}
-            className="fixed inset-0 z-50 bg-bg-dark/98 backdrop-blur-md flex items-center justify-center p-5"
+            className="fixed inset-0 z-50 bg-bg-dark/98 flex items-center justify-center p-5"
           >
             <motion.div
               initial={{ scale: 0.94, opacity: 0 }}

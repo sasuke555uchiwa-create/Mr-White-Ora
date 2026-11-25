@@ -84,7 +84,7 @@ export const ImpostorGuessScreen: React.FC<ImpostorGuessScreenProps> = ({
   };
 
   return (
-    <div className="flex flex-col h-full items-center justify-center p-5 animate-fade-in bg-[#080B10]/90 backdrop-blur-md fixed inset-0 z-[100]">
+    <div className="flex flex-col h-full items-center justify-center p-5 animate-fade-in bg-[#080B10]/90 fixed inset-0 z-[100]">
       <motion.div
         initial={{ scale: 0.94, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
@@ -124,14 +124,14 @@ export const ImpostorGuessScreen: React.FC<ImpostorGuessScreenProps> = ({
                   : t('mrWhiteGuessTitle', { name: impostor.name })}
               </h2>
 
-              <div className="w-full space-y-5">
+              <div className="w-full space-y-4">
                 <p className="text-text-muted font-medium text-xs sm:text-sm leading-relaxed">
                   {lang === 'ar'
                     ? 'هذه فرصتك الأخيرة! خمن كلمة المدنيين السرية لسرقة الفوز باللعبة!'
                     : t('mrWhiteGuessSub')}
                 </p>
 
-                <div className="relative pb-2 border-b-2 border-[#B49A62]">
+                <div>
                   <input
                     type="text"
                     value={guess}
@@ -140,7 +140,7 @@ export const ImpostorGuessScreen: React.FC<ImpostorGuessScreenProps> = ({
                       if (e.key === 'Enter') void handleGuess();
                     }}
                     placeholder={lang === 'ar' ? 'اكتب الكلمة هنا...' : 'Type word here...'}
-                    className="w-full bg-transparent outline-none text-center text-2xl font-bold text-text-main placeholder-text-muted/60"
+                    className="blacksite-input w-full px-4 py-3 text-center text-xl font-bold placeholder-text-muted/60 focus:border-[#B49A62]"
                     autoFocus
                   />
                 </div>

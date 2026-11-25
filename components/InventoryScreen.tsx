@@ -124,7 +124,7 @@ export const InventoryScreen: React.FC<InventoryScreenProps> = ({ onBack }) => {
                 <span className="font-semibold text-sm leading-snug">{alertMsg.text}</span>
                 <button
                   onClick={() => setAlertMsg(null)}
-                  className="text-xs font-bold hover:underline opacity-80 shrink-0 min-h-[36px] px-2"
+                  className="text-xs font-bold hover:underline opacity-80 shrink-0 min-h-[44px] px-2.5"
                 >
                   {lang === 'ar' ? 'إغلاق' : 'Close'}
                 </button>
@@ -135,7 +135,7 @@ export const InventoryScreen: React.FC<InventoryScreenProps> = ({ onBack }) => {
       </AnimatePresence>
 
       {/* Header */}
-      <div className="py-3.5 flex items-center justify-between border-b border-border bg-bg-surface/85 backdrop-blur-md sticky top-0 z-20 -mx-4 px-4">
+      <div className="py-3.5 flex items-center justify-between border-b border-border-strong bg-bg-surface sticky top-0 z-20 -mx-4 px-4">
         <div className="flex items-center gap-3">
           <IconButton onClick={onBack} variant="secondary" aria-label={t('back')}>
             <ArrowLeft className="w-5 h-5 rtl:rotate-180" />
@@ -185,10 +185,10 @@ export const InventoryScreen: React.FC<InventoryScreenProps> = ({ onBack }) => {
                 <button
                   key={name}
                   onClick={() => handleSelectPlayer(name)}
-                  className={`min-h-[42px] px-3.5 py-2 rounded-[10px] border flex items-center gap-2.5 transition-colors shrink-0 ${
+                  className={`min-h-[44px] px-3.5 py-2 rounded-[10px] border flex items-center gap-2.5 transition-colors shrink-0 ${
                     active
                       ? 'bg-[#B49A62] border-[#D4BE8A]/50 text-[#080B10]'
-                      : 'bg-bg-card border-border text-text-muted hover:border-border-strong'
+                      : 'blacksite-card-interactive text-text-muted hover:text-text-main'
                   }`}
                 >
                   <span className="font-bold text-sm">{name}</span>

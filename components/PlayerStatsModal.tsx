@@ -64,13 +64,15 @@ export const PlayerStatsModal: React.FC<PlayerStatsModalProps> = ({
   return (
     <AnimatePresence>
       <div
-        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#080B10]/80 backdrop-blur-md"
+        onClick={onClose}
+        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#080B10]/85"
         dir={isRTL ? 'rtl' : 'ltr'}
       >
         <motion.div
           initial={{ opacity: 0, scale: 0.94, y: 12 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.94, y: 12 }}
+          onClick={(e) => e.stopPropagation()}
           className="w-full max-w-sm"
         >
           <ModalShell onClose={onClose} ariaLabel={name} className="p-6 relative">
