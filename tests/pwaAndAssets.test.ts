@@ -79,6 +79,8 @@ describe('PWA Manifest, Service Worker & HTML Entry Validation', () => {
     expect(swSource).toContain("'securetoken.googleapis.com'");
     expect(swSource).toContain("'cloudfunctions.net'");
     expect(swSource).toContain("url.pathname.startsWith('/api/')");
+    expect(swSource).toContain("url.pathname.startsWith('/node_modules/')");
+    expect(swSource).toContain("url.pathname.startsWith('/@')");
   });
 
   it('validates index.html title, BLACKSITE metadata, manifest, icons, SW script, and entry module', () => {

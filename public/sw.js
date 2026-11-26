@@ -1,4 +1,4 @@
-const CACHE_NAME = 'blacksite-shell-v12';
+const CACHE_NAME = 'blacksite-shell-v13';
 const SHELL_ASSETS = [
   '/',
   '/index.html',
@@ -75,6 +75,12 @@ function shouldBypassRequest(request, url) {
   if (url.origin !== self.location.origin) return true;
   if (url.pathname.startsWith('/__/')) return true;
   if (url.pathname.startsWith('/api/')) return true;
+  // Never intercept Vite dev-server modules or pre-bundled dependency chunks
+  if (url.pathname.startsWith('/node_modules/')) return true;
+  if (url.pathname.startsWith('/@')) return true;
+  if (url.pathname.startsWith('/src/')) return true;
+  if (/\.(ts|tsx|jsx)(\?.*)?$/i.test(url.pathname)) return true;
+  if (url.searchParams.has('v') || url.searchParams.has('t')) return true;
   return BYPASS_HOSTS.some((host) => url.hostname.endsWith(host));
 }
 
