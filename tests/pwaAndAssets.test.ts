@@ -7,6 +7,7 @@ import {
   ACHIEVEMENT_CATALOG,
   BLACKSITE_ACTION_ICONS,
   BLACKSITE_BACKGROUNDS,
+  BLACKSITE_NAV_ARTWORK,
   BLACKSITE_NAV_ICONS,
   BLACKSITE_TEXTURES,
   CATEGORY_COVERS,
@@ -178,7 +179,7 @@ describe('BLACKSITE Asset Registry & Special Roles Integrity', () => {
       expect(BLACKSITE_BACKGROUNDS[bgKey]).toBeDefined();
     }
 
-    // 3. Custom bottom-nav SVG pairs (inactive + active = 10 files)
+    // 3. Custom bottom-nav SVG pairs & Phase 4.2.2 illustrated 512x512 transparent WebP artwork
     expect(Object.keys(BLACKSITE_NAV_ICONS)).toHaveLength(5);
     for (const navPair of Object.values(BLACKSITE_NAV_ICONS)) {
       for (const svgUrl of [navPair.inactive, navPair.active]) {
@@ -189,6 +190,26 @@ describe('BLACKSITE Asset Registry & Special Roles Integrity', () => {
         expect(svgContent).toContain('</svg>');
       }
     }
+
+    expect(Object.keys(BLACKSITE_NAV_ARTWORK)).toHaveLength(5);
+    for (const artUrl of Object.values(BLACKSITE_NAV_ARTWORK)) {
+      expect(artUrl.startsWith('/assets/blacksite/icons/navigation-artwork/')).toBe(true);
+      expect(artUrl.endsWith('.webp')).toBe(true);
+      const diskPath = resolvePublicOrRoot(artUrl);
+      expect(fs.existsSync(diskPath), `Missing nav artwork WebP: ${artUrl}`).toBe(true);
+      const bytes = fs.readFileSync(diskPath);
+      expect(bytes.length).toBeGreaterThan(5000);
+      expect(bytes.subarray(0, 4).toString('ascii')).toBe('RIFF');
+      expect(bytes.subarray(8, 12).toString('ascii')).toBe('WEBP');
+      // VP8X extended header indicates alpha/dimensions support
+      expect(bytes.subarray(12, 16).toString('ascii')).toBe('VP8X');
+      // VP8X flags bit 4 (0x10) indicates alpha channel present
+      expect((bytes[20] & 0x10) !== 0, `Expected alpha channel in ${artUrl}`).toBe(true);
+    }
+
+    const welcomeSrc = fs.readFileSync(path.join(ROOT, 'components', 'WelcomeScreen.tsx'), 'utf8');
+    expect(welcomeSrc).toContain('BLACKSITE_NAV_ARTWORK');
+    expect(welcomeSrc).not.toContain('BLACKSITE_NAV_ICONS');
 
     // 4. 16 reusable BLACKSITE action icons
     expect(Object.keys(BLACKSITE_ACTION_ICONS)).toHaveLength(16);

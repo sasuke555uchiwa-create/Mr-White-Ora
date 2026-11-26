@@ -98,6 +98,10 @@ Root `package.json` separates verification into independent, composable scripts:
   - **6 Tactical Textures & Stamps**: `classified-paper.svg`, `tactical-map.svg`, `technical-carbon.svg`, `metallic-surface.svg`, `confidential-stamp.svg`, `dossier-ornament.svg`.
 - **Lazy-Loading & Layering Architecture**:
   - `BlacksiteScreenBackdrop` renders only the currently active screen's background behind a theme-aware `.blacksite-backdrop-scrim` (`z-0`), keeping non-modal content at `z-10` beneath `<Header z-20>` and isolating `fixed inset-0 z-50`/`z-[100]` handoff guards, ballot confirmations, and verdict modals outside `z-10` so privacy screens always cover header controls cleanly.
-  - `public/sw.js` (`blacksite-shell-v11`) caches static assets via stale-while-revalidate on demand rather than precaching all 9 portrait WebPs in `SHELL_ASSETS`.
-  - `tests/pwaAndAssets.test.ts` asserts on-disk integrity for all 41 assets, full `GamePhase` coverage in `SCREEN_BACKGROUND_MAP`, valid SVG markup, and direct `BlacksiteScreenBackdrop` integration across all 21 application screens.
+  - `public/sw.js` (`blacksite-shell-v12`) precaches the 5 lightweight `navigation-artwork/*.webp` icons and caches static background assets via stale-while-revalidate on demand rather than precaching all 9 portrait WebPs in `SHELL_ASSETS`.
+  - `tests/pwaAndAssets.test.ts` asserts on-disk integrity for all assets (including 512×512 alpha-transparent WebP headers on `BLACKSITE_NAV_ARTWORK`), full `GamePhase` coverage in `SCREEN_BACKGROUND_MAP`, valid SVG markup, and direct `BlacksiteScreenBackdrop` integration across all 21 application screens.
+
+### 6.3 Phase 4.2.2: Premium Illustrated Navigation Artwork & Scrim Calibration
+- Replaced the Home `NavDock` vector icons with 5 individual `512×512` alpha-transparent 3D/2D illustrated WebPs (`public/assets/blacksite/icons/navigation-artwork/{vault,rankings,dictionary,agents,settings}.webp`), registered via `BLACKSITE_NAV_ARTWORK` and rendered at `32–36px` inside `NavDock`.
+- Calibrated `BlacksiteScreenBackdrop` (`opacity-95` image, lighter texture pass) and `.blacksite-backdrop-scrim` / `.bg-vignette` / `.bg-scanlines` in `index.css` so environmental architectural backgrounds remain visibly atmospheric without reducing card or text contrast.
 

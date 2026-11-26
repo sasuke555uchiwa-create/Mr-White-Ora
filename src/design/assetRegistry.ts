@@ -194,6 +194,14 @@ export const BLACKSITE_NAV_ICONS: Record<
   },
 } as const;
 
+export const BLACKSITE_NAV_ARTWORK: Record<BlacksiteNavKey, string> = {
+  vault: '/assets/blacksite/icons/navigation-artwork/vault.webp',
+  rankings: '/assets/blacksite/icons/navigation-artwork/rankings.webp',
+  dictionary: '/assets/blacksite/icons/navigation-artwork/dictionary.webp',
+  agents: '/assets/blacksite/icons/navigation-artwork/agents.webp',
+  settings: '/assets/blacksite/icons/navigation-artwork/settings.webp',
+} as const;
+
 export const BLACKSITE_ACTION_ICONS = {
   playOperation: '/assets/blacksite/icons/actions/play-operation.svg',
   onlineMultiplayer: '/assets/blacksite/icons/actions/online-multiplayer.svg',

@@ -56,13 +56,13 @@ export const BlacksiteScreenBackdrop: React.FC<BlacksiteScreenBackdropProps> = (
   const bg = BLACKSITE_BACKGROUNDS[bgKey];
   const textureClass =
     texture === 'paper'
-      ? 'blacksite-texture-paper opacity-35'
+      ? 'blacksite-texture-paper opacity-20'
       : texture === 'map'
-      ? 'blacksite-texture-map opacity-45'
+      ? 'blacksite-texture-map opacity-25'
       : texture === 'carbon'
-      ? 'blacksite-texture-carbon opacity-35'
+      ? 'blacksite-texture-carbon opacity-20'
       : texture === 'metal'
-      ? 'blacksite-texture-metal opacity-35'
+      ? 'blacksite-texture-metal opacity-20'
       : '';
 
   return (
@@ -77,7 +77,7 @@ export const BlacksiteScreenBackdrop: React.FC<BlacksiteScreenBackdropProps> = (
         loading={priority ? 'eager' : 'lazy'}
         decoding="async"
         referrerPolicy="no-referrer"
-        className="w-full h-full object-cover object-center opacity-80"
+        className="w-full h-full object-cover object-center opacity-95"
       />
       <div className="absolute inset-0 blacksite-backdrop-scrim" />
       {textureClass && <div className={`absolute inset-0 ${textureClass}`} />}
@@ -324,21 +324,21 @@ export const NavButton: React.FC<NavButtonProps> = ({
   return (
     <button
       type={type}
-      className={`group relative flex flex-col items-center justify-center gap-1 min-h-[50px] px-0.5 sm:px-1.5 py-2 rounded-[10px] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#668F9A]/75 active:scale-[0.97] ${
+      className={`group relative flex flex-col items-center justify-center gap-1 min-h-[60px] px-0.5 sm:px-1.5 py-1.5 rounded-[10px] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#668F9A]/75 active:scale-[0.97] ${
         active
-          ? 'bg-bg-card text-text-main border border-border'
-          : 'bg-transparent hover:bg-bg-card/65 text-text-muted hover:text-text-main border border-transparent'
+          ? 'bg-bg-card text-text-main border border-[#B49A62]/45'
+          : 'bg-transparent hover:bg-bg-card/65 hover:border-[#B49A62]/30 text-text-muted hover:text-text-main border border-transparent'
       } ${className}`}
       {...props}
     >
       {active && (
         <span
           aria-hidden="true"
-          className="absolute top-1 w-5 h-[2px] rounded-full bg-[#B49A62]"
+          className="absolute top-1 w-6 h-[2px] rounded-full bg-[#B49A62]"
         />
       )}
       <span
-        className={`transition-colors ${
+        className={`flex items-center justify-center transition-transform duration-150 group-hover:scale-105 ${
           active ? 'text-[#B49A62]' : 'text-text-muted group-hover:text-primary-text'
         }`}
       >

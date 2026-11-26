@@ -1,4 +1,4 @@
-const CACHE_NAME = 'blacksite-shell-v11';
+const CACHE_NAME = 'blacksite-shell-v12';
 const SHELL_ASSETS = [
   '/',
   '/index.html',
@@ -9,6 +9,11 @@ const SHELL_ASSETS = [
   '/images/3.png',
   '/images/4.png',
   '/assets/ui/home.png',
+  '/assets/blacksite/icons/navigation-artwork/vault.webp',
+  '/assets/blacksite/icons/navigation-artwork/rankings.webp',
+  '/assets/blacksite/icons/navigation-artwork/dictionary.webp',
+  '/assets/blacksite/icons/navigation-artwork/agents.webp',
+  '/assets/blacksite/icons/navigation-artwork/settings.webp',
   '/assets/wallpapers/dark_cosmic.webp',
   '/assets/wallpapers/light_sakura.webp',
   '/assets/roles/civilian_agent.png',

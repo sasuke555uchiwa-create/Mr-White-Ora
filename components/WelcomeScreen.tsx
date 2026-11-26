@@ -13,7 +13,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { Avatar } from './Avatar';
 import { playSound } from '../services/soundService';
 import {
-  BLACKSITE_NAV_ICONS,
+  BLACKSITE_NAV_ARTWORK,
   BLACKSITE_TEXTURES,
   BlacksiteNavKey,
   HERO_ASSETS,
@@ -34,26 +34,18 @@ import {
 } from './ui/BlacksiteUI';
 
 const NavDockCustomIcon: React.FC<{ navKey: BlacksiteNavKey }> = ({ navKey }) => {
-  const pair = BLACKSITE_NAV_ICONS[navKey];
+  const artworkSrc = BLACKSITE_NAV_ARTWORK[navKey];
   return (
-    <span className="relative inline-flex w-6 h-6 items-center justify-center">
+    <span className="relative inline-flex w-8 h-8 sm:w-9 sm:h-9 items-center justify-center">
       <img
-        src={pair.inactive}
+        src={artworkSrc}
         alt=""
         aria-hidden="true"
-        width={22}
-        height={22}
+        width={36}
+        height={36}
+        draggable={false}
         referrerPolicy="no-referrer"
-        className="w-[22px] h-[22px] object-contain transition-opacity duration-150 group-hover:opacity-0"
-      />
-      <img
-        src={pair.active}
-        alt=""
-        aria-hidden="true"
-        width={22}
-        height={22}
-        referrerPolicy="no-referrer"
-        className="w-[22px] h-[22px] object-contain absolute inset-0 m-auto opacity-0 transition-opacity duration-150 group-hover:opacity-100"
+        className="w-8 h-8 sm:w-9 sm:h-9 object-contain select-none pointer-events-none drop-shadow-[0_2px_6px_rgba(4,7,12,0.72)] transition-all duration-150 group-hover:brightness-110"
       />
     </span>
   );

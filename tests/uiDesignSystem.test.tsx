@@ -169,6 +169,14 @@ describe('BLACKSITE Phase 4.1 & 4.2 UI Design System & Home Ergonomics', () => {
 
     const nav = screen.getByRole('navigation', { name: 'Primary navigation' });
     expect(nav.querySelectorAll('button')).toHaveLength(5);
+    const ltrNavImgs = Array.from(nav.querySelectorAll('img')).map((img) => img.getAttribute('src'));
+    expect(ltrNavImgs).toEqual([
+      '/assets/blacksite/icons/navigation-artwork/vault.webp',
+      '/assets/blacksite/icons/navigation-artwork/rankings.webp',
+      '/assets/blacksite/icons/navigation-artwork/dictionary.webp',
+      '/assets/blacksite/icons/navigation-artwork/agents.webp',
+      '/assets/blacksite/icons/navigation-artwork/settings.webp',
+    ]);
 
     fireEvent.click(screen.getByRole('button', { name: /Vault/i }));
     expect(handlers.onShowInventory).toHaveBeenCalledTimes(1);
@@ -209,6 +217,7 @@ describe('BLACKSITE Phase 4.1 & 4.2 UI Design System & Home Ergonomics', () => {
 
     const nav = screen.getByRole('navigation', { name: 'التنقل الرئيسي' });
     expect(nav.querySelectorAll('button')).toHaveLength(5);
+    expect(nav.querySelectorAll('img')).toHaveLength(5);
 
     fireEvent.click(screen.getByRole('button', { name: /ابدأ اللعب/i }));
     const rtlDialog = screen.getByRole('dialog', { name: 'اختر وضع التشغيل' });
