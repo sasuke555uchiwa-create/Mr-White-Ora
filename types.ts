@@ -1,3 +1,8 @@
+import type { GameTypeId } from './src/game/gameRegistry';
+import type { MafiaCaseFileSummary } from './src/game/mafia/mafiaTypes';
+
+export type { GameTypeId };
+
 export enum GamePhase {
   WELCOME = 'WELCOME',
   SETUP = 'SETUP',
@@ -20,7 +25,15 @@ export enum GamePhase {
   ONLINE_LOBBY = 'ONLINE_LOBBY',
   ONLINE_GAME = 'ONLINE_GAME',
   DICTIONARY = 'DICTIONARY',
-  INVENTORY = 'INVENTORY'
+  INVENTORY = 'INVENTORY',
+  MAFIA_SETTINGS = 'MAFIA_SETTINGS',
+  MAFIA_REVEAL = 'MAFIA_REVEAL',
+  MAFIA_NIGHT = 'MAFIA_NIGHT',
+  MAFIA_DAWN = 'MAFIA_DAWN',
+  MAFIA_DISCUSSION = 'MAFIA_DISCUSSION',
+  MAFIA_VOTING = 'MAFIA_VOTING',
+  MAFIA_VOTE_RESULT = 'MAFIA_VOTE_RESULT',
+  MAFIA_RESULT = 'MAFIA_RESULT'
 }
 
 export type GameMode = 'question' | 'expression';
@@ -59,6 +72,7 @@ export interface GameSettings {
   selectedSpecialRoles: SpecialRoleId[];
   gameMode: GameMode;
   turnDurationSeconds: number;
+  enableOperationEvents?: boolean;
 }
 
 export interface Player {
@@ -240,6 +254,7 @@ export interface CaseFileAward {
 
 export interface ClassifiedCaseFile {
   schemaVersion: number;
+  gameType?: GameTypeId;
   reportId: string;
   operationCode: string;
   mode: CaseFileMode;
@@ -266,4 +281,5 @@ export interface ClassifiedCaseFile {
   specialEvents: CaseFileEvent[];
   turningPoints: CaseFileTurningPoint[];
   awards: CaseFileAward[];
+  mafiaSummary?: MafiaCaseFileSummary;
 }

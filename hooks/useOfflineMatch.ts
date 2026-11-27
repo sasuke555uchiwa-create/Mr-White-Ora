@@ -31,6 +31,7 @@ import {
 } from '../src/game/voteEngine';
 import { evaluateWinCondition, getPlayerRoundPoints } from '../src/game/winEngine';
 import { buildClassifiedCaseFile, CaseFileRoundInput } from '../src/game/caseFileEngine';
+import { OperationEventCard, pickOperationEvent } from '../data/operationEvents';
 
 interface UseOfflineMatchOptions {
   navigate: (nextPhase: GamePhase) => void;
@@ -68,6 +69,9 @@ export function useOfflineMatch({ navigate, t }: UseOfflineMatchOptions) {
   >(null);
   const [currentRound, setCurrentRound] = useState<number>(1);
   const [latestCaseFile, setLatestCaseFile] = useState<ClassifiedCaseFile | null>(null);
+  const [currentOperationEvent, setCurrentOperationEvent] = useState<OperationEventCard | null>(
+    null
+  );
 
   const matchKeyRef = useRef<string>('');
   const matchStartedAtMsRef = useRef<number>(0);
@@ -76,6 +80,7 @@ export function useOfflineMatch({ navigate, t }: UseOfflineMatchOptions) {
   const matchEventsRef = useRef<CaseFileEvent[]>([]);
   const activeRoundVoteRef = useRef<CaseFileRoundInput | null>(null);
   const pendingRoundElimsRef = useRef<string[]>([]);
+  const usedOperationEventIdsRef = useRef<string[]>([]);
 
   const [gameSettings, setGameSettings] = useState<GameSettings>({
     mrWhiteCount: 1,
@@ -86,6 +91,7 @@ export function useOfflineMatch({ navigate, t }: UseOfflineMatchOptions) {
     selectedSpecialRoles: [],
     gameMode: 'expression',
     turnDurationSeconds: 45,
+    enableOperationEvents: true,
   });
 
   const appendDescriptionEntry = useCallback(
@@ -232,6 +238,17 @@ export function useOfflineMatch({ navigate, t }: UseOfflineMatchOptions) {
       matchEventsRef.current = [];
       activeRoundVoteRef.current = null;
       pendingRoundElimsRef.current = [];
+      usedOperationEventIdsRef.current = [];
+      if (settings.enableOperationEvents !== false) {
+        const firstEvt = pickOperationEvent({
+          gameMode: settings.gameMode,
+          round: 1,
+        });
+        usedOperationEventIdsRef.current = [firstEvt.id];
+        setCurrentOperationEvent(firstEvt);
+      } else {
+        setCurrentOperationEvent(null);
+      }
       matchKeyRef.current = `offline_${nowMs}_${Math.random().toString(36).slice(2, 8)}`;
 
       navigate(GamePhase.REVEAL);
@@ -381,7 +398,21 @@ export function useOfflineMatch({ navigate, t }: UseOfflineMatchOptions) {
         navigate(GamePhase.RESULT);
       } else {
         commitActiveRound();
-        setCurrentRound((prev) => prev + 1);
+        setCurrentRound((prev) => {
+          const nextRound = prev + 1;
+          if (gameSettings.enableOperationEvents !== false) {
+            const nextEvt = pickOperationEvent({
+              gameMode: gameSettings.gameMode,
+              round: nextRound,
+              excludeIds: usedOperationEventIdsRef.current,
+            });
+            usedOperationEventIdsRef.current = [...usedOperationEventIdsRef.current, nextEvt.id];
+            setCurrentOperationEvent(nextEvt);
+          } else {
+            setCurrentOperationEvent(null);
+          }
+          return nextRound;
+        });
         setVoteData({});
         setMostVotedPlayerId(null);
         setBlockedBySpecial(null);
@@ -391,7 +422,7 @@ export function useOfflineMatch({ navigate, t }: UseOfflineMatchOptions) {
         navigate(GamePhase.PLAYING);
       }
     },
-    [commitActiveRound, handleGameEnd, navigate]
+    [commitActiveRound, handleGameEnd, navigate, gameSettings]
   );
 
   const eliminatePlayerAndCheckWin = useCallback(
@@ -781,7 +812,21 @@ export function useOfflineMatch({ navigate, t }: UseOfflineMatchOptions) {
 
     if (blockedBySpecial) {
       commitActiveRound([]);
-      setCurrentRound((prev) => prev + 1);
+      setCurrentRound((prev) => {
+        const nextRound = prev + 1;
+        if (gameSettings.enableOperationEvents !== false) {
+          const nextEvt = pickOperationEvent({
+            gameMode: gameSettings.gameMode,
+            round: nextRound,
+            excludeIds: usedOperationEventIdsRef.current,
+          });
+          usedOperationEventIdsRef.current = [...usedOperationEventIdsRef.current, nextEvt.id];
+          setCurrentOperationEvent(nextEvt);
+        } else {
+          setCurrentOperationEvent(null);
+        }
+        return nextRound;
+      });
       setVoteData({});
       setMostVotedPlayerId(null);
       setBlockedBySpecial(null);
@@ -897,6 +942,7 @@ export function useOfflineMatch({ navigate, t }: UseOfflineMatchOptions) {
     lastWinner,
     winReason,
     currentRound,
+    currentOperationEvent,
     latestCaseFile,
     gameSettings,
     setPlayerRole,

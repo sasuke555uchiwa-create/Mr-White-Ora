@@ -9,7 +9,9 @@ import {
   Key,
   Layers,
   MessageSquare,
+  Moon,
   RefreshCw,
+  Search,
   Shield,
   Target,
   Users,
@@ -26,10 +28,13 @@ import { getUITranslation } from '../translations';
 import { getLocalCaseFileById, getSettings } from '../services/storageService';
 import { fetchOnlineCaseFile } from '../utils/caseFileService';
 import { getRoleAsset, getRoleTitle } from '../data/specialRoles';
+import { getMafiaRoleLabel, getMafiaRoleMeta } from '../src/game/mafia/mafiaCatalog';
+import { MafiaRoleId } from '../src/game/mafia/mafiaTypes';
 import {
   ACHIEVEMENT_ASSETS,
   BLACKSITE_TEXTURES,
   CATEGORY_COVERS,
+  HERO_ASSETS,
 } from '../src/design/assetRegistry';
 import { playSound } from '../services/soundService';
 import {
@@ -259,6 +264,399 @@ export const CaseFileScreen: React.FC<CaseFileScreenProps> = ({
     if (unit === 'points') return `${val} ${t('points')}`;
     return String(val);
   };
+
+  if (resolvedFile.gameType === 'mafia_shadow_city' && resolvedFile.mafiaSummary) {
+    const summary = resolvedFile.mafiaSummary;
+    const cityWon = summary.winningFaction === 'city';
+    const langKey = isRTL ? 'ar' : lang === 'fr' ? 'fr' : 'en';
+    const mafiaCopy = {
+      ar: {
+        modeBadge: 'مافيا: مدينة الظلال',
+        factionTitle: cityWon ? 'انتصار فريق المدينة' : 'سيطرة المافيا على المدينة',
+        reason:
+          summary.winReason === 'all_mafia_eliminated'
+            ? 'تم كشف وإخراج جميع أعضاء المافيا.'
+            : 'وصلت المافيا إلى التكافؤ العددي مع المدينة.',
+        days: 'الأيام',
+        nights: 'الليالي',
+        saves: 'عمليات الإنقاذ',
+        scans: 'فحوصات المحقق',
+        nightAuditsTitle: 'سجل أحداث الليل (بعد انتهاء الجولة)',
+        noNightAudits: 'لم تُسجّل استهدافات ليلية في هذه الجولة.',
+        nightLabel: 'الليلة',
+        mafiaTarget: 'هدف المافيا',
+        doctorShield: 'حماية الطبيب',
+        detectiveScan: 'فحص المحقق',
+        savedTag: 'تم الإنقاذ',
+        votesTitle: 'تاريخ التصويت السري بالنهار',
+        noVotes: 'لم تُجرَ جولات تصويت في هذه الجولة.',
+        dayLabel: 'اليوم',
+        revoteTag: 'إعادة تصويت',
+        abstains: 'امتناع',
+        awardsTitle: 'أوسمة مدينة الظلال',
+      },
+      fr: {
+        modeBadge: 'MAFIA : SHADOW CITY',
+        factionTitle: cityWon ? 'Victoire de la Cité' : 'Victoire du Syndicat Mafia',
+        reason:
+          summary.winReason === 'all_mafia_eliminated'
+            ? 'Tous les membres de la Mafia ont été retirés.'
+            : 'La Mafia a atteint la parité numérique avec la Cité.',
+        days: 'Jours',
+        nights: 'Nuits',
+        saves: 'Sauvetages',
+        scans: 'Enquêtes',
+        nightAuditsTitle: 'Audit Nocturne (Post-Partie)',
+        noNightAudits: 'Aucune action nocturne enregistrée.',
+        nightLabel: 'Nuit',
+        mafiaTarget: 'Cible Mafia',
+        doctorShield: 'Protection Médecin',
+        detectiveScan: 'Scan Détective',
+        savedTag: 'SAUVÉ',
+        votesTitle: 'Historique des Votes Secrets',
+        noVotes: 'Aucun tour de vote enregistré.',
+        dayLabel: 'Jour',
+        revoteTag: 'Second tour',
+        abstains: 'Abstentions',
+        awardsTitle: 'Distinctions Shadow City',
+      },
+      en: {
+        modeBadge: 'MAFIA: SHADOW CITY',
+        factionTitle: cityWon ? 'CITY VICTORY' : 'MAFIA SYNDICATE VICTORY',
+        reason:
+          summary.winReason === 'all_mafia_eliminated'
+            ? 'All Mafia Syndicate members were identified and removed.'
+            : 'The Mafia Syndicate reached numerical parity over Shadow City.',
+        days: 'Days',
+        nights: 'Nights',
+        saves: 'Doctor Saves',
+        scans: 'Detective Scans',
+        nightAuditsTitle: 'Post-Match Night Audit Log',
+        noNightAudits: 'No night targeting actions occurred during this match.',
+        nightLabel: 'Night',
+        mafiaTarget: 'Mafia Target',
+        doctorShield: 'Doctor Shield',
+        detectiveScan: 'Detective Scan',
+        savedTag: 'SAVED',
+        votesTitle: 'Day Secret Ballot History',
+        noVotes: 'No daytime voting rounds took place.',
+        dayLabel: 'Day',
+        revoteTag: 'Revote',
+        abstains: 'Abstains',
+        awardsTitle: 'Shadow City Commendations',
+      },
+    }[langKey];
+
+    const resolveFallbackMafiaRole = (compatRole: string): MafiaRoleId => {
+      if (compatRole === 'inspector') return 'detective';
+      if (compatRole === 'protector') return 'doctor';
+      if (compatRole === 'undercover') return 'mafia';
+      if (compatRole === 'mrwhite') return 'mafia_boss';
+      return 'citizen';
+    };
+
+    const mafiaAwardIcons: Record<string, string> = {
+      SHARP_DETECTIVE: ACHIEVEMENT_ASSETS.masterDetective,
+      GUARDIAN_DOCTOR: ACHIEVEMENT_ASSETS.survivor,
+      SHADOW_SYNDICATE: ACHIEVEMENT_ASSETS.masterOfLies,
+      CITY_SURVIVOR: ACHIEVEMENT_ASSETS.sharpEye,
+    };
+
+    return (
+      <div
+        className="relative flex flex-col w-full max-w-4xl mx-auto px-4 sm:px-6 pt-3 pb-24"
+        dir={isRTL ? 'rtl' : 'ltr'}
+      >
+        <BlacksiteScreenBackdrop bgKey="archive" texture="paper" />
+        <div className="relative z-10 flex flex-col space-y-5 w-full">
+          <TacticalToolbar className="w-full justify-between px-2 py-1.5">
+            <TacticalButton
+              onClick={() => {
+                playSound('click');
+                onBack();
+              }}
+              variant="secondary"
+              size="sm"
+              icon={<BlacksiteIcon name="backNav" size={16} rtlFlip />}
+            >
+              {t('caseFileBackToMatch')}
+            </TacticalButton>
+
+            <div className="flex items-center gap-2">
+              <ClassifiedStamp tone="crimson">{mafiaCopy.modeBadge}</ClassifiedStamp>
+              <ClassifiedStamp tone="gold">{resolvedFile.operationCode}</ClassifiedStamp>
+            </div>
+          </TacticalToolbar>
+
+          {/* 1. CLASSIFIED COVER */}
+          <motion.section
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="relative rounded-[16px] overflow-hidden border border-[#963F46]/45 bg-[#080B10] shadow-[0_20px_50px_rgba(4,7,12,0.55)]"
+          >
+            <img
+              src={HERO_ASSETS.mainBanner}
+              alt=""
+              aria-hidden="true"
+              className="absolute inset-0 w-full h-full object-cover opacity-20"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#080B10] via-[#0D1219]/88 to-[#080B10]/75" />
+            <div className="relative z-10 p-5 sm:p-6 space-y-4">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div className="flex items-center gap-2 text-xs font-bold text-[#8CB3BE]">
+                  <FileText size={14} />
+                  <span>{t('caseSectionCover')}</span>
+                </div>
+                <StatusIndicator tone={cityWon ? 'cyan' : 'crimson'}>
+                  {t('caseStatusClosed')}
+                </StatusIndicator>
+              </div>
+              <div className="text-start">
+                <p className="text-[11px] font-semibold text-[#A8B1BA] mb-1">
+                  {t('operationCodeLabel')} · {formattedDate}
+                </p>
+                <h1 className="text-2xl sm:text-3xl font-bold text-[#ECEFF4] tracking-tight">
+                  {mafiaCopy.factionTitle}
+                </h1>
+                <p className="text-sm font-medium text-[#A8B1BA] mt-1">{mafiaCopy.reason}</p>
+              </div>
+            </div>
+          </motion.section>
+
+          {/* 2. SUMMARY METRICS */}
+          <ClassifiedDossierPanel className="p-5 space-y-4">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-center font-mono-code tabular-nums">
+              <div className="rounded-[10px] bg-bg-card border border-border p-3">
+                <p className="text-[11px] text-text-muted">{mafiaCopy.days}</p>
+                <p className="text-lg font-bold text-text-main mt-0.5">{summary.daysCount}</p>
+              </div>
+              <div className="rounded-[10px] bg-bg-card border border-border p-3">
+                <p className="text-[11px] text-text-muted">{mafiaCopy.nights}</p>
+                <p className="text-lg font-bold text-text-main mt-0.5">{summary.nightsCount}</p>
+              </div>
+              <div className="rounded-[10px] bg-bg-card border border-border p-3">
+                <p className="text-[11px] text-text-muted">{mafiaCopy.saves}</p>
+                <p className="text-lg font-bold text-emerald-text mt-0.5">
+                  {summary.successfulProtections}
+                </p>
+              </div>
+              <div className="rounded-[10px] bg-bg-card border border-border p-3">
+                <p className="text-[11px] text-text-muted">{mafiaCopy.scans}</p>
+                <p className="text-lg font-bold text-cyan-text mt-0.5">
+                  {summary.investigationsCount}
+                </p>
+              </div>
+            </div>
+          </ClassifiedDossierPanel>
+
+          {/* 3. PLAYERS & REVEALED ROLES */}
+          <IntelligencePanel className="p-5 space-y-4">
+            <div className="flex items-center gap-2 text-xs font-bold text-cyan-text">
+              <Users size={14} />
+              <h2>{t('caseSectionDossiers')}</h2>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {resolvedFile.players.map((p) => {
+                const roleId =
+                  summary.playerRoles?.[String(p.playerId)] ?? resolveFallbackMafiaRole(p.role);
+                const roleMeta = getMafiaRoleMeta(roleId);
+                const roleLabel = getMafiaRoleLabel(roleId, lang);
+
+                return (
+                  <PlayerIntelligenceCard
+                    key={p.playerId}
+                    className={`p-3.5 ${p.won ? 'bg-[#3E7B67]/10 border-[#3E7B67]/35' : ''}`}
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <Avatar avatar={p.avatar} name={p.name} size={42} />
+                        <div className="min-w-0 text-start">
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-sm font-bold text-text-main truncate">
+                              {p.name}
+                            </span>
+                            {p.won && (
+                              <CheckCircle2 size={14} className="text-emerald-text shrink-0" />
+                            )}
+                          </div>
+                          <div className="flex items-center gap-1.5 mt-1">
+                            <img
+                              src={roleMeta.portrait}
+                              alt={roleLabel}
+                              className="w-4 h-4 rounded-[4px] object-cover border border-border"
+                            />
+                            <span
+                              className={`text-xs font-bold ${
+                                roleMeta.faction === 'mafia' ? 'text-danger-text' : 'text-cyan-text'
+                              }`}
+                            >
+                              {roleLabel}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      <StatusIndicator tone={p.survived ? 'emerald' : 'crimson'}>
+                        {p.survived
+                          ? t('survivedLabel')
+                          : p.eliminatedRound
+                          ? t('eliminatedRoundLabel', { round: p.eliminatedRound })
+                          : t('eliminatedLabel')}
+                      </StatusIndicator>
+                    </div>
+                  </PlayerIntelligenceCard>
+                );
+              })}
+            </div>
+          </IntelligencePanel>
+
+          {/* 4. POST-MATCH NIGHT AUDIT LOG */}
+          <IntelligencePanel className="p-5 space-y-3">
+            <div className="flex items-center gap-2 text-xs font-bold text-primary-text">
+              <Moon size={14} />
+              <h2>{mafiaCopy.nightAuditsTitle}</h2>
+            </div>
+            {summary.nightAudits.length === 0 ? (
+              <p className="text-xs text-text-muted py-2">{mafiaCopy.noNightAudits}</p>
+            ) : (
+              <div className="space-y-2.5">
+                {summary.nightAudits.map((audit) => (
+                  <div
+                    key={audit.nightNumber}
+                    className="rounded-[10px] bg-bg-card border border-border p-3.5 space-y-2 text-xs"
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <ClassifiedStamp tone="crimson">
+                        {mafiaCopy.nightLabel} {audit.nightNumber}
+                      </ClassifiedStamp>
+                      {audit.wasSavedByDoctor && (
+                        <StatusIndicator tone="emerald">{mafiaCopy.savedTag}</StatusIndicator>
+                      )}
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-start">
+                      <div>
+                        <span className="text-text-muted block">{mafiaCopy.mafiaTarget}</span>
+                        <strong className="text-danger-text">
+                          {audit.mafiaTargetName || '—'}
+                        </strong>
+                      </div>
+                      <div>
+                        <span className="text-text-muted block">{mafiaCopy.doctorShield}</span>
+                        <strong className="text-emerald-text">
+                          {audit.doctorTargetName || '—'}
+                        </strong>
+                      </div>
+                      <div>
+                        <span className="text-text-muted block">{mafiaCopy.detectiveScan}</span>
+                        <strong className="text-cyan-text inline-flex items-center gap-1">
+                          <Search size={11} />
+                          {audit.detectiveTargetName
+                            ? `${audit.detectiveTargetName} (${audit.detectiveReportedFaction === 'mafia' ? 'MAFIA' : 'CITY'})`
+                            : '—'}
+                        </strong>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </IntelligencePanel>
+
+          {/* 5. DAY VOTE HISTORY */}
+          <IntelligencePanel className="p-5 space-y-3">
+            <div className="flex items-center gap-2 text-xs font-bold text-cyan-text">
+              <BlacksiteIcon name="secretVote" size={14} />
+              <h2>{mafiaCopy.votesTitle}</h2>
+            </div>
+            {summary.voteHistory.length === 0 ? (
+              <p className="text-xs text-text-muted py-2">{mafiaCopy.noVotes}</p>
+            ) : (
+              <div className="space-y-2.5">
+                {summary.voteHistory.map((vr, idx) => (
+                  <div
+                    key={`${vr.dayNumber}-${idx}`}
+                    className="rounded-[10px] bg-bg-card border border-border p-3.5 space-y-2 text-xs"
+                  >
+                    <div className="flex items-center justify-between gap-2 flex-wrap">
+                      <div className="flex items-center gap-2">
+                        <ClassifiedStamp tone="cyan">
+                          {mafiaCopy.dayLabel} {vr.dayNumber}
+                        </ClassifiedStamp>
+                        {vr.isRevote && (
+                          <StatusIndicator tone="gold">{mafiaCopy.revoteTag}</StatusIndicator>
+                        )}
+                      </div>
+                      <span className="font-mono-code text-text-muted tabular-nums">
+                        {mafiaCopy.abstains}: {vr.abstainCount}
+                      </span>
+                    </div>
+
+                    {vr.tally.length > 0 && (
+                      <div className="space-y-1.5">
+                        {vr.tally.map((item) => (
+                          <div key={item.targetId} className="flex justify-between font-semibold">
+                            <span className="text-text-main">{item.targetName}</span>
+                            <span className="font-mono-code text-cyan-text tabular-nums">
+                              {item.count}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {vr.eliminatedPlayerName && (
+                      <p className="font-bold text-danger-text">
+                        {t('eliminatedOutcomeLabel')}: {vr.eliminatedPlayerName}
+                      </p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </IntelligencePanel>
+
+          {/* 6. MAFIA AWARDS */}
+          <ClassifiedDossierPanel className="p-5 space-y-4">
+            <div className="flex items-center gap-2 text-xs font-bold text-primary-text">
+              <Award size={14} />
+              <h2>{mafiaCopy.awardsTitle}</h2>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {summary.awards.map((aw) => (
+                <div
+                  key={aw.awardId}
+                  className={`rounded-[12px] p-4 border flex items-start gap-3 ${
+                    aw.recipientName
+                      ? 'bg-[#B49A62]/10 border-[#B49A62]/40'
+                      : 'bg-bg-card/60 border-border opacity-75'
+                  }`}
+                >
+                  <img
+                    src={mafiaAwardIcons[aw.awardId] || ACHIEVEMENT_ASSETS.masterDetective}
+                    alt=""
+                    className={`w-10 h-10 rounded-[8px] object-cover shrink-0 ${
+                      aw.recipientName ? '' : 'grayscale opacity-50'
+                    }`}
+                  />
+                  <div className="min-w-0 text-start">
+                    <h3 className="text-sm font-bold text-text-main">
+                      {t(`mafiaAwardTitle_${aw.awardId}`)}
+                    </h3>
+                    <p className="text-xs font-bold text-primary-text mt-0.5 truncate">
+                      {aw.recipientName || t('notApplicable')}
+                    </p>
+                    <p className="text-[11px] text-text-muted mt-1 leading-relaxed">
+                      {t(aw.reasonKey)}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </ClassifiedDossierPanel>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div

@@ -16,6 +16,8 @@ import {
   Send,
   X,
   Heart,
+  Zap,
+  Sparkles,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getUITranslation } from '../translations';
@@ -26,6 +28,17 @@ import {
   getSpecialRoleDescription,
 } from '../data/specialRoles';
 import { HERO_ASSETS } from '../src/design/assetRegistry';
+import { OperationEventCard } from '../data/operationEvents';
+import {
+  CHALLENGE_INTERACTION_STYLES,
+  CHALLENGE_TOPIC_PACKS,
+  ChallengeLanguage,
+  ChallengePrompt,
+} from '../data/questionLibrary';
+import {
+  normalizeChallengeLanguage,
+  pickChallengePrompt,
+} from '../src/game/questionLibraryEngine';
 import {
   BlacksiteIcon,
   BlacksiteScreenBackdrop,
@@ -37,6 +50,7 @@ import {
   ModalShell,
   OperationPhaseBadge,
   PlayerIntelligenceCard,
+  StatusIndicator,
   TacticalButton,
   TacticalInput,
 } from './ui/BlacksiteUI';
@@ -52,6 +66,7 @@ interface QuestionPhaseProps {
   undercoverWord?: string;
   descriptionsLog?: DescriptionEntry[];
   onAddDescription?: (entry: DescriptionEntry) => void;
+  operationEvent?: OperationEventCard | null;
 }
 
 export const QuestionPhase: React.FC<QuestionPhaseProps> = ({
@@ -65,6 +80,7 @@ export const QuestionPhase: React.FC<QuestionPhaseProps> = ({
   undercoverWord = '',
   descriptionsLog = [],
   onAddDescription,
+  operationEvent = null,
 }) => {
   const [asker, setAsker] = useState<Player | null>(null);
   const [target, setTarget] = useState<Player | null>(null);
@@ -87,6 +103,17 @@ export const QuestionPhase: React.FC<QuestionPhaseProps> = ({
 
   const settings = getSettings();
   const lang = settings.language;
+  const langKey: 'ar' | 'en' | 'fr' = lang === 'ar' || lang === 'sa' ? 'ar' : lang === 'fr' ? 'fr' : 'en';
+  const [challengeLang, setChallengeLang] = useState<ChallengeLanguage>(() =>
+    normalizeChallengeLanguage(lang)
+  );
+  const [showChallengeModal, setShowChallengeModal] = useState(false);
+  const [activePrompt, setActivePrompt] = useState<ChallengePrompt | null>(() =>
+    pickChallengePrompt({
+      language: normalizeChallengeLanguage(lang),
+      difficulty,
+    })
+  );
   const t = (key: string, params?: Record<string, string>) =>
     getUITranslation(lang, key, params);
 
@@ -330,6 +357,25 @@ export const QuestionPhase: React.FC<QuestionPhaseProps> = ({
         )}
       </IntelligencePanel>
 
+      {operationEvent && (
+        <IntelligencePanel className="w-full p-3.5 mb-3 border-[#B49A62]/45 bg-[#B49A62]/[0.07] text-start">
+          <div className="flex items-start justify-between gap-2.5">
+            <div className="min-w-0 space-y-1">
+              <div className="flex items-center gap-2 flex-wrap">
+                <ClassifiedStamp tone={operationEvent.tone}>{operationEvent.code}</ClassifiedStamp>
+                <span className="text-xs sm:text-sm font-extrabold text-primary-text flex items-center gap-1">
+                  <Zap size={13} />
+                  <span>{operationEvent.titles[langKey]}</span>
+                </span>
+              </div>
+              <p className="text-xs font-medium text-text-main leading-relaxed">
+                {operationEvent.rules[langKey]}
+              </p>
+            </div>
+          </div>
+        </IntelligencePanel>
+      )}
+
       {/* Status Row: Active Special Powers + Remaining Infiltrators */}
       <div className="w-full mb-4">
         <div className="grid grid-cols-2 gap-3">
@@ -564,7 +610,7 @@ export const QuestionPhase: React.FC<QuestionPhaseProps> = ({
 
       {/* Bottom Action Dock */}
       <BottomActionBar className="self-stretch mt-auto">
-        <div className="max-w-4xl mx-auto flex items-center justify-between gap-2.5">
+        <div className="max-w-4xl mx-auto flex items-center justify-between gap-2">
           <TacticalButton
             onClick={() => {
               playSound('click');
@@ -575,10 +621,23 @@ export const QuestionPhase: React.FC<QuestionPhaseProps> = ({
             aria-label={lang === 'ar' ? 'سجل الأوصاف' : 'Descriptions Log'}
             title={lang === 'ar' ? 'سجل الأوصاف' : 'Descriptions Log'}
             icon={<FileText size={16} className="text-primary-text" />}
-            className="shrink-0"
+            className="shrink-0 !px-3"
           >
             <span className="font-mono-code tabular-nums">{descriptionsLog.length}</span>
           </TacticalButton>
+
+          <TacticalButton
+            onClick={() => {
+              playSound('click');
+              setShowChallengeModal(true);
+            }}
+            variant="secondary"
+            size="md"
+            aria-label={lang === 'ar' ? 'بطاقة تحدي' : 'Challenge Prompt'}
+            title={lang === 'ar' ? 'بطاقة تحدي' : 'Challenge Prompt'}
+            icon={<Sparkles size={16} className="text-primary-text" />}
+            className="shrink-0 !px-3"
+          />
 
           <TacticalButton
             onClick={() => {
@@ -587,19 +646,22 @@ export const QuestionPhase: React.FC<QuestionPhaseProps> = ({
             }}
             variant="secondary"
             size="md"
-            className="flex-1"
-            icon={<Eye size={16} className="text-cyan-text" />}
+            className="flex-1 min-w-0 !px-2.5"
+            icon={<Eye size={16} className="text-cyan-text shrink-0" />}
           >
-            {lang === 'ar' ? 'عرض كلمتي السرية' : 'Peek My Word'}
+            <span className="truncate">
+              {lang === 'ar' ? 'كلمتي السرية' : lang === 'fr' ? 'Mon mot' : 'My Word'}
+            </span>
           </TacticalButton>
 
           <TacticalButton
             onClick={handleFinish}
             variant="danger"
             size="md"
+            className="shrink-0 !px-3.5"
             icon={<BlacksiteIcon name="secretVote" size={16} />}
           >
-            {lang === 'ar' ? 'تصويت' : 'Vote'}
+            {lang === 'ar' ? 'تصويت' : lang === 'fr' ? 'Vote' : 'Vote'}
           </TacticalButton>
         </div>
       </BottomActionBar>
@@ -1071,6 +1133,109 @@ export const QuestionPhase: React.FC<QuestionPhaseProps> = ({
                     </TacticalButton>
                   </>
                 )}
+              </ModalShell>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Offline Challenge Prompt Drawer Modal */}
+      <AnimatePresence>
+        {showChallengeModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setShowChallengeModal(false)}
+            className="fixed inset-0 z-50 bg-[#080B10]/85 flex items-center justify-center p-5"
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+              className="w-full max-w-md"
+            >
+              <ModalShell
+                onClose={() => setShowChallengeModal(false)}
+                ariaLabel={lang === 'ar' ? 'مكتبة الأسئلة والتحديات' : 'Challenge Library'}
+                className="p-5 space-y-4"
+              >
+                <div className="flex items-center justify-between border-b border-border pb-3">
+                  <div className="flex items-center gap-2">
+                    <Sparkles size={17} className="text-primary-text" />
+                    <h3 className="text-base font-extrabold text-text-main">
+                      {lang === 'ar' ? 'مقترح سؤال أو تحدٍّ' : 'Tactical Prompt Deck'}
+                    </h3>
+                  </div>
+                  <IconButton
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => setShowChallengeModal(false)}
+                    aria-label={t('close')}
+                  >
+                    <X size={16} />
+                  </IconButton>
+                </div>
+
+                <div className="flex gap-1.5 overflow-x-auto pb-1">
+                  {(['ar', 'tn', 'en', 'fr'] as ChallengeLanguage[]).map((cLang) => (
+                    <button
+                      key={cLang}
+                      type="button"
+                      onClick={() => setChallengeLang(cLang)}
+                      className={`min-h-[44px] px-3 rounded-[8px] border text-xs font-bold shrink-0 ${
+                        challengeLang === cLang
+                          ? 'bg-[#B49A62]/15 border-[#B49A62] text-primary-text'
+                          : 'bg-bg-card border-border text-text-muted'
+                      }`}
+                    >
+                      {cLang === 'ar'
+                        ? 'فصحى'
+                        : cLang === 'tn'
+                        ? 'تونسي'
+                        : cLang.toUpperCase()}
+                    </button>
+                  ))}
+                </div>
+
+                {activePrompt && (
+                  <div className="p-4 rounded-[12px] bg-bg-card border border-[#668F9A]/40 space-y-2.5 text-start">
+                    <div className="flex items-center justify-between gap-2 flex-wrap">
+                      <StatusIndicator tone="cyan">
+                        {CHALLENGE_TOPIC_PACKS.find((p) => p.id === activePrompt.topicPack)?.labels[
+                          challengeLang
+                        ]}
+                      </StatusIndicator>
+                      <StatusIndicator tone={activePrompt.difficulty === 'hard' ? 'crimson' : 'gold'}>
+                        {CHALLENGE_INTERACTION_STYLES.find((s) => s.id === activePrompt.style)
+                          ?.labels[challengeLang]}
+                      </StatusIndicator>
+                    </div>
+                    <p className="text-sm sm:text-base font-bold text-text-main leading-relaxed">
+                      {activePrompt.prompts[challengeLang]}
+                    </p>
+                  </div>
+                )}
+
+                <TacticalButton
+                  variant="primary"
+                  size="md"
+                  fullWidth
+                  onClick={() => {
+                    playSound('click');
+                    setActivePrompt(
+                      pickChallengePrompt({
+                        language: challengeLang,
+                        difficulty,
+                        excludeIds: activePrompt ? [activePrompt.id] : [],
+                      })
+                    );
+                  }}
+                  icon={<RefreshCw size={16} />}
+                >
+                  {lang === 'ar' ? 'سحب تحدٍّ آخر' : 'Draw Another Prompt'}
+                </TacticalButton>
               </ModalShell>
             </motion.div>
           </motion.div>

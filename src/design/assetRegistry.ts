@@ -16,6 +16,12 @@ import loversPortrait from '../assets/mr-white/roles/lovers.webp';
 import avengerPortrait from '../assets/mr-white/roles/avenger.webp';
 import mrMemePortrait from '../assets/mr-white/roles/mr-meme.webp';
 
+// Mafia: Shadow City Portraits
+import mafiaMemberPortrait from '../assets/images/mafia_member_1795795925043.jpg';
+import mafiaBossPortrait from '../assets/images/mafia_boss_1795795925410.jpg';
+import mafiaDetectivePortrait from '../assets/images/mafia_detective_1795795925812.jpg';
+import mafiaDoctorPortrait from '../assets/images/mafia_doctor_1795795926262.jpg';
+
 // Achievement Icons (512x512 WebP)
 import achFirstWin from '../assets/mr-white/achievements/first-win.webp';
 import achSharpEye from '../assets/mr-white/achievements/sharp-eye.webp';
@@ -59,6 +65,7 @@ import collectibleCipherKey from '../assets/mr-white/cosmetics/collectibles/ciph
 import collectibleAgencySeal from '../assets/mr-white/cosmetics/collectibles/agency-seal.webp';
 
 import { GamePhase, PlayerRole } from '../../types';
+import type { MafiaRoleId } from '../game/mafia/mafiaTypes';
 
 export const HERO_ASSETS = {
   mainBanner,
@@ -164,6 +171,14 @@ export const SCREEN_BACKGROUND_MAP: Record<GamePhase, BlacksiteBackgroundKey> = 
   [GamePhase.PROFILE]: 'profile',
   [GamePhase.INVENTORY]: 'profile',
   [GamePhase.SETTINGS]: 'profile',
+  [GamePhase.MAFIA_SETTINGS]: 'setup',
+  [GamePhase.MAFIA_REVEAL]: 'briefing',
+  [GamePhase.MAFIA_NIGHT]: 'voting',
+  [GamePhase.MAFIA_DAWN]: 'briefing',
+  [GamePhase.MAFIA_DISCUSSION]: 'discussion',
+  [GamePhase.MAFIA_VOTING]: 'voting',
+  [GamePhase.MAFIA_VOTE_RESULT]: 'voting',
+  [GamePhase.MAFIA_RESULT]: 'results',
 };
 
 export type BlacksiteNavKey = 'vault' | 'rankings' | 'dictionary' | 'agents' | 'settings';
@@ -245,6 +260,14 @@ export const ROLE_PORTRAITS: Record<PlayerRole, string> = {
   lovers: loversPortrait,
   avenger: avengerPortrait,
   mr_meme: mrMemePortrait,
+};
+
+export const MAFIA_ROLE_PORTRAITS: Record<MafiaRoleId, string> = {
+  citizen: citizenPortrait,
+  detective: mafiaDetectivePortrait,
+  doctor: mafiaDoctorPortrait,
+  mafia: mafiaMemberPortrait,
+  mafia_boss: mafiaBossPortrait,
 };
 
 export const ACHIEVEMENT_ASSETS = {

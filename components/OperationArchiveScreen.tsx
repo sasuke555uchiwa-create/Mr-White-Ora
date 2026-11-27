@@ -218,14 +218,18 @@ export const OperationArchiveScreen: React.FC<OperationArchiveScreenProps> = ({
       {/* Case Files List */}
       <div className="space-y-2.5">
         {combinedFiles.map((item) => {
-          const factionLabel =
-            item.winningFaction === 'citizens'
-              ? t('factionCitizens')
-              : item.winningFaction === 'undercover_solo'
-              ? t('factionUndercoverSolo')
-              : item.winningFaction === 'mrwhite_solo'
-              ? t('factionMrWhiteSolo')
-              : t('factionBothInfiltrators');
+          const isMafia = item.gameType === 'mafia_shadow_city' && Boolean(item.mafiaSummary);
+          const factionLabel = isMafia
+            ? item.mafiaSummary!.winningFaction === 'city'
+              ? t('mafiaFactionCity')
+              : t('mafiaFactionMafia')
+            : item.winningFaction === 'citizens'
+            ? t('factionCitizens')
+            : item.winningFaction === 'undercover_solo'
+            ? t('factionUndercoverSolo')
+            : item.winningFaction === 'mrwhite_solo'
+            ? t('factionMrWhiteSolo')
+            : t('factionBothInfiltrators');
 
           return (
             <motion.div
@@ -243,7 +247,12 @@ export const OperationArchiveScreen: React.FC<OperationArchiveScreenProps> = ({
                   className="flex-1 min-w-0 min-h-[44px] text-start space-y-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#668F9A]/75 rounded-[8px]"
                 >
                   <div className="flex flex-wrap items-center gap-2">
-                    <ClassifiedStamp tone="gold">{item.operationCode}</ClassifiedStamp>
+                    <ClassifiedStamp tone={isMafia ? 'crimson' : 'gold'}>
+                      {item.operationCode}
+                    </ClassifiedStamp>
+                    {isMafia && (
+                      <StatusIndicator tone="crimson">MAFIA</StatusIndicator>
+                    )}
                     <StatusIndicator
                       tone="neutral"
                       icon={item.mode === 'online' ? <Globe size={11} /> : <Smartphone size={11} />}
@@ -256,7 +265,18 @@ export const OperationArchiveScreen: React.FC<OperationArchiveScreenProps> = ({
                   </div>
 
                   <p className="text-sm sm:text-base font-bold text-text-main truncate">
-                    {factionLabel} — <span className="text-cyan-text">{item.secretWord}</span>
+                    {isMafia ? (
+                      <>
+                        {factionLabel} —{' '}
+                        <span className="text-danger-text">
+                          {isRTL ? 'مافيا: مدينة الظلال' : 'Mafia: Shadow City'}
+                        </span>
+                      </>
+                    ) : (
+                      <>
+                        {factionLabel} — <span className="text-cyan-text">{item.secretWord}</span>
+                      </>
+                    )}
                   </p>
 
                   <div className="flex flex-wrap items-center gap-3 text-[11px] font-mono-code font-semibold text-text-muted tabular-nums">

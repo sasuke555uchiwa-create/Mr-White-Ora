@@ -13,6 +13,18 @@ import { getUITranslation } from '../translations';
 import { useAuth } from '../contexts/AuthContext';
 import { BLACKSITE_NAV_ARTWORK } from '../src/design/assetRegistry';
 import {
+  CHALLENGE_INTERACTION_STYLES,
+  CHALLENGE_TOPIC_PACKS,
+  ChallengeDifficulty,
+  ChallengeInteractionStyle,
+  ChallengeLanguage,
+  ChallengeTopicPack,
+} from '../data/questionLibrary';
+import {
+  normalizeChallengeLanguage,
+  queryChallengePrompts,
+} from '../src/game/questionLibraryEngine';
+import {
   BlacksiteIcon,
   BlacksiteScreenBackdrop,
   ClassifiedStamp,
@@ -21,6 +33,7 @@ import {
   IntelligencePanel,
   InteractiveCard,
   ModalShell,
+  SegmentedControl,
   StatusIndicator,
   TacticalButton,
   TacticalInput,
@@ -42,8 +55,15 @@ export const LanguageDictionary: React.FC<LanguageDictionaryProps> = ({ onBack }
   const t = (key: string) => getUITranslation(settings.language, key);
 
   const [customPairs, setCustomPairs] = useState<CustomWordPair[]>([]);
+  const [activeTab, setActiveTab] = useState<'words' | 'challenges'>('words');
   const [selectedLanguage, setSelectedLanguage] = useState(settings.language);
   const [selectedCategory, setSelectedCategory] = useState<CategoryFilter>('all');
+  const [challengeLang, setChallengeLang] = useState<ChallengeLanguage>(() =>
+    normalizeChallengeLanguage(settings.language)
+  );
+  const [challengePack, setChallengePack] = useState<ChallengeTopicPack | 'all'>('all');
+  const [challengeStyle, setChallengeStyle] = useState<ChallengeInteractionStyle | 'all'>('all');
+  const [challengeDifficulty, setChallengeDifficulty] = useState<ChallengeDifficulty | 'all'>('all');
   const [isAdding, setIsAdding] = useState(false);
   const [newWord1, setNewWord1] = useState('');
   const [newWord2, setNewWord2] = useState('');
@@ -195,6 +215,161 @@ export const LanguageDictionary: React.FC<LanguageDictionaryProps> = ({ onBack }
         }
       />
 
+      <div className="mb-3">
+        <SegmentedControl
+          value={activeTab}
+          onChange={(val) => setActiveTab(val === 'challenges' ? 'challenges' : 'words')}
+          className="w-full"
+          options={[
+            {
+              value: 'words',
+              label: isRTL ? 'أزواج الكلمات' : 'Word Pairs',
+            },
+            {
+              value: 'challenges',
+              label: isRTL ? 'مكتبة الأسئلة والتحديات' : 'Challenge Library',
+            },
+          ]}
+        />
+      </div>
+
+      {activeTab === 'challenges' ? (
+        <div className="space-y-3">
+          <IntelligencePanel className="p-3.5 space-y-2.5">
+            <div className="flex flex-wrap gap-2">
+              {(
+                [
+                  { id: 'ar', label: isRTL ? 'العربية' : 'Arabic' },
+                  { id: 'tn', label: isRTL ? 'تونسي' : 'Tunisian' },
+                  { id: 'en', label: 'English' },
+                  { id: 'fr', label: 'Français' },
+                ] as { id: ChallengeLanguage; label: string }[]
+              ).map((item) => (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => setChallengeLang(item.id)}
+                  className={`min-h-[44px] px-3 rounded-[8px] border text-xs font-bold ${
+                    challengeLang === item.id
+                      ? 'bg-[#B49A62]/15 border-[#B49A62] text-primary-text'
+                      : 'bg-bg-surface border-border text-text-muted'
+                  }`}
+                >
+                  {item.label}
+                </button>
+              ))}
+            </div>
+
+            <div className="overflow-x-auto whitespace-nowrap scrollbar-hide flex gap-1.5 pt-2 border-t border-border/70">
+              <button
+                type="button"
+                onClick={() => setChallengePack('all')}
+                className={`min-h-[44px] px-3 rounded-[8px] border text-xs font-bold shrink-0 ${
+                  challengePack === 'all'
+                    ? 'bg-[#668F9A]/15 border-[#668F9A] text-cyan-text'
+                    : 'bg-bg-surface border-border text-text-muted'
+                }`}
+              >
+                {isRTL ? 'كل الحزم (10)' : 'All Packs (10)'}
+              </button>
+              {CHALLENGE_TOPIC_PACKS.map((pk) => (
+                <button
+                  key={pk.id}
+                  type="button"
+                  onClick={() => setChallengePack(pk.id)}
+                  className={`min-h-[44px] px-3 rounded-[8px] border text-xs font-bold shrink-0 ${
+                    challengePack === pk.id
+                      ? 'bg-[#668F9A]/15 border-[#668F9A] text-cyan-text'
+                      : 'bg-bg-surface border-border text-text-muted'
+                  }`}
+                >
+                  {pk.labels[challengeLang]}
+                </button>
+              ))}
+            </div>
+
+            <div className="overflow-x-auto whitespace-nowrap scrollbar-hide flex gap-1.5 pt-2 border-t border-border/70">
+              <button
+                type="button"
+                onClick={() => setChallengeStyle('all')}
+                className={`min-h-[44px] px-3 rounded-[8px] border text-xs font-bold shrink-0 ${
+                  challengeStyle === 'all'
+                    ? 'bg-[#B49A62]/15 border-[#B49A62] text-primary-text'
+                    : 'bg-bg-surface border-border text-text-muted'
+                }`}
+              >
+                {isRTL ? 'كل الأساليب (6)' : 'All Styles (6)'}
+              </button>
+              {CHALLENGE_INTERACTION_STYLES.map((st) => (
+                <button
+                  key={st.id}
+                  type="button"
+                  onClick={() => setChallengeStyle(st.id)}
+                  className={`min-h-[44px] px-3 rounded-[8px] border text-xs font-bold shrink-0 ${
+                    challengeStyle === st.id
+                      ? 'bg-[#B49A62]/15 border-[#B49A62] text-primary-text'
+                      : 'bg-bg-surface border-border text-text-muted'
+                  }`}
+                >
+                  {st.labels[challengeLang]}
+                </button>
+              ))}
+            </div>
+
+            <div className="flex gap-2 pt-2 border-t border-border/70">
+              {(['all', 'easy', 'hard'] as const).map((diff) => (
+                <button
+                  key={diff}
+                  type="button"
+                  onClick={() => setChallengeDifficulty(diff)}
+                  className={`min-h-[44px] px-3 rounded-[8px] border text-xs font-bold ${
+                    challengeDifficulty === diff
+                      ? 'bg-[#963F46]/15 border-[#963F46] text-danger-text'
+                      : 'bg-bg-surface border-border text-text-muted'
+                  }`}
+                >
+                  {diff === 'all'
+                    ? isRTL
+                      ? 'كل الصعوبات'
+                      : 'All Levels'
+                    : diff === 'easy'
+                    ? t('difficultyEasy')
+                    : t('difficultyHard')}
+                </button>
+              ))}
+            </div>
+          </IntelligencePanel>
+
+          <div className="space-y-2.5">
+            {queryChallengePrompts({
+              language: challengeLang,
+              topicPack: challengePack,
+              style: challengeStyle,
+              difficulty: challengeDifficulty,
+            }).map((item) => (
+              <IntelligencePanel key={item.id} className="p-3.5 text-start space-y-2">
+                <div className="flex items-center justify-between gap-2 flex-wrap">
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <StatusIndicator tone="cyan">
+                      {CHALLENGE_TOPIC_PACKS.find((p) => p.id === item.topicPack)?.labels[challengeLang]}
+                    </StatusIndicator>
+                    <StatusIndicator tone="gold">
+                      {CHALLENGE_INTERACTION_STYLES.find((s) => s.id === item.style)?.labels[challengeLang]}
+                    </StatusIndicator>
+                  </div>
+                  <StatusIndicator tone={item.difficulty === 'hard' ? 'crimson' : 'emerald'}>
+                    {item.difficulty === 'hard' ? t('difficultyHard') : t('difficultyEasy')}
+                  </StatusIndicator>
+                </div>
+                <p className="text-sm font-bold text-text-main leading-relaxed">
+                  {item.prompts[challengeLang]}
+                </p>
+              </IntelligencePanel>
+            ))}
+          </div>
+        </div>
+      ) : (
+      <>
       {/* Language & Category Filter Surface */}
       <IntelligencePanel className="relative overflow-hidden blacksite-texture-paper p-3 space-y-2.5 mb-3">
         <div aria-hidden="true" className="blacksite-hairline-cyan absolute inset-x-0 top-0 pointer-events-none" />
@@ -342,6 +517,8 @@ export const LanguageDictionary: React.FC<LanguageDictionaryProps> = ({ onBack }
           </IntelligencePanel>
         )}
       </div>
+      </>
+      )}
       </div>
 
       {/* Add Modal */}

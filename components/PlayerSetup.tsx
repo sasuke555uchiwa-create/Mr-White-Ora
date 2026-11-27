@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { GameTypeId } from '../types';
 import {
   getRecentPlayers,
   saveRecentPlayers,
@@ -43,12 +44,18 @@ interface PlayerSetupProps {
   onNext?: (players: { name: string; avatar: string; isSleeping?: boolean }[]) => void;
   mode?: 'setup' | 'manage';
   onBack?: () => void;
+  minPlayers?: number;
+  maxPlayers?: number;
+  gameType?: GameTypeId;
 }
 
 export const PlayerSetup: React.FC<PlayerSetupProps> = ({
   onNext,
   mode = 'setup',
   onBack,
+  minPlayers = 3,
+  maxPlayers = 20,
+  gameType = 'mr_white',
 }) => {
   const [players, setPlayers] = useState<{ name: string; avatar: string; isSleeping?: boolean }[]>(
     []
@@ -70,23 +77,30 @@ export const PlayerSetup: React.FC<PlayerSetupProps> = ({
 
     if (saved.length > 0 && mode === 'manage') {
       setPlayers(saved);
-    } else if (saved.length >= 3 && mode === 'setup') {
-      setPlayers(
-        saved
-          .filter((p) => !p.isSleeping)
-          .slice(0, 8)
-          .map((p) => ({ name: p.name, avatar: p.avatar }))
-      );
+    } else if (mode === 'setup') {
+      const activeSaved = saved
+        .filter((p) => !p.isSleeping)
+        .slice(0, maxPlayers)
+        .map((p) => ({ name: p.name, avatar: p.avatar }));
+
+      if (activeSaved.length >= minPlayers) {
+        setPlayers(activeSaved);
+      } else {
+        const padded = [...activeSaved];
+        while (padded.length < minPlayers) {
+          padded.push({ name: '', avatar: '' });
+        }
+        setPlayers(padded);
+      }
     } else {
-      setPlayers([
-        { name: '', avatar: '' },
-        { name: '', avatar: '' },
-        { name: '', avatar: '' },
-      ]);
+      setPlayers(
+        Array.from({ length: minPlayers }, () => ({ name: '', avatar: '' }))
+      );
     }
-  }, [mode]);
+  }, [mode, minPlayers, maxPlayers]);
 
   const addPlayerField = () => {
+    if (mode === 'setup' && players.length >= maxPlayers) return;
     setPlayers([...players, { name: '', avatar: '' }]);
     playSound('click');
   };
@@ -130,7 +144,7 @@ export const PlayerSetup: React.FC<PlayerSetupProps> = ({
       newPlayers[emptySlotIndex].name = player.name;
       newPlayers[emptySlotIndex].avatar = player.avatar;
       setPlayers(newPlayers);
-    } else {
+    } else if (mode !== 'setup' || newPlayers.length < maxPlayers) {
       setPlayers([
         ...newPlayers,
         {
@@ -218,7 +232,14 @@ export const PlayerSetup: React.FC<PlayerSetupProps> = ({
   const activeCount = players.filter(
     (p) => p.name.trim().length > 0 && !p.isSleeping
   ).length;
-  const isValid = activeCount >= 3 && !hasDuplicates;
+  const isValid = activeCount >= minPlayers && activeCount <= maxPlayers && !hasDuplicates;
+
+  const boundsHint =
+    minPlayers === 3 && maxPlayers === 20
+      ? t('atLeast3')
+      : isRTL
+      ? `(${minPlayers}–${maxPlayers} لاعباً)`
+      : `(${minPlayers}–${maxPlayers} required)`;
 
   const unselectedRecentPlayers = recentPlayers.filter(
     (rp) =>
@@ -232,10 +253,18 @@ export const PlayerSetup: React.FC<PlayerSetupProps> = ({
       <div className="relative z-10 flex flex-col flex-1">
       {/* Header Summary */}
       <DossierHeaderBand
-        accent="cyan"
+        accent={gameType === 'mafia_shadow_city' ? 'crimson' : 'cyan'}
         texture="map"
         className="mb-4"
-        badge={<ClassifiedStamp tone="cyan">{mode === 'manage' ? 'AGENTS' : 'ROSTER'}</ClassifiedStamp>}
+        badge={
+          <ClassifiedStamp tone={gameType === 'mafia_shadow_city' ? 'crimson' : 'cyan'}>
+            {mode === 'manage'
+              ? 'AGENTS'
+              : gameType === 'mafia_shadow_city'
+              ? 'MAFIA · 6–14'
+              : 'ROSTER'}
+          </ClassifiedStamp>
+        }
         icon={
           <img
             src={BLACKSITE_NAV_ARTWORK.agents}
@@ -248,6 +277,10 @@ export const PlayerSetup: React.FC<PlayerSetupProps> = ({
         subtitle={
           mode === 'manage'
             ? t('editDeletePlayers')
+            : gameType === 'mafia_shadow_city'
+            ? isRTL
+              ? 'أدخل أسماء لاعبي مدينة الظلال (من 6 إلى 14 لاعباً)'
+              : 'Enter Shadow City operatives (6 to 14 players)'
             : isRTL
             ? 'أدخل أسماء العملاء واختر ملفاتهم التعريفية'
             : 'Enter operative callsigns and select portraits'
@@ -259,7 +292,7 @@ export const PlayerSetup: React.FC<PlayerSetupProps> = ({
                 {t('count')} {activeCount}
               </StatusIndicator>
               {!isValid && (
-                <span className="text-xs font-bold text-danger-text">{t('atLeast3')}</span>
+                <span className="text-xs font-bold text-danger-text">{boundsHint}</span>
               )}
             </div>
           ) : (
@@ -434,6 +467,7 @@ export const PlayerSetup: React.FC<PlayerSetupProps> = ({
             variant="secondary"
             size="md"
             fullWidth
+            disabled={mode === 'setup' && players.length >= maxPlayers}
             onClick={addPlayerField}
             icon={<BlacksiteIcon name="addPlayer" size={17} />}
           >

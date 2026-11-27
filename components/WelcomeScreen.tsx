@@ -29,9 +29,11 @@ import {
   ModalShell,
   NavButton,
   NavDock,
+  SegmentedControl,
   TacticalButton,
   TacticalToolbar,
 } from './ui/BlacksiteUI';
+import { getGameDefinition } from '../src/game/gameRegistry';
 
 const NavDockCustomIcon: React.FC<{ navKey: BlacksiteNavKey }> = ({ navKey }) => {
   const artworkSrc = BLACKSITE_NAV_ARTWORK[navKey];
@@ -53,6 +55,9 @@ const NavDockCustomIcon: React.FC<{ navKey: BlacksiteNavKey }> = ({ navKey }) =>
 
 interface WelcomeScreenProps {
   onStart: () => void;
+  onStartMafia?: () => void;
+  hasSavedMafiaMatch?: boolean;
+  onResumeMafia?: () => void;
   onShowScoreboard: () => void;
   onManagePlayers: () => void;
   onOpenSettings: () => void;
@@ -77,6 +82,9 @@ const QUICK_LANGUAGES = [
 
 export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
   onStart,
+  onStartMafia,
+  hasSavedMafiaMatch = false,
+  onResumeMafia,
   onShowScoreboard,
   onManagePlayers,
   onOpenSettings,
@@ -93,7 +101,10 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
   const isRTL = ['ar', 'sa'].includes(lang);
   const t = (key: string) => getUITranslation(lang, key);
   const [showPlayOptions, setShowPlayOptions] = useState(false);
+  const [selectedUniverse, setSelectedUniverse] = useState<'mr_white' | 'mafia_shadow_city'>('mr_white');
   const [showLangModal, setShowLangModal] = useState(false);
+  const caseZeroDef = getGameDefinition('case_zero');
+  const langKey = isRTL ? 'ar' : lang === 'fr' ? 'fr' : 'en';
 
   const avatarSrc = profile
     ? profile.photoURL || ''
@@ -419,7 +430,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
                       {isRTL ? 'اختر وضع التشغيل' : 'Select Operation Mode'}
                     </h2>
                     <p className="text-xs text-text-muted">
-                      {isRTL ? 'حدد نمط المواجهة الميدانية' : 'Choose how operatives connect'}
+                      {isRTL ? 'حدد العملية ونمط المواجهة الميدانية' : 'Select operation universe & connection'}
                     </p>
                   </div>
                   <IconButton
@@ -432,61 +443,149 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
                   </IconButton>
                 </div>
 
-                {/* Online Operations */}
-                <InteractiveCard
-                  accent="cyan"
-                  onClick={() => {
+                {/* Game Universe Switcher */}
+                <SegmentedControl
+                  value={selectedUniverse}
+                  onChange={(val) => {
                     playSound('click');
-                    setShowPlayOptions(false);
-                    onShowOnline();
+                    setSelectedUniverse(val);
                   }}
-                  className="w-full text-start border-[#668F9A]/45 hover:border-[#668F9A] p-4 flex items-center justify-between gap-4"
-                >
-                  <div className="space-y-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span className="text-base sm:text-lg font-extrabold text-text-main">
-                        {isRTL ? 'عمليات أونلاين' : t('playOnline')}
-                      </span>
-                      <ClassifiedStamp tone="cyan">NET</ClassifiedStamp>
-                    </div>
-                    <p className="text-xs text-text-muted leading-relaxed">
-                      {isRTL
-                        ? 'العب عبر الإنترنت في غرف عامة أو خاصة مشفّرة مع أصدقائك.'
-                        : 'Join public or private encrypted rooms over the network.'}
-                    </p>
-                  </div>
-                  <div className="w-12 h-12 rounded-[10px] bg-[#668F9A]/15 border border-[#668F9A]/40 flex items-center justify-center shrink-0">
-                    <BlacksiteIcon name="onlineMultiplayer" size={24} />
-                  </div>
-                </InteractiveCard>
+                  ariaLabel={isRTL ? 'نوع اللعبة' : 'Game Mode Universe'}
+                  size="sm"
+                  className="w-full"
+                  options={[
+                    {
+                      value: 'mr_white',
+                      label: isRTL ? 'مستر وايت (3–20)' : 'Mr. White (3–20)',
+                    },
+                    {
+                      value: 'mafia_shadow_city',
+                      label: isRTL ? 'مافيا: مدينة الظلال' : 'Mafia: Shadow City',
+                    },
+                  ]}
+                />
 
-                {/* Local Pass & Play */}
-                <InteractiveCard
-                  accent="gold"
-                  onClick={() => {
-                    playSound('click');
-                    setShowPlayOptions(false);
-                    onStart();
-                  }}
-                  className="w-full text-start border-[#B49A62]/45 hover:border-[#B49A62] p-4 flex items-center justify-between gap-4"
-                >
-                  <div className="space-y-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span className="text-base sm:text-lg font-extrabold text-text-main">
-                        {isRTL ? 'لعب على نفس الهاتف' : t('playOffline')}
-                      </span>
-                      <ClassifiedStamp tone="gold">LOCAL</ClassifiedStamp>
+                {selectedUniverse === 'mr_white' ? (
+                  <>
+                    {/* Online Operations */}
+                    <InteractiveCard
+                      accent="cyan"
+                      onClick={() => {
+                        playSound('click');
+                        setShowPlayOptions(false);
+                        onShowOnline();
+                      }}
+                      className="w-full text-start border-[#668F9A]/45 hover:border-[#668F9A] p-4 flex items-center justify-between gap-4"
+                    >
+                      <div className="space-y-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="text-base sm:text-lg font-extrabold text-text-main">
+                            {isRTL ? 'عمليات أونلاين' : t('playOnline')}
+                          </span>
+                          <ClassifiedStamp tone="cyan">NET</ClassifiedStamp>
+                        </div>
+                        <p className="text-xs text-text-muted leading-relaxed">
+                          {isRTL
+                            ? 'العب عبر الإنترنت في غرف عامة أو خاصة مشفّرة مع أصدقائك.'
+                            : 'Join public or private encrypted rooms over the network.'}
+                        </p>
+                      </div>
+                      <div className="w-12 h-12 rounded-[10px] bg-[#668F9A]/15 border border-[#668F9A]/40 flex items-center justify-center shrink-0">
+                        <BlacksiteIcon name="onlineMultiplayer" size={24} />
+                      </div>
+                    </InteractiveCard>
+
+                    {/* Local Pass & Play */}
+                    <InteractiveCard
+                      accent="gold"
+                      onClick={() => {
+                        playSound('click');
+                        setShowPlayOptions(false);
+                        onStart();
+                      }}
+                      className="w-full text-start border-[#B49A62]/45 hover:border-[#B49A62] p-4 flex items-center justify-between gap-4"
+                    >
+                      <div className="space-y-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="text-base sm:text-lg font-extrabold text-text-main">
+                            {isRTL ? 'لعب على نفس الهاتف' : t('playOffline')}
+                          </span>
+                          <ClassifiedStamp tone="gold">LOCAL</ClassifiedStamp>
+                        </div>
+                        <p className="text-xs text-text-muted leading-relaxed">
+                          {isRTL
+                            ? 'مرر الجهاز بين العملاء الجالسين في نفس الغرفة.'
+                            : 'Pass & play on one shared briefing device in the same room.'}
+                        </p>
+                      </div>
+                      <div className="w-12 h-12 rounded-[10px] bg-[#B49A62]/15 border border-[#B49A62]/40 flex items-center justify-center shrink-0">
+                        <BlacksiteIcon name="passAndPlay" size={24} />
+                      </div>
+                    </InteractiveCard>
+                  </>
+                ) : (
+                  <div className="space-y-2.5">
+                    <InteractiveCard
+                      accent="crimson"
+                      onClick={() => {
+                        playSound('click');
+                        setShowPlayOptions(false);
+                        onStartMafia?.();
+                      }}
+                      className="w-full text-start border-[#963F46]/50 hover:border-[#963F46] p-4 flex items-center justify-between gap-4"
+                    >
+                      <div className="space-y-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="text-base sm:text-lg font-extrabold text-text-main">
+                            {isRTL ? 'مافيا: مدينة الظلال' : 'Mafia: Shadow City'}
+                          </span>
+                          <ClassifiedStamp tone="crimson">6–14</ClassifiedStamp>
+                        </div>
+                        <p className="text-xs text-text-muted leading-relaxed">
+                          {isRTL
+                            ? 'ليالي سرية، محقق، طبيب، زعيم المافيا وتصويت سري على جهاز واحد.'
+                            : 'Night operations, Detective, Doctor, Boss cover & secret voting on one device.'}
+                        </p>
+                      </div>
+                      <div className="w-12 h-12 rounded-[10px] bg-[#963F46]/15 border border-[#963F46]/40 flex items-center justify-center shrink-0">
+                        <BlacksiteIcon name="passAndPlay" size={24} />
+                      </div>
+                    </InteractiveCard>
+
+                    {hasSavedMafiaMatch && onResumeMafia && (
+                      <TacticalButton
+                        variant="primary"
+                        size="md"
+                        fullWidth
+                        onClick={() => {
+                          playSound('click');
+                          setShowPlayOptions(false);
+                          onResumeMafia();
+                        }}
+                      >
+                        {isRTL ? 'استكمال جولة المافيا المحفوظة' : 'Resume Active Mafia Match'}
+                      </TacticalButton>
+                    )}
+
+                    <div className="rounded-[10px] bg-bg-card/70 border border-border px-3.5 py-2.5 text-start">
+                      <p className="text-[11px] font-bold text-text-muted">
+                        {isRTL
+                          ? 'وضع اللعب الجماعي على جهاز واحد (6–14 لاعباً). اللعب القريب بين الأجهزة قيد التجهيز المعماري.'
+                          : 'Pass & Play local mode (6–14 players). Nearby P2P architecture prepared for future release.'}
+                      </p>
                     </div>
-                    <p className="text-xs text-text-muted leading-relaxed">
-                      {isRTL
-                        ? 'مرر الجهاز بين العملاء الجالسين في نفس الغرفة.'
-                        : 'Pass & play on one shared briefing device in the same room.'}
-                    </p>
                   </div>
-                  <div className="w-12 h-12 rounded-[10px] bg-[#B49A62]/15 border border-[#B49A62]/40 flex items-center justify-center shrink-0">
-                    <BlacksiteIcon name="passAndPlay" size={24} />
-                  </div>
-                </InteractiveCard>
+                )}
+
+                {/* Future Operation Preview Badge (non-interactive) */}
+                <div className="pt-2 border-t border-border flex items-center justify-between gap-2 text-[11px] text-text-muted">
+                  <span className="font-semibold truncate">
+                    {caseZeroDef.code} · {caseZeroDef.titles[langKey]}
+                  </span>
+                  <ClassifiedStamp tone="neutral">
+                    {isRTL ? 'قريباً' : 'COMING SOON'}
+                  </ClassifiedStamp>
+                </div>
               </ModalShell>
             </motion.div>
           </motion.div>

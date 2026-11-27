@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { ClassifiedCaseFile, GamePhase } from './types';
+import { ClassifiedCaseFile, GamePhase, GameTypeId } from './types';
 import { WelcomeScreen } from './components/WelcomeScreen';
 import { PlayerSetup } from './components/PlayerSetup';
 import { GameRound } from './components/GameRound';
@@ -40,8 +40,17 @@ import {
 } from './utils/onlineRoomService';
 import { getRoleAsset, getRoleTitle, getRoleVisualIdentity } from './data/specialRoles';
 import { useOfflineMatch } from './hooks/useOfflineMatch';
+import { useMafiaMatch } from './hooks/useMafiaMatch';
 import { hasSpecialRole } from './src/game/voteEngine';
 import { ClassifiedStamp, ModalShell, TacticalButton } from './components/ui/BlacksiteUI';
+import { MafiaSettingsScreen } from './components/mafia/MafiaSettingsScreen';
+import { MafiaRoleRevealScreen } from './components/mafia/MafiaRoleRevealScreen';
+import { MafiaNightScreen } from './components/mafia/MafiaNightScreen';
+import { MafiaDawnScreen } from './components/mafia/MafiaDawnScreen';
+import { MafiaDiscussionScreen } from './components/mafia/MafiaDiscussionScreen';
+import { MafiaVotingScreen } from './components/mafia/MafiaVotingScreen';
+import { MafiaVoteResultScreen } from './components/mafia/MafiaVoteResultScreen';
+import { MafiaResultScreen } from './components/mafia/MafiaResultScreen';
 
 const ACTIVE_GAME_PHASES = [
   GamePhase.REVEAL,
@@ -52,10 +61,17 @@ const ACTIVE_GAME_PHASES = [
   GamePhase.IMPOSTOR_GUESS,
   GamePhase.ONLINE_LOBBY,
   GamePhase.ONLINE_GAME,
+  GamePhase.MAFIA_REVEAL,
+  GamePhase.MAFIA_NIGHT,
+  GamePhase.MAFIA_DAWN,
+  GamePhase.MAFIA_DISCUSSION,
+  GamePhase.MAFIA_VOTING,
+  GamePhase.MAFIA_VOTE_RESULT,
 ];
 
 function AppContent() {
   const [phase, setPhase] = useState<GamePhase>(GamePhase.WELCOME);
+  const [selectedGameType, setSelectedGameType] = useState<GameTypeId>('mr_white');
   const [currentRoomId, setCurrentRoomId] = useState<string | null>(null);
   const [showExitConfirmation, setShowExitConfirmation] = useState(false);
   const [onlineBusy, setOnlineBusy] = useState(false);
@@ -97,12 +113,24 @@ function AppContent() {
   );
 
   const offline = useOfflineMatch({ navigate, t });
+  const mafia = useMafiaMatch({ navigate });
 
   const bgClass = (() => {
-    if (phase === GamePhase.VOTING || phase === GamePhase.REVEAL_VOTE_RESULT) {
+    if (
+      phase === GamePhase.VOTING ||
+      phase === GamePhase.REVEAL_VOTE_RESULT ||
+      phase === GamePhase.MAFIA_NIGHT ||
+      phase === GamePhase.MAFIA_VOTING ||
+      phase === GamePhase.MAFIA_VOTE_RESULT
+    ) {
       return 'bg-game-danger';
     }
-    if (phase === GamePhase.PLAYING || phase === GamePhase.DISCUSSION) {
+    if (
+      phase === GamePhase.PLAYING ||
+      phase === GamePhase.DISCUSSION ||
+      phase === GamePhase.MAFIA_DAWN ||
+      phase === GamePhase.MAFIA_DISCUSSION
+    ) {
       return 'bg-game-accent';
     }
     return 'bg-game-premium';
@@ -169,8 +197,13 @@ function AppContent() {
     playersData: { name: string; avatar: string; isSleeping?: boolean }[]
   ) => {
     const activePlayers = playersData.filter((p) => !p.isSleeping);
-    offline.setTempPlayers(activePlayers);
     saveRecentPlayers(playersData);
+    if (selectedGameType === 'mafia_shadow_city') {
+      mafia.setTempPlayers(activePlayers.map((p) => ({ name: p.name, avatar: p.avatar })));
+      navigate(GamePhase.MAFIA_SETTINGS);
+      return;
+    }
+    offline.setTempPlayers(activePlayers);
     navigate(GamePhase.GAME_SETTINGS);
   };
 
@@ -190,6 +223,9 @@ function AppContent() {
     setShowExitConfirmation(false);
     setCurrentRoomId(null);
     offline.resetPendingSpecialModals();
+    if (String(phase).startsWith('MAFIA_')) {
+      mafia.resetMafiaMatch();
+    }
     navigate(GamePhase.WELCOME);
 
     if (roomToLeave && uid) {
@@ -333,7 +369,21 @@ function AppContent() {
               className="w-full h-full"
             >
               <WelcomeScreen
-                onStart={() => navigate(GamePhase.SETUP)}
+                onStart={() => {
+                  setSelectedGameType('mr_white');
+                  navigate(GamePhase.SETUP);
+                }}
+                onStartMafia={() => {
+                  setSelectedGameType('mafia_shadow_city');
+                  navigate(GamePhase.SETUP);
+                }}
+                hasSavedMafiaMatch={Boolean(
+                  mafia.savedSavedSession || (mafia.matchState && mafia.matchState.phase !== 'ended')
+                )}
+                onResumeMafia={() => {
+                  setSelectedGameType('mafia_shadow_city');
+                  mafia.resumeSavedMatch();
+                }}
                 onShowScoreboard={() => navigate(GamePhase.SCOREBOARD)}
                 onManagePlayers={() => navigate(GamePhase.PLAYERS_LIST)}
                 onOpenSettings={() => navigate(GamePhase.SETTINGS)}
@@ -468,7 +518,13 @@ function AppContent() {
               transition={pageTransition}
               className="w-full h-full"
             >
-              <PlayerSetup mode="setup" onNext={handlePlayersConfirmed} />
+              <PlayerSetup
+                mode="setup"
+                onNext={handlePlayersConfirmed}
+                minPlayers={selectedGameType === 'mafia_shadow_city' ? 6 : 3}
+                maxPlayers={selectedGameType === 'mafia_shadow_city' ? 14 : 20}
+                gameType={selectedGameType}
+              />
             </motion.div>
           )}
 
@@ -550,6 +606,7 @@ function AppContent() {
                 undercoverWord={offline.undercoverWord}
                 descriptionsLog={offline.descriptionsLog}
                 onAddDescription={(entry) => offline.setDescriptionsLog((prev) => [...prev, entry])}
+                operationEvent={offline.currentOperationEvent}
               />
             </motion.div>
           )}
@@ -675,6 +732,162 @@ function AppContent() {
                         })
                     : undefined
                 }
+              />
+            </motion.div>
+          )}
+
+          {phase === GamePhase.MAFIA_SETTINGS && (
+            <motion.div
+              key="mafia_settings"
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              variants={pageVariants}
+              transition={pageTransition}
+              className="w-full h-full"
+            >
+              <MafiaSettingsScreen
+                playersCount={mafia.tempPlayers.length}
+                onStart={(mafiaSettings) => mafia.startNewMafiaMatch(mafiaSettings)}
+                onBack={handleGoHome}
+                onEditPlayers={() => navigate(GamePhase.SETUP)}
+              />
+            </motion.div>
+          )}
+
+          {phase === GamePhase.MAFIA_REVEAL && mafia.matchState && (
+            <motion.div
+              key="mafia_reveal"
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              variants={pageVariants}
+              transition={pageTransition}
+              className="w-full h-full"
+            >
+              <MafiaRoleRevealScreen
+                match={mafia.matchState}
+                onComplete={mafia.finishRoleReveal}
+              />
+            </motion.div>
+          )}
+
+          {phase === GamePhase.MAFIA_NIGHT && mafia.matchState && (
+            <motion.div
+              key="mafia_night"
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              variants={pageVariants}
+              transition={pageTransition}
+              className="w-full h-full"
+            >
+              <MafiaNightScreen
+                key={`night-${mafia.matchState.nightNumber}`}
+                match={mafia.matchState}
+                onCompleteNight={mafia.completeNightPhase}
+              />
+            </motion.div>
+          )}
+
+          {phase === GamePhase.MAFIA_DAWN && mafia.matchState && (
+            <motion.div
+              key="mafia_dawn"
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              variants={pageVariants}
+              transition={pageTransition}
+              className="w-full h-full"
+            >
+              <MafiaDawnScreen
+                match={mafia.matchState}
+                onContinue={mafia.continueFromDawn}
+              />
+            </motion.div>
+          )}
+
+          {phase === GamePhase.MAFIA_DISCUSSION && mafia.matchState && (
+            <motion.div
+              key="mafia_discussion"
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              variants={pageVariants}
+              transition={pageTransition}
+              className="w-full h-full"
+            >
+              <MafiaDiscussionScreen
+                match={mafia.matchState}
+                onToggleNomination={mafia.toggleDiscussionNomination}
+                onProceedToDefenseOrVoting={mafia.proceedToDefenseOrVoting}
+              />
+            </motion.div>
+          )}
+
+          {phase === GamePhase.MAFIA_VOTING && mafia.matchState && (
+            <motion.div
+              key="mafia_voting"
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              variants={pageVariants}
+              transition={pageTransition}
+              className="w-full h-full"
+            >
+              <MafiaVotingScreen
+                key={`vote-${mafia.matchState.dayNumber}-${mafia.matchState.isRevote ? 'revote' : 'primary'}`}
+                match={mafia.matchState}
+                onVotingComplete={mafia.completeSecretVoting}
+              />
+            </motion.div>
+          )}
+
+          {phase === GamePhase.MAFIA_VOTE_RESULT && mafia.matchState && (
+            <motion.div
+              key="mafia_vote_result"
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              variants={pageVariants}
+              transition={pageTransition}
+              className="w-full h-full"
+            >
+              <MafiaVoteResultScreen
+                match={mafia.matchState}
+                onContinue={mafia.continueAfterVoteResult}
+              />
+            </motion.div>
+          )}
+
+          {phase === GamePhase.MAFIA_RESULT && mafia.matchState && (
+            <motion.div
+              key="mafia_result"
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              variants={pageVariants}
+              transition={pageTransition}
+              className="w-full h-full"
+            >
+              <MafiaResultScreen
+                match={mafia.matchState}
+                caseFile={mafia.latestCaseFile}
+                onOpenCaseFile={
+                  mafia.latestCaseFile
+                    ? () =>
+                        openCaseFileView({
+                          caseFile: mafia.latestCaseFile,
+                          modeHint: 'local',
+                          returnPhase: GamePhase.MAFIA_RESULT,
+                        })
+                    : undefined
+                }
+                onPlayAgain={mafia.playAgainSameSquad}
+                onGoHome={() => {
+                  mafia.resetMafiaMatch();
+                  navigate(GamePhase.WELCOME);
+                }}
               />
             </motion.div>
           )}

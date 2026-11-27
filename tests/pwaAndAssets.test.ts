@@ -233,7 +233,7 @@ describe('BLACKSITE Asset Registry & Special Roles Integrity', () => {
       expect(svgContent).toContain('</svg>');
     }
 
-    // 6. All 21 interactive screen components integrate BlacksiteScreenBackdrop directly
+    // 6. All 29 interactive screen components integrate BlacksiteScreenBackdrop directly
     const integratedScreens = [
       'WelcomeScreen.tsx',
       'PlayerSetup.tsx',
@@ -256,6 +256,14 @@ describe('BLACKSITE Asset Registry & Special Roles Integrity', () => {
       'LanguageDictionary.tsx',
       'SettingsScreen.tsx',
       'RulesScreen.tsx',
+      'mafia/MafiaSettingsScreen.tsx',
+      'mafia/MafiaRoleRevealScreen.tsx',
+      'mafia/MafiaNightScreen.tsx',
+      'mafia/MafiaDawnScreen.tsx',
+      'mafia/MafiaDiscussionScreen.tsx',
+      'mafia/MafiaVotingScreen.tsx',
+      'mafia/MafiaVoteResultScreen.tsx',
+      'mafia/MafiaResultScreen.tsx',
     ];
     for (const screenFile of integratedScreens) {
       const filePath = path.join(ROOT, 'components', screenFile);

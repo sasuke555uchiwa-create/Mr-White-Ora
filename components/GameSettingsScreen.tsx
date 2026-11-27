@@ -63,6 +63,7 @@ export const GameSettingsScreen: React.FC<GameSettingsScreenProps> = ({
   const [selectedSpecialRoles, setSelectedSpecialRoles] = useState<SpecialRoleId[]>([]);
   const [gameMode, setGameMode] = useState<GameMode>('expression');
   const [turnDurationSeconds, setTurnDurationSeconds] = useState<number>(45);
+  const [enableOperationEvents, setEnableOperationEvents] = useState<boolean>(true);
   const [showSpecialRolesModal, setShowSpecialRolesModal] = useState(false);
   const [activeInfo, setActiveInfo] = useState<string | null>(null);
 
@@ -136,6 +137,7 @@ export const GameSettingsScreen: React.FC<GameSettingsScreenProps> = ({
       selectedSpecialRoles,
       gameMode,
       turnDurationSeconds,
+      enableOperationEvents,
     });
   };
 
@@ -546,6 +548,40 @@ export const GameSettingsScreen: React.FC<GameSettingsScreenProps> = ({
                   ))}
                 </div>
               </div>
+            </div>
+
+            <div className="pt-3 border-t border-border">
+              <InteractiveCard
+                selected={enableOperationEvents}
+                accent="gold"
+                onClick={() => {
+                  playSound('click');
+                  setEnableOperationEvents((prev) => !prev);
+                }}
+                className="w-full p-3 flex items-center justify-between gap-3 text-start"
+              >
+                <div className="min-w-0">
+                  <p className="text-xs sm:text-sm font-bold text-text-main">
+                    {isRTL ? 'أحداث العملية التكتيكية' : lang === 'fr' ? 'Événements d’Opération' : 'Operation Events'}
+                  </p>
+                  <p className="text-[11px] text-text-muted truncate">
+                    {isRTL
+                      ? 'بطاقات تحدٍّ متوازنة لكل جولة دون كشف الأسرار'
+                      : lang === 'fr'
+                      ? 'Cartes tactiques par manche sans révéler les rôles'
+                      : 'Balanced public round modifiers without leaking roles'}
+                  </p>
+                </div>
+                <StatusIndicator tone={enableOperationEvents ? 'gold' : 'neutral'}>
+                  {enableOperationEvents
+                    ? isRTL
+                      ? 'مُفعّل'
+                      : 'ON'
+                    : isRTL
+                    ? 'معطّل'
+                    : 'OFF'}
+                </StatusIndicator>
+              </InteractiveCard>
             </div>
           </IntelligencePanel>
         </div>

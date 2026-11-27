@@ -105,3 +105,19 @@ Root `package.json` separates verification into independent, composable scripts:
 - Replaced the Home `NavDock` vector icons with 5 individual `512×512` alpha-transparent 3D/2D illustrated WebPs (`public/assets/blacksite/icons/navigation-artwork/{vault,rankings,dictionary,agents,settings}.webp`), registered via `BLACKSITE_NAV_ARTWORK` and rendered at `32–36px` inside `NavDock`.
 - Calibrated `BlacksiteScreenBackdrop` (`opacity-95` image, lighter texture pass) and `.blacksite-backdrop-scrim` / `.bg-vignette` / `.bg-scanlines` in `index.css` so environmental architectural backgrounds remain visibly atmospheric without reducing card or text contrast.
 
+---
+
+## 7. Phase 5.0: Mafia: Shadow City + Game Content Expansion
+
+### 7.1 Game Universe Registry & Isolation
+- **`src/game/gameRegistry.ts`**: Central `GAME_MODE_REGISTRY` separates independent game universes (`mr_white`, `mafia_shadow_city`, and non-playable preview `case_zero`) while keeping Mr. White's internal `GameMode = 'question' | 'expression'` untouched.
+- **Zero Impact on Mr. White Scoring & Security**: Cloud Functions (`functions/src/*`), `firestore.rules`, Mr. White role distribution (`src/game/roleEngine.ts`), and XP/score formulas remain unchanged.
+
+### 7.2 Mafia: Shadow City (Standalone Pass & Play Engine)
+- **Pure State Engine (`src/game/mafia/mafiaEngine.ts`)**: Enforces 6–14 players, validated presets & Mafia < City guard, Pass & Play privacy handoffs, **Opening Night** coordination (zero eliminations), full Night sequence (**Mafia Target -> Doctor Shield** with optional consecutive-night restriction -> **Detective Scan** where `mafia_boss` reads as `city`), **Dawn** non-graphic removal summary (`"إخراج اللاعب من الجولة"` / `"Removed from round"`), **Discussion + Optional Nomination/Defense**, **Secret Ballot** (1 vote per living player, optional abstention, `revote` / `no_elimination` ties), and **Victory Checks** after *every* resolved night and vote removal (`livingMafia === 0` or `livingMafia >= livingCity`).
+- **Local Persistence & Case Files**: Active Mafia sessions persist locally in `localStorage` (`src/game/mafia/mafiaStorage.ts`). Post-match Case Files (`src/game/mafia/mafiaCaseFile.ts`) record full role assignments, night audit logs, day ballots, and Mafia awards strictly *after* `phase === 'ended'` (never mid-match), integrating cleanly into `OperationArchiveScreen` and `CaseFileScreen`.
+
+### 7.3 Mr. White Content Expansion (Events & Challenge Library)
+- **Operation Events (`data/operationEvents.ts`)**: 16 balanced public modifier cards (`exposesSecretInfo: false`, `modifiesScoring: false`) toggleable in `GameSettingsScreen` and surfaced in `QuestionPhase` via `useOfflineMatch`.
+- **Offline Question & Challenge Library (`data/questionLibrary.ts` + `src/game/questionLibraryEngine.ts`)**: 60 curated prompts spanning 4 languages (`ar`, `tn` Tunisian Arabic, `en`, `fr`), 10 topic packs, 6 interaction styles, and `easy`/`hard` difficulty — accessible inside `QuestionPhase` and as a dedicated tab in `LanguageDictionary`.
+- **Future Nearby P2P Blueprint**: Documented in `docs/NEARBY_MULTIPLAYER_ARCHITECTURE.md` without exposing fake browser/Bluetooth UI controls.
