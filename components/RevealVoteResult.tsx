@@ -3,7 +3,7 @@ import { Player } from '../types';
 import { playSound } from '../services/soundService';
 import { getSettings } from '../services/storageService';
 import { Avatar } from './Avatar';
-import { ArrowRight, ShieldCheck, RotateCcw, Heart } from 'lucide-react';
+import { ArrowRight, ShieldCheck, Heart } from 'lucide-react';
 import { motion, useReducedMotion } from 'framer-motion';
 import { getUITranslation } from '../translations';
 import { BLACKSITE_TEXTURES } from '../src/design/assetRegistry';
@@ -18,7 +18,6 @@ import {
   BlacksiteScreenBackdrop,
   ClassifiedStamp,
   ModalShell,
-  OperationPhaseBadge,
   TacticalButton,
 } from './ui/BlacksiteUI';
 
@@ -151,7 +150,7 @@ export const RevealVoteResult: React.FC<RevealVoteResultProps> = ({
             {isSaved ? (
               <ClassifiedStamp tone="cyan">INTERCEPTED</ClassifiedStamp>
             ) : (
-              <OperationPhaseBadge phase="verdict" lang={lang} />
+              <ClassifiedStamp tone="gold">VERDICT</ClassifiedStamp>
             )}
             <ClassifiedStamp tone={roleVisual.stampTone}>{roleVisual.stamp}</ClassifiedStamp>
           </div>
@@ -177,10 +176,10 @@ export const RevealVoteResult: React.FC<RevealVoteResultProps> = ({
           {/* Eliminated/Saved Player + Clean Role Attribution */}
           <div className="mb-4 flex flex-col items-center">
             <motion.div
-              initial={prefersReducedMotion ? false : { rotateY: 0 }}
-              animate={prefersReducedMotion ? undefined : { rotateY: [0, 90, 0] }}
-              transition={{ duration: 0.55, delay: 0.15 }}
-              className="p-1.5 rounded-full border border-border-strong bg-bg-card"
+              initial={prefersReducedMotion ? false : { scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 0.24, delay: 0.08 }}
+              className="p-1.5 rounded-full border border-border-strong bg-bg-card shrink-0"
             >
               <Avatar avatar={votedPlayer.avatar} name={votedPlayer.name} size={88} />
             </motion.div>
@@ -202,8 +201,6 @@ export const RevealVoteResult: React.FC<RevealVoteResultProps> = ({
                       referrerPolicy="no-referrer"
                       className="w-full h-full object-cover"
                     />
-                  ) : blockedBySpecial === 'boomerang' ? (
-                    <RotateCcw size={15} />
                   ) : (
                     <ShieldCheck size={15} />
                   )}
@@ -299,7 +296,7 @@ export const RevealVoteResult: React.FC<RevealVoteResultProps> = ({
           </div>
 
           {/* Voters List */}
-          {voters && voters.length > 0 && (
+          {voters && voters.filter((v) => v && v.name).length > 0 && (
             <div className="mb-5 pt-3 border-t border-border">
               <p
                 className={`text-text-muted font-semibold mb-2.5 text-xs ${
@@ -309,20 +306,22 @@ export const RevealVoteResult: React.FC<RevealVoteResultProps> = ({
                 {t('votedBy')}
               </p>
               <div className="flex flex-wrap justify-center gap-2">
-                {voters.map((voter, idx) => (
-                  <motion.div
-                    key={voter.uid || voter.id || idx}
-                    initial={{ opacity: 0, scale: 0.7 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 0.45 + idx * 0.05 }}
-                    className="relative flex flex-col items-center"
-                  >
-                    <Avatar avatar={voter.avatar} name={voter.name} size={36} />
-                    <span className="text-[11px] font-semibold text-text-muted mt-0.5 max-w-[58px] truncate">
-                      {voter.name}
-                    </span>
-                  </motion.div>
-                ))}
+                {voters
+                  .filter((v) => v && v.name)
+                  .map((voter, idx) => (
+                    <motion.div
+                      key={voter.uid || voter.id || idx}
+                      initial={prefersReducedMotion ? false : { opacity: 0, scale: 0.88 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ delay: prefersReducedMotion ? 0 : 0.1 + idx * 0.03 }}
+                      className="relative flex flex-col items-center"
+                    >
+                      <Avatar avatar={voter.avatar} name={voter.name} size={36} />
+                      <span className="text-[11px] font-semibold text-text-muted mt-0.5 max-w-[58px] truncate">
+                        {voter.name}
+                      </span>
+                    </motion.div>
+                  ))}
               </div>
             </div>
           )}

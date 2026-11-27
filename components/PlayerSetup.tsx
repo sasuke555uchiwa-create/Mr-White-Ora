@@ -17,17 +17,18 @@ import {
   Sun,
   Upload,
   Type,
-  Users,
 } from 'lucide-react';
 import { Avatar } from './Avatar';
 import { getUITranslation } from '../translations';
 import { CHARACTER_AVATARS } from '../data/specialRoles';
 import { compressAvatarImage } from '../utils/imageUtils';
 import { showToast } from '../utils/toast';
+import { BLACKSITE_NAV_ARTWORK } from '../src/design/assetRegistry';
 import {
   BlacksiteIcon,
   BlacksiteScreenBackdrop,
   BottomActionBar,
+  ClassifiedStamp,
   DossierHeaderBand,
   IconButton,
   IntelligencePanel,
@@ -234,7 +235,15 @@ export const PlayerSetup: React.FC<PlayerSetupProps> = ({
         accent="cyan"
         texture="map"
         className="mb-4"
-        icon={<Users size={20} />}
+        badge={<ClassifiedStamp tone="cyan">{mode === 'manage' ? 'AGENTS' : 'ROSTER'}</ClassifiedStamp>}
+        icon={
+          <img
+            src={BLACKSITE_NAV_ARTWORK.agents}
+            alt=""
+            aria-hidden="true"
+            className="w-7 h-7 object-contain"
+          />
+        }
         title={mode === 'manage' ? t('managePlayers') : t('whoIsPlaying')}
         subtitle={
           mode === 'manage'
@@ -253,7 +262,11 @@ export const PlayerSetup: React.FC<PlayerSetupProps> = ({
                 <span className="text-xs font-bold text-danger-text">{t('atLeast3')}</span>
               )}
             </div>
-          ) : undefined
+          ) : (
+            <StatusIndicator tone="cyan">
+              {players.filter((p) => p.name.trim().length > 0).length} {isRTL ? 'عملاء' : 'Agents'}
+            </StatusIndicator>
+          )
         }
       />
 
@@ -308,10 +321,11 @@ export const PlayerSetup: React.FC<PlayerSetupProps> = ({
           return (
             <PlayerIntelligenceCard
               key={index}
-              className={`px-3 py-2 flex items-center gap-2.5 sm:gap-3 relative focus-within:border-[#668F9A] ${
+              className={`px-3 py-2.5 flex items-center gap-2.5 sm:gap-3 relative focus-within:border-[#668F9A] ${
+                focusedIndex === index ? 'z-20' : 'z-[1]'
+              } ${
                 isDuplicateRow ? 'border-[#963F46] bg-[#963F46]/10' : 'border-border bg-bg-card/90'
               } ${player.isSleeping ? 'opacity-50 grayscale' : ''}`}
-              style={{ zIndex: focusedIndex === index ? 20 : 1 }}
             >
               <button
                 type="button"
@@ -321,9 +335,15 @@ export const PlayerSetup: React.FC<PlayerSetupProps> = ({
                 }}
                 title={t('changeAvatar')}
                 aria-label={`${t('changeAvatar')} ${player.name || `${t('playerNumber')} ${index + 1}`}`}
-                className="group relative rounded-full p-0.5 border border-border-strong hover:border-[#B49A62] transition-colors active:scale-95 shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#668F9A]/75"
+                className="group relative rounded-full p-0.5 border border-[#B49A62]/35 hover:border-[#B49A62] transition-colors active:scale-95 shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#668F9A]/75"
               >
                 <Avatar avatar={player.avatar} name={player.name} size={42} />
+                <span
+                  aria-hidden="true"
+                  className="absolute -bottom-1 -end-1 px-1 rounded-[4px] bg-bg-surface border border-border-strong font-mono-code text-[9px] font-bold text-primary-text leading-tight"
+                >
+                  {String(index + 1).padStart(2, '0')}
+                </span>
               </button>
 
               <div className="relative flex-1 min-w-0">

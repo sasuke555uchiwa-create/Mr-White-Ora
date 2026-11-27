@@ -13,6 +13,7 @@ import { Plus, Globe, Lock, EyeOff, Eye, Zap, Clock, Minus } from 'lucide-react'
 import { Avatar } from './Avatar';
 import { getUITranslation } from '../translations';
 import { showToast } from '../utils/toast';
+import { COSMETIC_COLLECTIBLES } from '../src/design/assetRegistry';
 import {
   BlacksiteIcon,
   BlacksiteScreenBackdrop,
@@ -148,10 +149,25 @@ export const OnlineRoomsScreen: React.FC<OnlineRoomsScreenProps> = ({
     return (
       <div className="relative min-h-full flex flex-col items-center justify-center p-6 text-center text-text-main">
         <BlacksiteScreenBackdrop bgKey="online" texture="map" />
-        <IntelligencePanel className="relative z-10 max-w-sm w-full p-6 space-y-4">
-          <h2 className="text-xl font-extrabold">{t('loginRequired')}</h2>
+        <IntelligencePanel className="relative z-10 overflow-hidden blacksite-texture-map max-w-sm w-full p-6 space-y-4 border-[#668F9A]/40">
+          <div aria-hidden="true" className="blacksite-hairline-cyan absolute inset-x-0 top-0 pointer-events-none" />
+          <div className="w-16 h-16 mx-auto rounded-[14px] bg-[#080B10] border border-[#668F9A]/40 p-2 flex items-center justify-center shadow-lg">
+            <img
+              src={COSMETIC_COLLECTIBLES.agencySeal}
+              alt=""
+              aria-hidden="true"
+              className="w-full h-full object-contain"
+            />
+          </div>
+          <ClassifiedStamp tone="cyan">RESTRICTED NET</ClassifiedStamp>
+          <h2 className="text-xl font-extrabold text-text-main">{t('loginRequired')}</h2>
           <p className="text-sm text-text-muted leading-relaxed">{t('mustLoginToPlayOnline')}</p>
-          <TacticalButton variant="primary" fullWidth onClick={onBack}>
+          <TacticalButton
+            variant="primary"
+            fullWidth
+            onClick={onBack}
+            icon={<BlacksiteIcon name="backNav" size={16} tone="ink" rtlFlip />}
+          >
             {t('backToHome')}
           </TacticalButton>
         </IntelligencePanel>

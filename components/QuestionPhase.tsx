@@ -264,13 +264,20 @@ export const QuestionPhase: React.FC<QuestionPhaseProps> = ({
       <div className="relative z-10 flex flex-col items-center w-full flex-1">
       {/* Tactical Turn Header */}
       <IntelligencePanel
-        className={`w-full px-4 py-4 mb-4 blacksite-texture-map ${
+        className={`w-full px-4 py-3.5 mb-4 blacksite-texture-map ${
           gameMode === 'question' ? 'border-border-strong' : 'border-[#668F9A]/40'
         }`}
       >
+        <div className="flex items-center justify-center mb-2.5 pb-2 border-b border-border/60">
+          <OperationPhaseBadge
+            phase={gameMode === 'question' ? 'interrogation' : 'active'}
+            round={currentRound}
+            lang={lang}
+          />
+        </div>
         <div className="flex items-center justify-between gap-3">
           {/* Countdown Timer Control */}
-          <div className="flex flex-col items-center gap-1">
+          <div className="flex flex-col items-center gap-1 shrink-0">
             <button
               onClick={() => setIsPaused(!isPaused)}
               title={isPaused ? 'Resume' : 'Pause'}
@@ -282,22 +289,17 @@ export const QuestionPhase: React.FC<QuestionPhaseProps> = ({
             >
               {isPaused ? <Play size={18} /> : timeLeft}
             </button>
-            {activeSpeaker && hasPlayerPerk(activeSpeaker.name, 'extra_time') && (
-              <span className="text-[10px] font-mono-code font-bold text-emerald-text bg-[#3E7B67]/15 border border-[#3E7B67]/35 px-1.5 py-0.5 rounded-[4px] tabular-nums">
-                +15s
-              </span>
-            )}
+            <div className="flex items-center gap-1">
+              <BlacksiteIcon name="timer" size={12} className="opacity-75" />
+              {activeSpeaker && hasPlayerPerk(activeSpeaker.name, 'extra_time') && (
+                <span className="text-[10px] font-mono-code font-bold text-emerald-text bg-[#3E7B67]/15 border border-[#3E7B67]/35 px-1.5 py-0.5 rounded-[4px] tabular-nums">
+                  +15s
+                </span>
+              )}
+            </div>
           </div>
 
           <div className="text-center min-w-0 flex-1">
-            <div className="flex items-center justify-center gap-1.5 mb-1">
-              <OperationPhaseBadge
-                phase={gameMode === 'question' ? 'interrogation' : 'active'}
-                round={currentRound}
-                lang={lang}
-              />
-              <BlacksiteIcon name="timer" size={14} className="opacity-80" />
-            </div>
             <h2 className="text-lg sm:text-xl font-bold text-text-main truncate">
               {gameMode === 'expression'
                 ? lang === 'ar'

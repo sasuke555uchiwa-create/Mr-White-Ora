@@ -74,8 +74,9 @@ export const BlacksiteScreenBackdrop: React.FC<BlacksiteScreenBackdropProps> = (
       <img
         src={bg.src}
         alt=""
-        loading={priority ? 'eager' : 'lazy'}
+        loading="eager"
         decoding="async"
+        data-priority={priority ? 'true' : undefined}
         referrerPolicy="no-referrer"
         className="w-full h-full object-cover object-center opacity-95"
       />
@@ -746,8 +747,8 @@ export const DossierHeaderBand: React.FC<DossierHeaderBandProps> = ({
       aria-hidden="true"
       className={`${accent === 'cyan' ? 'blacksite-hairline-cyan' : 'blacksite-hairline'} absolute inset-x-0 top-0 pointer-events-none`}
     />
-    <div className="relative flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-      <div className="flex items-center gap-3.5 min-w-0">
+    <div className="relative flex items-start sm:items-center justify-between gap-3 flex-wrap">
+      <div className="flex items-center gap-3.5 min-w-0 flex-1">
         {icon && (
           <div
             className={`w-11 h-11 rounded-[10px] border flex items-center justify-center shrink-0 ${DOSSIER_ICON_TONES[accent]}`}

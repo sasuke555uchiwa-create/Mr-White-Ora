@@ -11,6 +11,7 @@ import {
 import { getUITranslation } from '../translations';
 import { playSound } from '../services/soundService';
 import { SHOP_ITEMS, ShopItem, getShopItemField } from '../data/shopItems';
+import { BLACKSITE_NAV_ARTWORK, COSMETIC_COLLECTIBLES } from '../src/design/assetRegistry';
 import {
   BlacksiteIcon,
   BlacksiteScreenBackdrop,
@@ -108,7 +109,7 @@ export const InventoryScreen: React.FC<InventoryScreenProps> = ({ onBack }) => {
   const currentInventory = selectedPlayer ? unlockedItems[selectedPlayer] || [] : [];
 
   return (
-    <div className="flex flex-col h-full w-full relative max-w-3xl mx-auto px-4 sm:px-6 pt-4 pb-24">
+    <div className="flex flex-col min-h-full w-full relative max-w-3xl mx-auto px-4 sm:px-6 pt-4 pb-24">
       <BlacksiteScreenBackdrop bgKey="profile" texture="carbon" />
       <AnimatePresence>
         {alertMsg && (
@@ -157,7 +158,14 @@ export const InventoryScreen: React.FC<InventoryScreenProps> = ({ onBack }) => {
             ? 'استبدل نقاطك بشارات ومزايا فعلية داخل جولات المتخفي'
             : 'Spend points to unlock badges and real in-game perks'
         }
-        icon={<ShoppingBag className="w-5 h-5" />}
+        icon={
+          <img
+            src={BLACKSITE_NAV_ARTWORK.vault}
+            alt=""
+            aria-hidden="true"
+            className="w-7 h-7 object-contain"
+          />
+        }
         action={
           <IconButton onClick={onBack} variant="secondary" aria-label={t('back')}>
             <BlacksiteIcon name="backNav" size={18} rtlFlip />
@@ -237,16 +245,25 @@ export const InventoryScreen: React.FC<InventoryScreenProps> = ({ onBack }) => {
       </div>
 
       {/* Main Container */}
-      <div className="mt-4 flex-1 overflow-y-auto space-y-4">
+      <div className="mt-4 flex-1 space-y-4">
         {selectedPlayer === '' ? (
-          <div className="h-64 flex flex-col items-center justify-center text-center">
-            <BlacksiteIcon name="specialAbility" size={34} className="mb-3 opacity-80" />
-            <p className="text-text-muted font-semibold text-sm">
+          <IntelligencePanel className="relative overflow-hidden blacksite-texture-carbon p-7 flex flex-col items-center justify-center text-center gap-3 border-[#B49A62]/30">
+            <div aria-hidden="true" className="blacksite-hairline absolute inset-x-0 top-0 pointer-events-none" />
+            <div className="w-16 h-16 rounded-[14px] bg-[#080B10] border border-[#B49A62]/40 p-2 flex items-center justify-center">
+              <img
+                src={COSMETIC_COLLECTIBLES.agencySeal}
+                alt=""
+                aria-hidden="true"
+                className="w-full h-full object-contain"
+              />
+            </div>
+            <ClassifiedStamp tone="gold">VAULT LOCKED</ClassifiedStamp>
+            <p className="text-text-muted font-semibold text-sm max-w-xs leading-relaxed">
               {lang === 'ar'
-                ? 'سجّل نقاطاً في اللعب أولاً لتتمكن من فتح المقتنيات!'
-                : 'Earn points in a match first to unlock perks!'}
+                ? 'سجّل نقاطاً في اللعب أولاً لتتمكن من فتح المقتنيات والمزايا السرية!'
+                : 'Earn points in a match first to unlock covert badges and field perks!'}
             </p>
-          </div>
+          </IntelligencePanel>
         ) : activeTab === 'shop' ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
             {SHOP_ITEMS.map((item) => {

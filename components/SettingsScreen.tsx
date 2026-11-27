@@ -9,8 +9,8 @@ import {
 import { playSound, SOUND_EFFECT_LIST, SoundType } from '../services/soundService';
 import { getUITranslation } from '../translations';
 import { useAuth } from '../contexts/AuthContext';
+import { BLACKSITE_NAV_ARTWORK } from '../src/design/assetRegistry';
 import {
-  Settings,
   Globe,
   Volume2,
   Volume1,
@@ -175,7 +175,19 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
           className="mb-5"
           badge={<ClassifiedStamp tone="gold">SYS-CONFIG</ClassifiedStamp>}
           title={t('settings')}
-          icon={<Settings size={20} />}
+          subtitle={
+            lang === 'ar'
+              ? 'اللغة، المظهر، الصوت وإدارة بيانات الجهاز'
+              : 'Language, theme, audio & local system preferences'
+          }
+          icon={
+            <img
+              src={BLACKSITE_NAV_ARTWORK.settings}
+              alt=""
+              aria-hidden="true"
+              className="w-7 h-7 object-contain"
+            />
+          }
         />
 
         <div className="space-y-4">
@@ -226,9 +238,21 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
             />
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
               {[
-                { id: 'dark' as const, label: t('themeDark'), swatch: 'bg-[#080B10] border-[#B49A62]/40' },
-                { id: 'gray' as const, label: grayLabel, swatch: 'bg-[#202731] border-white/25' },
-                { id: 'light' as const, label: t('themeLight'), swatch: 'bg-[#F3F5F8] border-slate-400' },
+                {
+                  id: 'dark' as const,
+                  label: t('themeDark'),
+                  swatch: 'bg-gradient-to-br from-[#05070B] to-[#131A24] border-[#B49A62]/55',
+                },
+                {
+                  id: 'gray' as const,
+                  label: grayLabel,
+                  swatch: 'bg-gradient-to-br from-[#1B222C] via-[#2C3646] to-[#435064] border-[#A8B1BA]/55',
+                },
+                {
+                  id: 'light' as const,
+                  label: t('themeLight'),
+                  swatch: 'bg-gradient-to-br from-[#FFFFFF] to-[#DDE3EB] border-slate-400',
+                },
                 {
                   id: 'system' as const,
                   label: t('themeSystem'),

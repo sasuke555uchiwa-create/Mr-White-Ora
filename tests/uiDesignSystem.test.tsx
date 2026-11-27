@@ -10,9 +10,13 @@ vi.mock('../contexts/AuthContext', () => ({
   useAuth: () => mockUseAuth(),
 }));
 
-vi.mock('../services/soundService', () => ({
-  playSound: vi.fn(),
-}));
+vi.mock('../services/soundService', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../services/soundService')>();
+  return {
+    ...actual,
+    playSound: vi.fn(),
+  };
+});
 
 import { WelcomeScreen } from '../components/WelcomeScreen';
 import { PlayerSetup } from '../components/PlayerSetup';
@@ -20,6 +24,11 @@ import { GameSettingsScreen } from '../components/GameSettingsScreen';
 import { VotingScreen } from '../components/VotingScreen';
 import { ResultScreen } from '../components/ResultScreen';
 import { ScoreboardScreen } from '../components/ScoreboardScreen';
+import { LanguageDictionary } from '../components/LanguageDictionary';
+import { InventoryScreen } from '../components/InventoryScreen';
+import { SettingsScreen } from '../components/SettingsScreen';
+import { RevealVoteResult } from '../components/RevealVoteResult';
+import { ImpostorGuessScreen } from '../components/ImpostorGuessScreen';
 import {
   BottomActionBar,
   DossierHeaderBand,
@@ -282,5 +291,90 @@ describe('BLACKSITE Phase 4.1 & 4.2 UI Design System & Home Ergonomics', () => {
     document.documentElement.dir = 'rtl';
     render(<ScoreboardScreen onBack={vi.fn()} onOpenArchive={vi.fn()} />);
     expect(screen.getByText('RANKINGS')).toBeTruthy();
+  });
+
+  it('enforces Phase 4.3 visual polish invariants across Dictionary, Vault, Settings, Scoreboard, and Verdict screens', () => {
+    saveSettings({
+      soundVolume: 0,
+      hapticEnabled: false,
+      language: 'en',
+      theme: 'dark',
+    });
+
+    const samplePlayers = [
+      { id: 0, name: 'Alpha', role: 'citizen' as const, isImpostor: false, score: 2, isEliminated: false, avatar: '' },
+      { id: 1, name: 'Bravo', role: 'undercover' as const, isImpostor: true, score: 0, isEliminated: false, avatar: '' },
+      { id: 2, name: 'Charlie', role: 'mrwhite' as const, isImpostor: true, score: 0, isEliminated: true, avatar: '' },
+    ];
+
+    // Dictionary: uses dedicated lexicon subtitle (never dataManagementDesc) & illustrated icon
+    const { unmount: unmountDict } = render(<LanguageDictionary onBack={vi.fn()} />);
+    expect(screen.queryByText(/reset scores/i)).toBeNull();
+    expect(screen.getByText(/Field cipher lexicon/i)).toBeTruthy();
+    unmountDict();
+
+    // Inventory: locked vault frame with VAULT LOCKED stamp when no player scores exist
+    const { unmount: unmountInv } = render(<InventoryScreen onBack={vi.fn()} />);
+    expect(screen.getByText('VAULT LOCKED')).toBeTruthy();
+    unmountInv();
+
+    // Scoreboard: uses BLACKSITE rankings artwork rather than legacy /i1.png
+    const { container: sbContainer, unmount: unmountSb } = render(
+      <ScoreboardScreen onBack={vi.fn()} onOpenArchive={vi.fn()} />
+    );
+    const sbImgs = Array.from(sbContainer.querySelectorAll('img')).map((img) => img.getAttribute('src'));
+    expect(sbImgs.every((src) => src !== '/i1.png')).toBe(true);
+    unmountSb();
+
+    // Settings: renders SYS-CONFIG header cleanly
+    const { unmount: unmountSettings } = render(
+      <SettingsScreen
+        onBack={vi.fn()}
+        onThemeChange={vi.fn()}
+        onButtonColorChange={vi.fn()}
+        onLanguageChange={vi.fn()}
+      />
+    );
+    expect(screen.getByText('SYS-CONFIG')).toBeTruthy();
+    unmountSettings();
+
+    // ResultScreen: uses BLACKSITE portraits/banners rather than legacy /images/*.png
+    const { container: resContainer, unmount: unmountRes } = render(
+      <ResultScreen
+        players={samplePlayers}
+        impostorIndex={2}
+        secretWord="Coffee"
+        undercoverWord="Tea"
+        voteData={{ 0: 2 }}
+        onGameEnd={vi.fn()}
+        onNext={vi.fn()}
+        roundWinner="citizens"
+        winReason="impostor_caught"
+      />
+    );
+    const resImgs = Array.from(resContainer.querySelectorAll('img')).map((img) => img.getAttribute('src') || '');
+    expect(resImgs.some((src) => /^\/images\/[1-4]\.png$/.test(src))).toBe(false);
+    expect(screen.getByText('OPERATION COMPLETE')).toBeTruthy();
+    unmountRes();
+
+    // RevealVoteResult & ImpostorGuessScreen: crisp stamps without truncated labels
+    const { unmount: unmountReveal } = render(
+      <RevealVoteResult
+        votedPlayerId={2}
+        impostorId={2}
+        players={samplePlayers}
+        voters={[samplePlayers[0], samplePlayers[1]]}
+        onNext={vi.fn()}
+      />
+    );
+    expect(screen.getByText('VERDICT')).toBeTruthy();
+    expect(screen.getByText('Alpha')).toBeTruthy();
+    unmountReveal();
+
+    const { unmount: unmountGuess } = render(
+      <ImpostorGuessScreen impostor={samplePlayers[2]} secretWord="Coffee" onGuess={vi.fn()} />
+    );
+    expect(screen.getByText('PRIORITY-OVERRIDE')).toBeTruthy();
+    unmountGuess();
   });
 });

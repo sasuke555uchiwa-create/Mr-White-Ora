@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { getSettings } from '../services/storageService';
 import { getUITranslation } from '../translations';
 import {
-  Users,
   UserMinus,
   UserPlus,
   MessageSquare,
@@ -15,11 +14,12 @@ import { GameMode, GameSettings, SpecialRoleId } from '../types';
 import { SPECIAL_ROLES } from '../data/specialRoles';
 import { motion, AnimatePresence } from 'framer-motion';
 import { playSound } from '../services/soundService';
-import { CATEGORY_COVERS, ROLE_PORTRAITS } from '../src/design/assetRegistry';
+import { BLACKSITE_NAV_ARTWORK, CATEGORY_COVERS, ROLE_PORTRAITS } from '../src/design/assetRegistry';
 import {
   BlacksiteIcon,
   BlacksiteScreenBackdrop,
   BottomActionBar,
+  ClassifiedStamp,
   DossierHeaderBand,
   IconButton,
   IntelligencePanel,
@@ -181,7 +181,15 @@ export const GameSettingsScreen: React.FC<GameSettingsScreenProps> = ({
         accent="gold"
         texture="map"
         className="mb-4"
-        icon={<Users size={20} />}
+        badge={<ClassifiedStamp tone="gold">BRIEFING</ClassifiedStamp>}
+        icon={
+          <img
+            src={BLACKSITE_NAV_ARTWORK.agents}
+            alt=""
+            aria-hidden="true"
+            className="w-7 h-7 object-contain"
+          />
+        }
         title={`${t('playersLabel')}: ${playersCount}`}
         subtitle={t('gameSettings')}
         action={
@@ -350,16 +358,16 @@ export const GameSettingsScreen: React.FC<GameSettingsScreenProps> = ({
                 : 'Bonus abilities layered over main roles (never win solo)'}
             </p>
 
-            <div className="grid grid-cols-4 gap-2">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
               {SPECIAL_ROLES.map((role) => {
                 const isSelected = selectedSpecialRoles.includes(role.id);
                 return (
                   <div
                     key={role.id}
-                    className={`rounded-[10px] border p-1.5 flex items-center gap-1.5 overflow-hidden transition-all ${
+                    className={`rounded-[10px] border p-2 flex items-center gap-2 overflow-hidden transition-all ${
                       isSelected
                         ? 'bg-[#B49A62]/12 border-[#B49A62] opacity-100'
-                        : 'bg-bg-card/80 border-border opacity-55 grayscale'
+                        : 'bg-bg-card/80 border-border opacity-60 grayscale'
                     }`}
                   >
                     <img
@@ -368,7 +376,7 @@ export const GameSettingsScreen: React.FC<GameSettingsScreenProps> = ({
                       referrerPolicy="no-referrer"
                       className="w-7 h-7 rounded-[6px] bg-[#080B10] object-cover shrink-0"
                     />
-                    <span className="text-[10.5px] font-bold text-text-main truncate">
+                    <span className="text-[11px] font-bold text-text-main truncate">
                       {role.names[lang] || role.names.en}
                     </span>
                   </div>

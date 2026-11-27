@@ -172,9 +172,9 @@ export const VotingScreen: React.FC<VotingScreenProps> = ({
             <div aria-hidden="true" className="blacksite-hairline absolute inset-x-0 top-0 pointer-events-none" />
             <div className="flex items-center justify-between gap-2 mb-3 pb-2.5 border-b border-border/70">
               <OperationPhaseBadge phase="tribunal" round={currentRound} lang={lang} />
-              <span className="text-xs font-semibold text-text-muted shrink-0">
-                {lang === 'ar' ? `تصويت الجولة ${currentRound}` : `Round ${currentRound} Vote`}
-              </span>
+              <ClassifiedStamp tone="neutral">
+                {alivePlayers.length} {['ar', 'sa'].includes(lang) ? 'عملاء' : 'AGENTS'}
+              </ClassifiedStamp>
             </div>
 
             <h2 className="text-xl sm:text-2xl font-bold text-text-main flex items-center justify-center gap-2">

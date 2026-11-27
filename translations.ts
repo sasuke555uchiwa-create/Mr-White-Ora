@@ -13,7 +13,7 @@ export const uiTranslations: Record<string, Record<string, string>> = {
     "colorRed": "أحمر",
     "colorPurple": "بنفسجي",
     "colorOrange": "برتقالي",
-    "settings": "الاعدادات",
+    "settings": "الإعدادات",
     "language": "اللغة",
     "theme": "المظهر",
     "buttonColors": "ألوان الأزرار",

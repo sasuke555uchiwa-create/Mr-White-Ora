@@ -7,7 +7,7 @@ import { playSound } from '../services/soundService';
 import { getUITranslation } from '../translations';
 import { getSettings } from '../services/storageService';
 import { getRoleAsset, getRoleTitle, getRoleVisualIdentity } from '../data/specialRoles';
-import { BLACKSITE_TEXTURES } from '../src/design/assetRegistry';
+import { BLACKSITE_TEXTURES, HERO_ASSETS, ROLE_PORTRAITS } from '../src/design/assetRegistry';
 import { getPlayerRoundPoints, resolveWinningFaction } from '../services/gameScoring';
 import {
   BlacksiteIcon,
@@ -129,15 +129,15 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({
   const getWinImage = () => {
     switch (winningFaction) {
       case 'citizens':
-        return '/images/2.png';
+        return ROLE_PORTRAITS.citizen;
       case 'undercover_solo':
-        return '/images/3.png';
+        return ROLE_PORTRAITS.undercover;
       case 'mrwhite_solo':
-        return '/images/1.png';
+        return ROLE_PORTRAITS.mrwhite;
       case 'both':
-        return '/images/4.png';
+        return HERO_ASSETS.mainBanner;
       default:
-        return '/images/2.png';
+        return ROLE_PORTRAITS.citizen;
     }
   };
 
@@ -223,7 +223,7 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({
                       src={getWinImage()}
                       alt={getResultTitle()}
                       referrerPolicy="no-referrer"
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-cover object-top"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-[#080B10] via-[#080B10]/35 to-transparent flex flex-col justify-between p-3 text-start">
                       <OperationPhaseBadge phase="verdict" lang={lang} />
@@ -536,7 +536,7 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({
                   className="pointer-events-none select-none absolute top-11 end-3 w-24 h-12 object-contain opacity-[0.16] -rotate-6 z-10"
                 />
                 <div className="flex items-center justify-between gap-2">
-                  <OperationPhaseBadge phase="verdict" lang={lang} />
+                  <ClassifiedStamp tone="gold">VERDICT</ClassifiedStamp>
                   <ClassifiedStamp tone={winningFaction === 'citizens' ? 'cyan' : 'gold'}>
                     OPERATION COMPLETE
                   </ClassifiedStamp>
@@ -548,7 +548,7 @@ export const ResultScreen: React.FC<ResultScreenProps> = ({
                     alt={getResultTitle()}
                     loading="lazy"
                     referrerPolicy="no-referrer"
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover object-top"
                   />
                   <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-[#080B10]/95 via-[#080B10]/55 to-transparent flex items-end justify-center pb-4 px-5">
                     <h3 className="text-xl font-bold text-[#ECEFF4] text-center leading-tight">

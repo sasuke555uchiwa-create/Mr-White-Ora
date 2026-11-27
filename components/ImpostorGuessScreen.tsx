@@ -13,7 +13,6 @@ import {
   BlacksiteScreenBackdrop,
   ClassifiedStamp,
   ModalShell,
-  OperationPhaseBadge,
   TacticalButton,
 } from './ui/BlacksiteUI';
 
@@ -107,7 +106,7 @@ export const ImpostorGuessScreen: React.FC<ImpostorGuessScreenProps> = ({
             className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-[#B49A62]/75 to-transparent"
           />
           <div className="w-full flex items-center justify-between gap-2 mb-4">
-            <OperationPhaseBadge phase="verdict" lang={lang} />
+            <ClassifiedStamp tone="cyan">MR. WHITE</ClassifiedStamp>
             <ClassifiedStamp tone="gold">PRIORITY-OVERRIDE</ClassifiedStamp>
           </div>
 

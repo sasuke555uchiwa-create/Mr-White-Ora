@@ -229,15 +229,24 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ onBack, onOpenArch
         dir={isRTL ? 'rtl' : 'ltr'}
       >
         <BlacksiteScreenBackdrop bgKey="profile" texture="carbon" />
-        <IntelligencePanel className="relative z-10 p-6 w-full space-y-5 blacksite-texture-carbon">
-          <div>
+        <IntelligencePanel className="relative z-10 overflow-hidden p-6 w-full space-y-5 blacksite-texture-carbon border-[#B49A62]/35">
+          <div aria-hidden="true" className="blacksite-hairline absolute inset-x-0 top-0 pointer-events-none" />
+          <div className="flex flex-col items-center">
+            <div className="w-16 h-16 rounded-[14px] bg-[#080B10] border border-[#B49A62]/40 p-2 mb-3 flex items-center justify-center shadow-lg">
+              <img
+                src={COSMETIC_COLLECTIBLES.agencySeal}
+                alt=""
+                aria-hidden="true"
+                className="w-full h-full object-contain"
+              />
+            </div>
             <ClassifiedStamp tone="gold" className="mb-3">
               OPERATIVE ACCESS
             </ClassifiedStamp>
             <h2 className="text-xl sm:text-2xl font-bold text-text-main mb-2">
               {getUITranslation(lang, 'signInRequired')}
             </h2>
-            <p className="text-text-muted text-sm font-medium">
+            <p className="text-text-muted text-sm font-medium leading-relaxed">
               {getUITranslation(lang, 'signInToSaveProgress')}
             </p>
           </div>

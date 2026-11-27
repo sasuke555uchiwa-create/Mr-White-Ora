@@ -11,6 +11,7 @@ import {
 import { WORD_PAIRS } from '../data/offlineData';
 import { getUITranslation } from '../translations';
 import { useAuth } from '../contexts/AuthContext';
+import { BLACKSITE_NAV_ARTWORK } from '../src/design/assetRegistry';
 import {
   BlacksiteIcon,
   BlacksiteScreenBackdrop,
@@ -151,18 +152,29 @@ export const LanguageDictionary: React.FC<LanguageDictionaryProps> = ({ onBack }
   };
 
   return (
-    <div className="flex flex-col h-full w-full relative max-w-3xl mx-auto px-4 sm:px-6 pt-4">
+    <div className="flex flex-col min-h-full w-full relative max-w-3xl mx-auto px-4 sm:px-6 pt-4 pb-24">
       <BlacksiteScreenBackdrop bgKey="archive" texture="paper" />
       <div className="relative z-10 flex flex-col flex-1 w-full">
       {/* Header */}
       <DossierHeaderBand
         accent="cyan"
         texture="paper"
-        className="mb-3"
+        className="mb-4"
         badge={<ClassifiedStamp tone="cyan">LEXICON</ClassifiedStamp>}
         title={t('gameWords')}
-        subtitle={t('dataManagementDesc')}
-        icon={<BookOpen className="w-5 h-5" />}
+        subtitle={
+          isRTL
+            ? 'أرشيف المفردات الميدانية وإضافة أزواج كلمات مخصصة'
+            : 'Field cipher lexicon & custom word-pair registry'
+        }
+        icon={
+          <img
+            src={BLACKSITE_NAV_ARTWORK.dictionary}
+            alt=""
+            aria-hidden="true"
+            className="w-7 h-7 object-contain"
+          />
+        }
         action={
           <TacticalToolbar>
             <IconButton onClick={onBack} aria-label={t('back')} variant="ghost" size="sm">
@@ -183,50 +195,54 @@ export const LanguageDictionary: React.FC<LanguageDictionaryProps> = ({ onBack }
         }
       />
 
-      {/* Language Selector */}
-      <div className="p-3.5 overflow-x-auto whitespace-nowrap scrollbar-hide flex gap-2 border-b border-border bg-bg-main/60">
-        {languages.map((langItem) => {
-          const active = selectedLanguage === langItem.code;
-          return (
+      {/* Language & Category Filter Surface */}
+      <IntelligencePanel className="relative overflow-hidden blacksite-texture-paper p-3 space-y-2.5 mb-3">
+        <div aria-hidden="true" className="blacksite-hairline-cyan absolute inset-x-0 top-0 pointer-events-none" />
+        {/* Language Selector */}
+        <div className="overflow-x-auto whitespace-nowrap scrollbar-hide flex gap-2 pb-1">
+          {languages.map((langItem) => {
+            const active = selectedLanguage === langItem.code;
+            return (
+              <button
+                key={langItem.code}
+                type="button"
+                onClick={() => setSelectedLanguage(langItem.code)}
+                className={`min-h-[44px] px-3 py-1.5 rounded-[10px] border flex items-center gap-2 transition-colors shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#668F9A]/75 ${
+                  active
+                    ? 'bg-[#B49A62]/15 border-[#B49A62] text-text-main'
+                    : 'bg-bg-surface border-border text-text-muted hover:text-text-main'
+                }`}
+              >
+                <span className="font-mono-code text-[11px] font-semibold text-primary-text">
+                  {langItem.symbol}
+                </span>
+                <span className="font-bold text-xs sm:text-sm">{langItem.name}</span>
+                <span className="font-mono-code text-[11px] px-1.5 py-0.5 rounded-[6px] bg-bg-card tabular-nums text-text-muted">
+                  {getWordCount(langItem.code)}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Category Filter Tabs */}
+        <div className="overflow-x-auto whitespace-nowrap scrollbar-hide flex gap-2 pt-2 border-t border-border/70">
+          {CATEGORIES.map((cat) => (
             <button
-              key={langItem.code}
+              key={cat}
               type="button"
-              onClick={() => setSelectedLanguage(langItem.code)}
-              className={`min-h-[44px] px-3 py-1.5 rounded-[10px] border flex items-center gap-2 transition-colors shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#668F9A]/75 ${
-                active
-                  ? 'bg-[#B49A62]/15 border-[#B49A62] text-text-main'
+              onClick={() => setSelectedCategory(cat)}
+              className={`min-h-[44px] px-3 py-1.5 rounded-[8px] text-xs font-bold transition-colors shrink-0 border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#668F9A]/75 ${
+                selectedCategory === cat
+                  ? 'bg-[#668F9A]/15 border-[#668F9A] text-cyan-text'
                   : 'bg-bg-surface border-border text-text-muted hover:text-text-main'
               }`}
             >
-              <span className="font-mono-code text-[11px] font-semibold text-primary-text">
-                {langItem.symbol}
-              </span>
-              <span className="font-bold text-xs sm:text-sm">{langItem.name}</span>
-              <span className="font-mono-code text-[11px] px-1.5 py-0.5 rounded-[6px] bg-bg-card tabular-nums text-text-muted">
-                {getWordCount(langItem.code)}
-              </span>
+              {categoryLabels[cat]}
             </button>
-          );
-        })}
-      </div>
-
-      {/* Category Filter Tabs */}
-      <div className="px-3.5 py-2.5 overflow-x-auto whitespace-nowrap scrollbar-hide flex gap-2 border-b border-border bg-bg-surface/40">
-        {CATEGORIES.map((cat) => (
-          <button
-            key={cat}
-            type="button"
-            onClick={() => setSelectedCategory(cat)}
-            className={`min-h-[44px] px-3 py-1.5 rounded-[8px] text-xs font-bold transition-colors shrink-0 border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#668F9A]/75 ${
-              selectedCategory === cat
-                ? 'bg-[#668F9A]/15 border-[#668F9A] text-cyan-text'
-                : 'bg-bg-surface border-border text-text-muted hover:text-text-main'
-            }`}
-          >
-            {categoryLabels[cat]}
-          </button>
-        ))}
-      </div>
+          ))}
+        </div>
+      </IntelligencePanel>
 
       {/* Stats Bar */}
       <div className="py-3 grid grid-cols-2 gap-3">
@@ -271,7 +287,7 @@ export const LanguageDictionary: React.FC<LanguageDictionaryProps> = ({ onBack }
       </div>
 
       {/* Word List */}
-      <div className="flex-1 overflow-y-auto pb-20 space-y-2.5 custom-scrollbar">
+      <div className="flex-1 space-y-2.5">
         {currentPairs.map((pair, index) => (
           <React.Fragment key={pair.id}>
             {!pair.isBase && currentPairs[index - 1]?.isBase && (
@@ -281,12 +297,9 @@ export const LanguageDictionary: React.FC<LanguageDictionaryProps> = ({ onBack }
                 <div className="h-px flex-1 bg-border-strong" />
               </div>
             )}
-            <motion.div
-              layout
-              initial={{ opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              className={`rounded-[12px] bg-bg-surface p-3.5 flex items-center justify-between gap-3 border ${
-                pair.isBase ? 'border-border' : 'border-[#B49A62]/40'
+            <div
+              className={`rounded-[12px] bg-bg-surface/95 p-3.5 flex items-center justify-between gap-3 border shadow-[inset_0_1px_0_var(--surface-highlight)] ${
+                pair.isBase ? 'border-border' : 'border-[#B49A62]/45 bg-[#B49A62]/[0.04]'
               }`}
             >
               <div className="flex items-center gap-3 flex-1 min-w-0">
@@ -320,13 +333,13 @@ export const LanguageDictionary: React.FC<LanguageDictionaryProps> = ({ onBack }
               ) : (
                 <Info className="w-4 h-4 text-text-muted/40 shrink-0" />
               )}
-            </motion.div>
+            </div>
           </React.Fragment>
         ))}
         {currentPairs.length === 0 && (
-          <div className="py-16 text-center">
+          <IntelligencePanel className="py-14 px-6 text-center">
             <p className="text-text-muted font-bold text-sm">{t('preparing')}</p>
-          </div>
+          </IntelligencePanel>
         )}
       </div>
       </div>

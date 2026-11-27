@@ -522,10 +522,15 @@ export const OnlineLobbyScreen: React.FC<OnlineLobbyScreenProps> = ({
           {Array.from({ length: emptySlotsCount }).map((_, i) => (
             <div
               key={`empty-${i}`}
-              className="rounded-[12px] p-3 flex flex-col items-center justify-center border border-dashed border-border-strong bg-bg-surface/40 opacity-60 min-h-[146px]"
+              className="rounded-[12px] p-3 flex flex-col items-center justify-center border border-dashed border-border-strong bg-bg-surface/45 min-h-[146px]"
             >
-              <div className="w-12 h-12 rounded-[10px] bg-bg-card mb-2 border border-border" />
-              <p className="text-xs font-medium text-text-muted">{t('waitingForPlayer')}</p>
+              <div className="w-12 h-12 rounded-[10px] bg-bg-card mb-2 border border-border flex flex-col items-center justify-center gap-0.5 text-text-muted/60">
+                <Users className="w-4 h-4" />
+                <span className="font-mono-code text-[9px] font-bold">
+                  OP-{String(playersArr.length + i + 1).padStart(2, '0')}
+                </span>
+              </div>
+              <p className="text-xs font-medium text-text-muted/80">{t('waitingForPlayer')}</p>
             </div>
           ))}
         </div>

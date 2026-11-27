@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { getScores, getSettings, getInventoryMap } from '../services/storageService';
 import { SHOP_ITEMS } from '../data/shopItems';
-import { Medal, TrendingDown, Archive } from 'lucide-react';
+import { Medal, Archive } from 'lucide-react';
 import { getUITranslation } from '../translations';
+import { BLACKSITE_NAV_ARTWORK } from '../src/design/assetRegistry';
 import {
   BlacksiteIcon,
   BlacksiteScreenBackdrop,
@@ -63,7 +64,7 @@ export const ScoreboardScreen: React.FC<ScoreboardScreenProps> = ({
           subtitle={t('whoIsTheBoss')}
           icon={
             <img
-              src="/i1.png"
+              src={BLACKSITE_NAV_ARTWORK.rankings}
               alt={t('playerRanking')}
               referrerPolicy="no-referrer"
               className="w-7 h-7 object-contain"
@@ -74,9 +75,20 @@ export const ScoreboardScreen: React.FC<ScoreboardScreenProps> = ({
         {/* Standings List */}
         <div className="pb-6 flex-1">
           {sortedPlayers.length === 0 ? (
-            <IntelligencePanel className="flex flex-col items-center justify-center h-64 text-text-muted p-6">
-              <TrendingDown size={34} className="mb-3 opacity-50" />
-              <p className="text-sm font-semibold">{t('noScoreRecorded')}</p>
+            <IntelligencePanel className="relative overflow-hidden blacksite-texture-metal flex flex-col items-center justify-center min-h-[256px] text-center p-7 gap-3 border-[#B49A62]/30">
+              <div aria-hidden="true" className="blacksite-hairline absolute inset-x-0 top-0 pointer-events-none" />
+              <div className="w-16 h-16 rounded-[14px] bg-[#080B10] border border-[#B49A62]/35 p-2 flex items-center justify-center">
+                <img
+                  src={BLACKSITE_NAV_ARTWORK.rankings}
+                  alt=""
+                  aria-hidden="true"
+                  className="w-full h-full object-contain opacity-85"
+                />
+              </div>
+              <ClassifiedStamp tone="gold">NO RECORDS</ClassifiedStamp>
+              <p className="text-sm font-semibold text-text-muted max-w-xs">
+                {t('noScoreRecorded')}
+              </p>
             </IntelligencePanel>
           ) : (
             <div className="space-y-2.5">

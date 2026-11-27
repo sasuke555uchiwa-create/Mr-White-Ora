@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { MessageCircle, VenetianMask } from 'lucide-react';
+import { MessageCircle } from 'lucide-react';
 import { getUITranslation } from '../translations';
 import { getSettings } from '../services/storageService';
 import { playSound } from '../services/soundService';
 import { Player } from '../types';
 import { Avatar } from './Avatar';
+import { ROLE_PORTRAITS } from '../src/design/assetRegistry';
 import {
   BlacksiteIcon,
   BlacksiteScreenBackdrop,
@@ -57,7 +58,7 @@ export const DiscussionPhase: React.FC<DiscussionPhaseProps> = ({ players, onSki
         <IntelligencePanel className="relative overflow-hidden blacksite-texture-map p-5 sm:p-6 flex flex-col items-center text-center border-[#B49A62]/35">
           <div aria-hidden="true" className="blacksite-hairline absolute inset-x-0 top-0 pointer-events-none" />
           <div className="flex items-center justify-between w-full mb-4 pb-2.5 border-b border-border/70">
-            <OperationPhaseBadge phase="briefing" lang={lang} />
+            <OperationPhaseBadge phase="interrogation" lang={lang} />
             <span className="text-xs font-mono-code font-bold text-text-muted tabular-nums shrink-0">
               {alivePlayers.length} ACTIVE
             </span>
@@ -84,7 +85,12 @@ export const DiscussionPhase: React.FC<DiscussionPhaseProps> = ({ players, onSki
                 <span className="text-base font-bold text-text-main font-mono-code tabular-nums">
                   {mrWhiteCount + undercoverCount}
                 </span>
-                <VenetianMask size={15} className="text-danger-text" />
+                <img
+                  src={ROLE_PORTRAITS.undercover}
+                  alt=""
+                  aria-hidden="true"
+                  className="w-5 h-5 rounded-[4px] object-cover border border-[#A46F44]/50"
+                />
               </div>
             </div>
             <div className="bg-bg-card border border-border rounded-[10px] p-3 flex flex-col items-center">
@@ -136,9 +142,9 @@ export const DiscussionPhase: React.FC<DiscussionPhaseProps> = ({ players, onSki
 
                   <Avatar avatar={player.avatar} name={player.name} size={60} />
 
-                  <div className="px-2.5 py-1 rounded-[8px] bg-bg-surface border border-border text-xs font-bold text-text-main text-center truncate max-w-full w-full">
+                  <span className="mt-0.5 text-xs sm:text-sm font-bold text-text-main text-center truncate max-w-full w-full">
                     {player.name}
-                  </div>
+                  </span>
                 </PlayerIntelligenceCard>
               </motion.div>
             );
